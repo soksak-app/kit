@@ -89,7 +89,7 @@ export function checklist(text, file, errors) {
       // default: an item without an identifier is named by that fact in the error.
       if (missing.length) errors.push(`${file}:${index + 1}: blocked checklist item ${id ?? "without an identifier"} requires nonempty ${missing.join(" and ")}`);
     }
-    // [-] records non-reproduction, an authorized unavailable-evidence audit, or a scoped Windows/Linux exclusion.
+    // [-] records a Closed: reason, non-reproduction, an authorized unavailable-evidence audit, or a scoped Windows/Linux exclusion.
     if (state === "-") {
       const korean = file.endsWith(".ko.md");
       const unavailable = unavailableEvidenceErrors(label, file, index + 1, id, korean);
@@ -98,15 +98,17 @@ export function checklist(text, file, errors) {
       } else {
         const record = (korean ? /재현되지 않음:\s*(.+)$/u : /Not reproduced:\s*(.+)$/i).exec(label)?.[1]?.trim();
         const hasAttemptRecord = record && /[\p{L}\p{N}]/u.test(record);
+        const reason = /Closed:\s*(.+)$/.exec(label)?.[1]?.trim();
+        const hasClosedReason = reason && /[\p{L}\p{N}]/u.test(reason);
         const scopeRecord = (korean ? /플랫폼 범위 제외:\s*(.+)$/u : /Platform excluded:\s*(.+)$/i).exec(label)?.[1]?.trim();
         const hasScopedPlatformRecord = scopeRecord
           && /\b(?:Windows|Linux)\b/i.test(scopeRecord)
           && (korean
             ? /(?:환경이 없|구현되지 않|사용할 수 없|실행할 수 없)/u.test(scopeRecord) && /(?:미검증|검증되지 않)/u.test(scopeRecord)
             : /(?:unavailable|not implemented|not available)/i.test(scopeRecord) && /(?:unverified|not verified)/i.test(scopeRecord));
-        if (!hasAttemptRecord && !hasScopedPlatformRecord) {
+        if (!hasAttemptRecord && !hasScopedPlatformRecord && !hasClosedReason) {
           // default: an item without an identifier is named by that fact in the error.
-          errors.push(`${file}:${index + 1}: closed checklist item ${id ?? "without an identifier"} requires either a nonempty ${korean ? "재현되지 않음" : "Not reproduced"} record or a complete ${korean ? "플랫폼 범위 제외" : "Platform excluded"} record`);
+          errors.push(`${file}:${index + 1}: closed checklist item ${id ?? "without an identifier"} requires a nonempty Closed: reason, a nonempty ${korean ? "재현되지 않음" : "Not reproduced"} record or a complete ${korean ? "플랫폼 범위 제외" : "Platform excluded"} record`);
         }
       }
     }

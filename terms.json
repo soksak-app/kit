@@ -22,7 +22,7 @@
     },
     {
       "term": "kit",
-      "definition": "A repository whose release is a build input that several repositories share: a tool that their checks or releases run, or a static library that their builds link. The application never installs it, and it is not a layer of the application.",
+      "definition": "A repository whose release is a tool that several repositories run in their checks or releases, a build input of those repositories. The application never installs it, and it is not a layer of the application.",
       "rejected": [
         "kit package",
         "kit 패키지",

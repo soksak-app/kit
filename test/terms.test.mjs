@@ -31,10 +31,10 @@ test("a term is listed once and is no rejected synonym", () => {
   for (const word of rejected) assert.ok(!names.includes(word), `${word} is a term and a rejected synonym`);
 });
 
-test("the kit term names a build input that the application does not install", () => {
+test("the kit term names a tool of the repositories that the application does not install", () => {
   const entry = terms.find((term) => term.term === "kit");
   assert.ok(entry, "the term list defines kit");
   assert.match(entry.definition, /build input/);
-  assert.match(entry.definition, /static library/);
+  assert.doesNotMatch(entry.definition, /static library|link/, "a kit holds tools of the repositories; a library that sidecars share belongs to core");
   assert.match(entry.definition, /never installs/);
 });

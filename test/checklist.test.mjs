@@ -83,3 +83,14 @@ test("unavailable-evidence records reject verified results and noncanonical fiel
     assert.match(errors.join("\n"), message, `invalid record was accepted: ${line}`);
   }
 });
+
+test("a closed item states Closed: and its reason, and a Closed: without a reason is refused", { timeout: 1000 }, () => {
+  for (const file of ["docs/features.md", "docs/features.ko.md"]) {
+    const errors = [];
+    checklist("- [-] G1 — The item text. Closed: the library stays in core.\n", file, errors);
+    assert.deepEqual(errors, [], `${file}: a Closed: reason was refused`);
+    const empty = [];
+    checklist("- [-] G1 — The item text. Closed:\n", file, empty);
+    assert.match(empty.join("\n"), /closed checklist item G1 requires/, `${file}: an empty Closed: was accepted`);
+  }
+});
