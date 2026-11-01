@@ -30,3 +30,11 @@ test("a term is listed once and is no rejected synonym", () => {
   assert.equal(new Set(rejected).size, rejected.length);
   for (const word of rejected) assert.ok(!names.includes(word), `${word} is a term and a rejected synonym`);
 });
+
+test("the kit term names a build input that the application does not install", () => {
+  const entry = terms.find((term) => term.term === "kit");
+  assert.ok(entry, "the term list defines kit");
+  assert.match(entry.definition, /build input/);
+  assert.match(entry.definition, /static library/);
+  assert.match(entry.definition, /never installs/);
+});

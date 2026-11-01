@@ -21,6 +21,16 @@
       "allowed": []
     },
     {
+      "term": "kit",
+      "definition": "A repository whose release is a build input that several repositories share: a tool that their checks or releases run, or a static library that their builds link. The application never installs it, and it is not a layer of the application.",
+      "rejected": [
+        "kit package",
+        "kit 패키지",
+        "킷 패키지"
+      ],
+      "allowed": []
+    },
+    {
       "term": "release",
       "definition": "The file that a registry lists: the pnpm pack file of a plugin, <scope>-<name>-<version>.tgz, the npm pack file of a sidecar, <file name>-<version>-<platform>.tgz, or soksak-<version>-<platform>-<host>.zip of an application bundle.",
       "rejected": [

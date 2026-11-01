@@ -2,5 +2,6 @@
 
 [한국어](features.ko.md)
 
+- [o] KR2 — P0, linked to core F355-4-1-1: The term list defines `kit`. Input: `terms.json` had no entry for `kit`, while the specifications name kits as the repositories of shared build inputs. Expected: the entry `kit` defines a repository whose release is a build input that several repositories share, a tool or a static library that the application never installs, and rejects `kit package`; the release `0.0.2` carries it. Result: `the kit term names a build input that the application does not install` failed (Red) and passes (Green).
 - [o] KR1 — P0, linked to core F355-3-1: The records kit at version 0.0.1 holds the commit message check, the record check, the release gate, the checklist reader and the term list, with their tests, and releases them as the `npm pack` file of a GitHub release. The release run published `v0.0.1` with `soksak-kit-records-0.0.1.tgz`.
   - [o] KR1-1 — P0: The pre-push hook checks every commit of the pushed ref on the first push to a remote without `main`. Input: the hook passed `origin/main..<sha>`, which git refuses when `origin/main` does not exist, so the first push of the repository failed. Expected: the range is `<sha>` when the remote has no `main`. Result: `the first push to a remote without main checks every commit of the pushed ref` failed (Red) and passes (Green).
