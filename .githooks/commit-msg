@@ -1,0 +1,3 @@
+#!/bin/sh
+# Checks the form of the commit message. `make hooks` sets this folder as the git hook folder.
+exec node "$(git rev-parse --show-toplevel)/commits-check.js" "$1"

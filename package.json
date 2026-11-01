@@ -1,0 +1,35 @@
+{
+  "name": "@soksak/kit-records",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Records kit: the commit message check, the record check, the release gate and the term list that every soksak repository runs on its own records.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soksak-app/kit-records.git"
+  },
+  "type": "module",
+  "packageManager": "pnpm@11.24.0",
+  "bin": {
+    "soksak-commits": "./commits-check.js",
+    "soksak-records": "./records-check.js",
+    "soksak-release-gate": "./release-gate.js"
+  },
+  "exports": {
+    "./checklist": "./checklist.js",
+    "./records-check": "./records-check.js",
+    "./release-gate": "./release-gate.js",
+    "./terms.json": "./terms.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "checklist.js",
+    "commits-check.js",
+    "records-check.js",
+    "release-gate.js",
+    "terms.json"
+  ],
+  "scripts": {
+    "test": "node --test --test-reporter=spec --test-timeout=60000 test/"
+  }
+}
