@@ -46,3 +46,14 @@ test("the drawing term names when a supplier draws the raster of an image region
   assert.match(entry.definition, /occluded/);
   assert.match(entry.definition, /minimized/);
 });
+
+test("the presentation mode and lease terms name how the host presents the image of an image region", () => {
+  const mode = terms.find((term) => term.term === "presentation mode");
+  assert.ok(mode, "the term list defines presentation mode");
+  assert.match(mode.definition, /copy/);
+  assert.match(mode.definition, /lease/);
+  const lease = terms.find((term) => term.term === "lease");
+  assert.ok(lease, "the term list defines lease");
+  assert.match(lease.definition, /IOSurface/);
+  assert.match(lease.definition, /released/);
+});

@@ -1,6 +1,6 @@
 {
   "name": "@soksak/kit-records",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "description": "Records kit: the commit message check, the record check, the release gate and the term list that every soksak repository runs on its own records.",
   "license": "MIT",

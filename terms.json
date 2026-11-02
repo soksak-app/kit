@@ -548,6 +548,24 @@
         "presenting"
       ],
       "allowed": []
+    },
+    {
+      "term": "presentation mode",
+      "definition": "How the host presents the transfer images of an image region, which the region declares as `present`: `copy`, where the host copies each accepted image into host-owned storage and answers `consumed`, or `lease`, where the host presents the supplier's IOSurface itself (docs/spec/native-surfaces.md).",
+      "rejected": [
+        "present mode",
+        "presentation kind"
+      ],
+      "allowed": []
+    },
+    {
+      "term": "lease",
+      "definition": "The presentation mode in which the host holds the supplier's IOSurface of an accepted frame and its image layer presents it, answered `leased`, until a later frame replaces it, the region closes or its generation is detached, answered `released` (docs/spec/native-surfaces.md).",
+      "rejected": [
+        "borrowed surface",
+        "shared presentation"
+      ],
+      "allowed": []
     }
   ]
 }
