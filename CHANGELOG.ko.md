@@ -4,6 +4,7 @@
 
 ## 미출시
 
+- KR6: `drawing`의 거부어는 `presenting state`이므로 record가 호스트의 frame 표시를 적을 수 있고, version은 0.0.6이다. Red: term 검사 test가 실패했다. Green: 통과한다.
 - KR5: term 목록은 호스트가 그림 영역의 그림을 보이는 방식인 `presentation mode`와 `lease`를 정의하고, version은 0.0.5이다. Red: term test가 실패했다. Green: 통과한다.
 - KR4: term 목록은 image region의 공급자가 raster를 그리는지를 뜻하는 `drawing`을 정의하고, version은 0.0.4이다. Red: drawing term test가 실패했다. Green: 통과한다.
 - KR3: term `kit`은 KR2의 static library 없이 여러 repository가 검사나 release에서 실행하는 도구를 가리키고, checklist reader는 `Closed:`와 비지 않은 사유가 있는 닫힌 항목을 받는다. version은 0.0.3이다. Red: 두 test가 실패했다. Green: 둘 다 통과한다.

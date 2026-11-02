@@ -115,6 +115,12 @@ test("a longer rejected synonym is reported once and a file name is not a use", 
     ['a.md:1: rejected term "plugin package", use "plugin": plugin-packages']);
 });
 
+test("the verb of presentation is not a synonym of drawing", () => {
+  assert.deepEqual(termViolations("The image layer stops presenting the surface.", "a.md"), []);
+  assert.deepEqual(termViolations("The presenting state of the region follows its window.", "a.md"),
+    ['a.md:1: rejected term "presenting state", use "drawing": presenting state']);
+});
+
 test("the term list, the changelogs and the checklists are not checked for rejected terms", () => {
   assert.equal(termChecked("packages/plugin-api/terms.json"), false);
   assert.equal(termChecked("CHANGELOG.ko.md"), false);
