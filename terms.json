@@ -539,6 +539,15 @@
         "declaration pool"
       ],
       "allowed": []
+    },
+    {
+      "term": "drawing",
+      "definition": "Whether the supplier of an image region draws its raster: the outer surface of the region is visible and its window is on screen, neither occluded nor minimized (docs/spec/native-surfaces.md).",
+      "rejected": [
+        "region shown state",
+        "presenting"
+      ],
+      "allowed": []
     }
   ]
 }

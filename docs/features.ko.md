@@ -2,6 +2,7 @@
 
 [English](features.md)
 
+- [o] KR4 — P0, core F381 연결: term 목록은 `drawing`을 정의한다. 입력: core F381은 image region의 공급자에게 raster를 그릴지 알리는데, 이 개념을 가리키는 term이 없었다. 기대: entry `drawing`이 그것을 정의하고 version은 0.0.4이다. Red: `the drawing term names when a supplier draws the raster of an image region`이 `the term list defines drawing`으로 실패했다. Green: 통과한다.
 - [o] KR3 — P0, KR2와 core F355-4-2 연결: term `kit`은 repository의 도구를 가리키고, checklist reader는 `Closed:`와 사유가 있는 닫힌 항목을 받는다. 입력: KR2의 정의는 build가 link하는 static library도 가리켰지만 sidecar가 공유하는 library는 core에 속하는 공통 기능이다. 또 reader는 작업 규칙이 허용하는 `Closed: <사유>`가 있는 `[-]`를 거부했다. 기대: 정의는 여러 repository가 검사나 release에서 실행하는 도구를 가리키고, reader는 사유가 있는 `Closed:`를 받고 빈 것을 거부하며, release `0.0.3`이 둘을 담는다. 결과: `the kit term names a tool of the repositories that the application does not install`와 `a closed item states Closed: and its reason, and a Closed: without a reason is refused`는 실패했고(Red) 통과한다(Green).
 - [o] KR2 — P0, core F355-4-1-1 연결: term 목록은 `kit`을 정의한다. 입력: 명세는 kit을 공유 build 입력의 repository로 부르지만 `terms.json`에는 `kit` 항목이 없었다. 기대: `kit` 항목은 release가 여러 repository가 공유하는 build 입력, 곧 application이 설치하지 않는 도구나 static library인 repository로 정의하고 `kit package`를 거부하며, release `0.0.2`가 그것을 담는다. 결과: `the kit term names a build input that the application does not install`는 실패했고(Red) 통과한다(Green).
 - [o] KR1 — P0, core F355-3-1 연결: records kit 0.0.1은 commit message 검사, record 검사, release gate, checklist reader, term 목록과 그 test를 담고, 그것을 GitHub release의 `npm pack` 파일로 release한다. release run이 `soksak-kit-records-0.0.1.tgz`와 함께 `v0.0.1`을 게시했다.

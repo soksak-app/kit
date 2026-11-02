@@ -38,3 +38,11 @@ test("the kit term names a tool of the repositories that the application does no
   assert.doesNotMatch(entry.definition, /static library|link/, "a kit holds tools of the repositories; a library that sidecars share belongs to core");
   assert.match(entry.definition, /never installs/);
 });
+
+test("the drawing term names when a supplier draws the raster of an image region", () => {
+  const entry = terms.find((term) => term.term === "drawing");
+  assert.ok(entry, "the term list defines drawing");
+  assert.match(entry.definition, /image region/);
+  assert.match(entry.definition, /occluded/);
+  assert.match(entry.definition, /minimized/);
+});
