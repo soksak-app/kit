@@ -82,3 +82,15 @@ test("the mygo host terms name its host packages, its native workbench, its allo
     for (const pattern of patterns) assert.match(entry.definition, pattern, name);
   }
 });
+
+test("the element entry and element name terms name an exposure entry of the kind element and its name", () => {
+  const entry = terms.find((term) => term.term === "element entry");
+  assert.ok(entry, "the term list defines element entry");
+  assert.match(entry.definition, /exposure entry of the kind `element`/);
+  assert.match(entry.definition, /workbench or of a view/);
+  assert.equal(entry.rejected.length, 1, "element entry rejects one phrase");
+  const name = terms.find((term) => term.term === "element name");
+  assert.ok(name, "the term list defines element name");
+  assert.match(name.definition, /name of an element entry/);
+  assert.equal(name.rejected.length, 1, "element name rejects one phrase");
+});

@@ -10,6 +10,9 @@ import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
+// The pattern source of a synonym followed by its plural ending: `ies` in place of a final `y` after a consonant, otherwise `s`.
+const withPlural = (source) => (/[^aeiou]y$/i.test(source) ? `${source.slice(0, -1)}(?:y|ies)` : `${source}s?`);
+
 /**
  * The rejected synonyms of terms.json, each with the term to use, the names that may hold it, such as names of external
  * libraries, and a pattern that also matches it in identifiers.
@@ -19,14 +22,15 @@ export const REJECTED_TERMS = JSON.parse(readFileSync(new URL("./terms.json", im
     word,
     term,
     allowed,
-    pattern: new RegExp(`(?<![A-Za-z0-9])${word.split(/[\s-]+/).map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[\\s_-]?")}s?(?![A-Za-z0-9]|\\.json)`, "gi"),
+    pattern: new RegExp(`(?<![A-Za-z0-9])${withPlural(word.split(/[\s-]+/).map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[\\s_-]?"))}(?![A-Za-z0-9]|\\.json)`, "gi"),
     // The same words joined with capital initials inside an identifier.
-    camel: new RegExp(`(?<=[a-z0-9])${word.split(/[\s-]+/).map((part) => part[0].toUpperCase() + part.slice(1)).join("")}s?(?![a-z])`, "g"),
+    camel: new RegExp(`(?<=[a-z0-9])${withPlural(word.split(/[\s-]+/).map((part) => part[0].toUpperCase() + part.slice(1)).join(""))}(?![a-z])`, "g"),
   })));
 
 /**
  * Lines of text that use a rejected synonym, as `file:line: rejected term "<word>", use "<term>": <match>`. A synonym
- * also matches in its plural; one followed by `.json` names a file such as package.json and is not a use.
+ * also matches in its plural, which ends in `ies` in place of a final `y` after a consonant and in `s` otherwise; one
+ * followed by `.json` names a file such as package.json and is not a use.
  */
 export function termViolations(text, file) {
   const errors = [];

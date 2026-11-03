@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- KR9: The term list defines element entry, an exposure entry of the kind `element`, and element name, its name, which reject `dom entry` and `dom name`; the term check matches the plural of a rejected phrase that ends in a consonant and `y` with `ies`, so `dom entries` is rejected as well. Red: the term check test and the term test failed. Green: both pass.
 - KR8: The term list defines the terms of the mygo host: language host library, framework adapter, framework port, native workbench, native view of the window, native view element, presentation notice, settled presentation, workbench call channel, language table, framework table, baseline host, other host and element tree. Red: the term test failed. Green: it passes.
 - KR7: The record check reports each link of a Markdown document whose fragment names no heading of the local Markdown document it targets, with the file, the line and the target, and each such link whose target does not exist; `@soksak/kit-records/records-check` exports the anchor rule as `headingAnchors` and the link reader as `markdownLinks`. Red: the anchor tests failed. Green: they pass.
 - KR6: The rejected synonym of `drawing` is `presenting state`, so records may state that the host presents a frame, and the version is 0.0.6. Red: the term check test failed. Green: it passes.

@@ -265,3 +265,15 @@ test("a link target that is not URI-encoded is an error with its file and line",
   });
   assert.throws(() => repositoryRecordViolations(repository), /^Error: docs\/features\.md:3: link target spec\/core\.md#strip%E0frame is not URI-encoded/);
 });
+
+test("dom entry and dom name are rejected for element entry and element name, also in their plurals and in identifiers", () => {
+  assert.deepEqual(termViolations("A dom entry names an element.\nEach dom name is declared.\nThe DOM entries and dom names of a view.\nconst domName = exposeDomEntry();\n", "a.md"), [
+    'a.md:1: rejected term "dom entry", use "element entry": dom entry',
+    'a.md:2: rejected term "dom name", use "element name": dom name',
+    'a.md:3: rejected term "dom entry", use "element entry": DOM entries',
+    'a.md:3: rejected term "dom name", use "element name": dom names',
+    'a.md:4: rejected term "dom entry", use "element entry": DomEntry',
+    'a.md:4: rejected term "dom name", use "element name": domName',
+  ]);
+  assert.deepEqual(termViolations('The region input `input: "dom"` keeps its name, and a random entry names the DOM of a view page.', "a.md"), []);
+});

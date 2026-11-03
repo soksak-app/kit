@@ -650,6 +650,22 @@
       "definition": "The tree of the elements of the native workbench of a window with their names, roles, frames and actions, which the framework builds in every build when the host asks for it and from which the binder audit, element rectangles and element actions take their answers.",
       "rejected": [],
       "allowed": []
+    },
+    {
+      "term": "element entry",
+      "definition": "An exposure entry of the kind `element`, which names an element of the workbench or of a view.",
+      "rejected": [
+        "dom entry"
+      ],
+      "allowed": []
+    },
+    {
+      "term": "element name",
+      "definition": "The name of an element entry, by which a window check addresses its element.",
+      "rejected": [
+        "dom name"
+      ],
+      "allowed": []
     }
   ]
 }
