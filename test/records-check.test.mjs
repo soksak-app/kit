@@ -2,9 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { checklistViolations, commitMessageErrors, recordKind, repositoryRecordViolations, recordViolations, termChecked, termViolations } from "../records-check.js";
 import { execSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { pathToFileURL } from "node:url";
 
 test("a checklist that states one identifier on two lines is refused, in any identifier form", () => {
   assert.deepEqual(checklistViolations("- [o] F218-2.4 — P2: a\n- [ ] F218-2.4 — P2: b\n", "docs/features.md"), ["docs/features.md:2: duplicate checklist identifier F218-2.4 (first stated on line 1)"]);
@@ -276,4 +277,16 @@ test("dom entry and dom name are rejected for element entry and element name, al
     'a.md:4: rejected term "dom name", use "element name": domName',
   ]);
   assert.deepEqual(termViolations('The region input `input: "dom"` keeps its name, and a random entry names the DOM of a view page.', "a.md"), []);
+});
+
+test("a rejected phrase with a regular expression character matches only its own words, also in identifiers", async () => {
+  // A copy of the check with a term list whose rejected phrase holds `.`, which a pattern must match literally.
+  const kit = mkdtempSync(join(tmpdir(), "records-escape-"));
+  for (const file of ["records-check.js", "checklist.js"]) copyFileSync(new URL(`../${file}`, import.meta.url), join(kit, file));
+  writeFileSync(join(kit, "terms.json"), JSON.stringify({ terms: [{ term: "dotted term", definition: "A term.", rejected: ["a.b entry"], allowed: [] }] }));
+  const { termViolations: check } = await import(pathToFileURL(join(kit, "records-check.js")).href);
+  assert.deepEqual(check("const value = makeAxbEntry();\nThe a.b entry is used.\nconst value = makeA.bEntry();", "a.js"), [
+    'a.js:2: rejected term "a.b entry", use "dotted term": a.b entry',
+    'a.js:3: rejected term "a.b entry", use "dotted term": A.bEntry',
+  ]);
 });

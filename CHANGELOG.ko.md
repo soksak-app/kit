@@ -4,6 +4,7 @@
 
 ## 미출시
 
+- KR11: identifier 안의 거부어를 찾는 pattern은 main pattern처럼 단어의 정규식 문자를 escape하므로, `a.b entry`가 더는 `AxbEntry`에 맞지 않는다. Red: escape test가 실패했다. Green: 통과한다.
 - KR10: version은 0.0.7이므로, tag v0.0.6이 release gate를 막던 KR7, KR8, KR9를 release run이 v0.0.7로 게시한다.
 - KR9: term 목록은 종류 `element`의 exposure entry인 element entry와 그 이름인 element name을 정의하고, 둘은 `dom entry`와 `dom name`을 거부한다. term 검사는 자음과 `y`로 끝나는 거부어의 복수형을 `ies`로 맞추므로 `dom entries`도 거부한다. Red: term 검사 test와 term test가 실패했다. Green: 둘 다 통과한다.
 - KR8: term 목록은 mygo host의 용어 language host library, framework adapter, framework port, native workbench, native view of the window, native view element, presentation notice, settled presentation, workbench call channel, language table, framework table, baseline host, other host, element tree를 정의한다. Red: term test가 실패했다. Green: 통과한다.

@@ -10,6 +10,9 @@ import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
+// The pattern source that matches text literally.
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 // The pattern source of a synonym followed by its plural ending: `ies` in place of a final `y` after a consonant, otherwise `s`.
 const withPlural = (source) => (/[^aeiou]y$/i.test(source) ? `${source.slice(0, -1)}(?:y|ies)` : `${source}s?`);
 
@@ -22,9 +25,9 @@ export const REJECTED_TERMS = JSON.parse(readFileSync(new URL("./terms.json", im
     word,
     term,
     allowed,
-    pattern: new RegExp(`(?<![A-Za-z0-9])${withPlural(word.split(/[\s-]+/).map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[\\s_-]?"))}(?![A-Za-z0-9]|\\.json)`, "gi"),
+    pattern: new RegExp(`(?<![A-Za-z0-9])${withPlural(word.split(/[\s-]+/).map(escapeRegExp).join("[\\s_-]?"))}(?![A-Za-z0-9]|\\.json)`, "gi"),
     // The same words joined with capital initials inside an identifier.
-    camel: new RegExp(`(?<=[a-z0-9])${withPlural(word.split(/[\s-]+/).map((part) => part[0].toUpperCase() + part.slice(1)).join(""))}(?![a-z])`, "g"),
+    camel: new RegExp(`(?<=[a-z0-9])${withPlural(word.split(/[\s-]+/).map((part) => escapeRegExp(part[0].toUpperCase() + part.slice(1))).join(""))}(?![a-z])`, "g"),
   })));
 
 /**
@@ -37,7 +40,7 @@ export function termViolations(text, file) {
   text.split("\n").forEach((line, index) => {
     const found = REJECTED_TERMS.flatMap(({ word, term, allowed, pattern, camel }) => {
       // An allowed name, such as the name of an external library, holds the word without using it.
-      const spans = allowed.flatMap((name) => [...line.matchAll(new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"))]
+      const spans = allowed.flatMap((name) => [...line.matchAll(new RegExp(escapeRegExp(name), "g"))]
         .map((match) => [match.index, match.index + name.length]));
       return [...line.matchAll(pattern), ...line.matchAll(camel)]
         .filter((match) => !spans.some(([start, end]) => match.index >= start && match.index < end))

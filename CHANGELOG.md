@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- KR11: The pattern that finds a rejected phrase inside an identifier escapes the regular expression characters of its words, as the main pattern does, so `a.b entry` no longer matches `AxbEntry`. Red: the escape test failed. Green: it passes.
 - KR10: The version is 0.0.7, so the release run publishes KR7, KR8 and KR9 as v0.0.7, where the tag v0.0.6 held the release gate.
 - KR9: The term list defines element entry, an exposure entry of the kind `element`, and element name, its name, which reject `dom entry` and `dom name`; the term check matches the plural of a rejected phrase that ends in a consonant and `y` with `ies`, so `dom entries` is rejected as well. Red: the term check test and the term test failed. Green: both pass.
 - KR8: The term list defines the terms of the mygo host: language host library, framework adapter, framework port, native workbench, native view of the window, native view element, presentation notice, settled presentation, workbench call channel, language table, framework table, baseline host, other host and element tree. Red: the term test failed. Green: it passes.
