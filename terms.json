@@ -566,6 +566,90 @@
         "shared presentation"
       ],
       "allowed": []
+    },
+    {
+      "term": "language host library",
+      "definition": "The host package of one language that holds every part of a host that names no framework, its bindings, windows, workspace, surfaces, documents, images, sidecars, exposure, endpoint, event log, diagnostics and darwin platform layer among them, and reaches the framework of its application only through the framework port.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "framework adapter",
+      "definition": "The host package of one framework that holds the run of the application, the implementations of the framework port and every file that only that framework needs, and links the language host library of its language.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "framework port",
+      "definition": "The two interfaces through which the language host library reaches a framework, named the same in both languages: `Framework`, with the application name, the main-thread step, quit, dialogs, menus, the Dock and window creation with its title bar, and `Frontend`, with the event emit, the window title, show, focus, the window events, the presentation notice, the settled presentation, the workbench start and the workbench call channel.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "native workbench",
+      "definition": "The workbench that the host draws in native UI with the widgets and layout of its framework instead of a JavaScript page in a web view, so that a window has no main page and the workbench start builds the workbench again instead of reloading a page.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "native view of the window",
+      "definition": "The view that the application places in a window under the surface that the native workbench draws on, filling the content of the window until the window closes, which holds the container of the surface hosts of that window.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "native view element",
+      "definition": "An element of the native workbench that names a view inside the native view of the window and the key view of the element, paints a hole over the box of the named view, computes the covers that the workbench draws over it and, in the frame that draws the element, gives its box, clip and covers to the application, which sets the frame of the named view in the same transaction as that frame.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "presentation notice",
+      "definition": "The notice that the frame which drew a given scene of a window has presented, for which the layout transaction waits through the framework port: the presentation update of the main page on a host with a main page, and on the native workbench a callback of the framework that runs once after that frame presents or reports that the scene presented nothing, for want of damage, for want of a drawable or because the window holds its frames.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "settled presentation",
+      "definition": "The block of the framework port that brings the content of a window to the screen in its current state and then calls back, which the settled wait of the surface layout takes in place of the main web view: on a host with a main page the read of its document and its next presentation update, and on the native workbench a frame without a hold that calls back on its presentation notice.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "workbench call channel",
+      "definition": "The part of `Frontend` in the framework port through which the language host library delivers a call to the workbench of a window, which a framework adapter of the native workbench passes on through its `Workbench` interface.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "language table",
+      "definition": "The table of the allowed differences between the host packages of the two languages, with the columns Go and Rust, whose rows H name files of the language host libraries, rows C files of the command line packages and rows E endpoint methods that one language does not have, with row IDs unique across it and the framework table.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "framework table",
+      "definition": "The table of the allowed differences between the host packages and the applications of the frameworks, with one column per framework, whose rows H name files of the framework adapters, rows A files of the applications and rows B host calls that the workbench of one framework does not make, with row IDs unique across it and the language table.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "baseline host",
+      "definition": "A host with a main page built from the revision that completes the measurement targets of the three-host benchmark, before any change of the code that such a host runs, which installs the plugin releases recorded for it and against which the benchmark judges the host of the native workbench and finds each regression of the other host of its framework.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "other host",
+      "definition": "A host with a main page built from the same revision as the host of the native workbench, which the three-host benchmark measures in the same session and against which it judges that host.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "element tree",
+      "definition": "The tree of the elements of the native workbench of a window with their names, roles, frames and actions, which the framework builds in every build when the host asks for it and from which the binder audit, element rectangles and element actions take their answers.",
+      "rejected": [],
+      "allowed": []
     }
   ]
 }

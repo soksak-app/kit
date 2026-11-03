@@ -4,6 +4,7 @@
 
 ## 미출시
 
+- KR8: term 목록은 mygo host의 용어 language host library, framework adapter, framework port, native workbench, native view of the window, native view element, presentation notice, settled presentation, workbench call channel, language table, framework table, baseline host, other host, element tree를 정의한다. Red: term test가 실패했다. Green: 통과한다.
 - KR7: record 검사는 Markdown 문서의 link 가운데 fragment가 대상 local Markdown 문서의 어느 heading도 가리키지 않는 link를 파일, 줄, 대상과 함께 보고하고, 그런 link의 대상이 없으면 그것도 보고한다. `@soksak/kit-records/records-check`는 anchor 규칙을 `headingAnchors`로, link reader를 `markdownLinks`로 export한다. Red: anchor test가 실패했다. Green: 통과한다.
 - KR6: `drawing`의 거부어는 `presenting state`이므로 record가 호스트의 frame 표시를 적을 수 있고, version은 0.0.6이다. Red: term 검사 test가 실패했다. Green: 통과한다.
 - KR5: term 목록은 호스트가 그림 영역의 그림을 보이는 방식인 `presentation mode`와 `lease`를 정의하고, version은 0.0.5이다. Red: term test가 실패했다. Green: 통과한다.

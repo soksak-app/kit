@@ -57,3 +57,28 @@ test("the presentation mode and lease terms name how the host presents the image
   assert.match(lease.definition, /IOSurface/);
   assert.match(lease.definition, /released/);
 });
+
+test("the mygo host terms name its host packages, its native workbench, its allowed difference tables and the hosts it is measured against", () => {
+  const meanings = {
+    "language host library": [/names no framework/, /framework port/],
+    "framework adapter": [/framework port/, /language host library/],
+    "framework port": [/`Framework`/, /`Frontend`/],
+    "native workbench": [/native UI/, /main page/],
+    "native view of the window": [/surface hosts/],
+    "native view element": [/hole/, /covers/],
+    "presentation notice": [/presented nothing/, /layout transaction/],
+    "settled presentation": [/current state/, /presentation notice/],
+    "workbench call channel": [/`Frontend`/, /call/],
+    "language table": [/Go/, /Rust/],
+    "framework table": [/framework adapters/],
+    "baseline host": [/revision/, /regression/],
+    "other host": [/same revision/],
+    "element tree": [/binder audit/, /actions/],
+  };
+  for (const [name, patterns] of Object.entries(meanings)) {
+    const entry = terms.find((term) => term.term === name);
+    assert.ok(entry, `the term list defines ${name}`);
+    assert.equal(entry.definition.split(/\.(?=\s|$)/).filter((part) => part.trim()).length, 1, `${name} is defined in one sentence: ${entry.definition}`);
+    for (const pattern of patterns) assert.match(entry.definition, pattern, name);
+  }
+});
