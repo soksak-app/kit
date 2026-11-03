@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- KR7: The record check reports each link of a Markdown document whose fragment names no heading of the local Markdown document it targets, with the file, the line and the target, and each such link whose target does not exist; `@soksak/kit-records/records-check` exports the anchor rule as `headingAnchors` and the link reader as `markdownLinks`. Red: the anchor tests failed. Green: they pass.
 - KR6: The rejected synonym of `drawing` is `presenting state`, so records may state that the host presents a frame, and the version is 0.0.6. Red: the term check test failed. Green: it passes.
 - KR5: The term list defines `presentation mode` and `lease`, how the host presents the image of an image region, and the version is 0.0.5. Red: the term test failed. Green: it passes.
 - KR4: The term list defines `drawing`, whether the supplier of an image region draws its raster, and the version is 0.0.4. Red: the drawing term test failed. Green: it passes.

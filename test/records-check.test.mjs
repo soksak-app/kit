@@ -4,7 +4,7 @@ import { checklistViolations, commitMessageErrors, recordKind, repositoryRecordV
 import { execSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 test("a checklist that states one identifier on two lines is refused, in any identifier form", () => {
   assert.deepEqual(checklistViolations("- [o] F218-2.4 — P2: a\n- [ ] F218-2.4 — P2: b\n", "docs/features.md"), ["docs/features.md:2: duplicate checklist identifier F218-2.4 (first stated on line 1)"]);
@@ -188,4 +188,80 @@ test("a census declaration reports an invalid exclude pattern with its file and 
   writeFileSync(join(repository, "own.md"), "Repository facts.\n");
   execSync("git add .", { cwd: repository });
   assert.throws(() => repositoryRecordViolations(repository), /census\.json.*exclude pattern.*\[.*invalid/);
+});
+
+/** A git repository in a new temporary folder that tracks files, a map from a path in the repository to its text. */
+function trackedRepository(prefix, files) {
+  const repository = mkdtempSync(join(tmpdir(), prefix));
+  execSync("git init -q .", { cwd: repository });
+  for (const [path, text] of Object.entries(files)) {
+    mkdirSync(join(repository, dirname(path)), { recursive: true });
+    writeFileSync(join(repository, path), text);
+  }
+  execSync("git add .", { cwd: repository });
+  return repository;
+}
+
+test("a link to a heading that its target document does not have is reported with the file, the line and the anchor", () => {
+  const repository = trackedRepository("records-anchor-", {
+    "docs/features.md": "# Features\n\n- [ ] S1-1 — P0: The frame follows [the core](spec/core.md#gpu-frame).\n",
+    "docs/spec/core.md": "# Core\n\n## Strip frame\n\nThe strip holds the frame.\n",
+  });
+  assert.deepEqual(repositoryRecordViolations(repository).errors, ["docs/features.md:3: missing heading spec/core.md#gpu-frame"]);
+});
+
+test("a link to a heading that its target has passes, also a repeated heading, a heading of the same document and an encoded fragment", () => {
+  const repository = trackedRepository("records-anchor-valid-", {
+    "docs/features.md": [
+      "# Features", "", "## Items", "",
+      "- [the frame](spec/core.md#strip-frame)",
+      "- [the second frame](spec/core.md#strip-frame-1)",
+      "- [the items](#items)",
+      "- [the Korean heading](spec/core.md#그림-frame)",
+      "- [the encoded heading](spec/core.md#%EA%B7%B8%EB%A6%BC-frame)",
+      "- [the bracketed target](<spec/core.md#strip-frame>)",
+      "- [the folder](spec/) and [the document](spec/core.md)",
+      "- [an address](https://example.com/core.md#gpu-frame)",
+      "- `[a code span](spec/core.md#gpu-frame)`",
+      "", "```", "[a code block](spec/core.md#gpu-frame)", "```", "",
+    ].join("\n"),
+    "docs/spec/core.md": "# Core\n\n## Strip frame\n\n## Strip frame\n\n## 그림 frame\n",
+  });
+  assert.deepEqual(repositoryRecordViolations(repository).errors, []);
+});
+
+test("a link to a third repeated heading, a missing heading of the same document, a fenced heading and a missing document is reported", () => {
+  const repository = trackedRepository("records-anchor-missing-", {
+    "docs/features.md": [
+      "# Features", "",
+      "- [the third frame](spec/core.md#strip-frame-2)",
+      "- [the items](#items)",
+      "- [the fenced heading](spec/core.md#fenced-heading)",
+      "- [the removed document](spec/gone.md#strip-frame)", "",
+    ].join("\n"),
+    "docs/spec/core.md": "# Core\n\n## Strip frame\n\n## Strip frame\n\n```md\n## Fenced heading\n```\n",
+  });
+  assert.deepEqual(repositoryRecordViolations(repository).errors, [
+    "docs/features.md:3: missing heading spec/core.md#strip-frame-2",
+    "docs/features.md:4: missing heading #items",
+    "docs/features.md:5: missing heading spec/core.md#fenced-heading",
+    "docs/features.md:6: missing link target spec/gone.md#strip-frame",
+  ]);
+});
+
+test("the package exports the anchor rule of the record check for the documentation checks of other repositories", async () => {
+  const { headingAnchors, markdownLinks } = await import("@soksak/kit-records/records-check");
+  assert.equal(typeof headingAnchors, "function", "the package exports headingAnchors");
+  assert.equal(typeof markdownLinks, "function", "the package exports markdownLinks");
+  assert.deepEqual([...headingAnchors("# A b\n\n## A b\n\n```\n## Fenced\n```\n\n### 그림, frame!\n#### snake_case  two\n")],
+    ["a-b", "a-b-1", "그림-frame", "snake_case--two"]);
+  assert.deepEqual(markdownLinks("See [a](b.md#c).\n`[d](e.md)`\n"), [{ start: 8, end: 14, target: "b.md#c" }]);
+});
+
+test("a link target that is not URI-encoded is an error with its file and line", () => {
+  const repository = trackedRepository("records-anchor-encoding-", {
+    "docs/features.md": "# Features\n\n[the frame](spec/core.md#strip%E0frame)\n",
+    "docs/spec/core.md": "# Core\n",
+  });
+  assert.throws(() => repositoryRecordViolations(repository), /^Error: docs\/features\.md:3: link target spec\/core\.md#strip%E0frame is not URI-encoded/);
 });

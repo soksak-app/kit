@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 // Checks that records state only facts about the repository. Documents are checked on every line outside code blocks, and configuration files (workflow, Makefile) only on comment lines,
-// and violations are reported as `path:line`. Each repository checks its own records with this command.
+// a link of a document to a heading of a local Markdown document must name a heading that the document has, and violations are reported as `path:line`.
+// Each repository checks its own records with this command.
 //
 //   soksak-records [repository]
 import { itemIdentifier } from "./checklist.js";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, realpathSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { dirname, extname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 /**
@@ -71,6 +72,70 @@ export const RECORD_PATTERNS = [
 
 // Replaces a Markdown code block with the same number of blank lines. The line numbers of violations stay equal to the original.
 const withoutCode = (text) => text.replace(/^(`{3,}|~{3,}).*\n[\s\S]*?^\1\s*$/gm, (block) => block.replace(/[^\n]/g, ""));
+
+/** Replaces each character of a Markdown code block or code span with a space, so positions in the result match the source. */
+const maskCode = (text) => {
+  const blank = (part) => part.replace(/[^\n]/g, " ");
+  return text.replace(/^(`{3,}|~{3,}).*\n[\s\S]*?^\1\s*$/gm, blank).replace(/(`+)[^`\n][\s\S]*?\1/g, blank);
+};
+
+/** The inline links of a Markdown text outside code blocks and code spans as { start, end, target }, where start and end bound the target inside its parentheses. */
+export function markdownLinks(text) {
+  return [...maskCode(text).matchAll(/\[[^\]]*\]\(([^)]+)\)/g)].map((match) => {
+    const start = match.index + match[0].length - 1 - match[1].length;
+    return { start, end: start + match[1].length, target: text.slice(start, start + match[1].length) };
+  });
+}
+
+/**
+ * The anchors of the headings of a Markdown text outside code blocks. An anchor is the heading text in lower case without
+ * the characters that are not a letter, a number, whitespace, `_` or `-`, trimmed, with each whitespace character as `-`;
+ * a heading whose anchor an earlier heading has takes the first free one of `<anchor>-1`, `<anchor>-2`, ….
+ */
+export function headingAnchors(text) {
+  const found = new Set();
+  for (const match of withoutCode(text).matchAll(/^#{1,6}\s+(.+)$/gm)) {
+    const base = match[1].toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, "").trim().replace(/\s/g, "-");
+    let anchor = base, count = 0;
+    while (found.has(anchor)) anchor = `${base}-${++count}`;
+    found.add(anchor);
+  }
+  return found;
+}
+
+/**
+ * The links of a Markdown document, a path relative to repository, whose target is a local Markdown document with a
+ * fragment: `file:line: missing link target <target>` when the target does not exist, and `file:line: missing heading
+ * <target>` when the fragment, URI-decoded, is no anchor of its headings. A fragment alone names a heading of the document itself.
+ */
+export function anchorViolations(text, file, repository) {
+  const errors = [];
+  const anchors = new Map();
+  for (const link of markdownLinks(text)) {
+    const target = link.target.replace(/^<|>$/g, "");
+    // A target with a scheme, such as https:, is an address outside the repository.
+    if (/^[a-z][a-z\d+.-]*:/i.test(target)) continue;
+    const [path, fragment] = target.split("#");
+    if (!fragment) continue;
+    const line = text.slice(0, link.start).split("\n").length;
+    const decode = (part) => {
+      try {
+        return decodeURIComponent(part);
+      } catch (error) {
+        throw new Error(`${file}:${line}: link target ${target} is not URI-encoded: ${error.message}`, { cause: error });
+      }
+    };
+    const full = path ? resolve(repository, dirname(file), decode(path)) : resolve(repository, file);
+    if (extname(full) !== ".md") continue;
+    if (!existsSync(full)) {
+      errors.push(`${file}:${line}: missing link target ${target}`);
+      continue;
+    }
+    if (!anchors.has(full)) anchors.set(full, headingAnchors(readFileSync(full, "utf8")));
+    if (!anchors.get(full).has(decode(fragment))) errors.push(`${file}:${line}: missing heading ${target}`);
+  }
+  return errors;
+}
 
 /** Returns the lines of text that break a record rule as `file:line: category: match`. kind is `document` or `config`. */
 export function recordViolations(text, file, kind = "document") {
@@ -169,6 +234,7 @@ export function repositoryRecordViolations(repository) {
     const text = readFileSync(join(repository, file), "utf8");
     return [
       ...(recordKind(file) ? recordViolations(text, file, recordKind(file)) : []),
+      ...(recordKind(file) === "document" ? anchorViolations(text, file, repository) : []),
       ...(termChecked(file) ? termViolations(text, file) : []),
       ...(/(?:^|\/)features(?:\.[a-z]+)?\.md$/.test(file) ? checklistViolations(text, file) : []),
     ];
