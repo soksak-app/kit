@@ -148,6 +148,14 @@ export function checkCompletedItems(previous, current, file, retiredIds = new Se
   return errors;
 }
 
+/** Compares a checklist with its earlier text: a line that the earlier text did not state takes no retired identifier. */
+export function checkRetiredIdentifiers(previous, current, file, retiredIds) {
+  const earlier = new Set(checklist(previous, file, []).map(({ id }) => id));
+  return [...new Set(checklist(current, file, []).map(({ id }) => id))]
+    .filter((id) => id && !earlier.has(id) && retiredIds.has(id))
+    .map((id) => `${file}: retired checklist identifier ${id} must not name a new item; take the next free identifier`);
+}
+
 /**
  * The identifiers that a changelog pair retires, with the errors of its retirement lines. The identifier of a line is the
  * one of itemIdentifier. Any error leaves no identifier retired, so a defective line excuses no removal.

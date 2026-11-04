@@ -131,3 +131,32 @@ test("the range check reads a root commit and a merge", (t) => {
   assert.deepEqual(rangeRecordViolations(folder, "HEAD").errors, []);
   assert.equal(rangeRecordViolations(folder, "HEAD").commits, 3);
 });
+
+test("a new line of a retired identifier is refused, and a line older than the retirement stays", (t) => {
+  const { folder, write, commit, root } = repository(t);
+  const english = "- Retired checklist entry `F2`: reason\n- Retired checklist entry `F1`: reason\n";
+  const korean = "- 체크리스트 항목 `F2` 폐기: 이유\n- 체크리스트 항목 `F1` 폐기: 이유\n";
+  write("- [o] F1 — P2: first\n", english, korean);
+  commit("retire");
+  assert.deepEqual(repositoryRecordViolations(folder).errors, []);
+  write("- [o] F1 — P2: first\n- [ ] F2 — P2: another item\n", english, korean);
+  const refused = [
+    "docs/features.md: retired checklist identifier F2 must not name a new item; take the next free identifier",
+    "docs/features.ko.md: retired checklist identifier F2 must not name a new item; take the next free identifier",
+  ];
+  assert.deepEqual(repositoryRecordViolations(folder).errors, refused);
+  const added = commit("reuse");
+  assert.deepEqual(rangeRecordViolations(folder, `${root}..HEAD`).errors, refused.map((error) => `${added.slice(0, 12)}: ${error}`));
+});
+
+test("a renumbering retires the old identifier of an open item as it does for a closed item", (t) => {
+  for (const state of [" ", "o"]) {
+    const { folder, write, commit } = repository(t);
+    write(`- [${state}] F1 — P2: first\n`);
+    commit("register");
+    write(`- [${state}] F2 — P2: first\n`);
+    assert.match(repositoryRecordViolations(folder).errors[0], /checklist item F1 /);
+    write(`- [${state}] F2 — P2: first\n`, "- Retired checklist entry `F1`: reason\n", "- 체크리스트 항목 `F1` 폐기: 이유\n");
+    assert.deepEqual(repositoryRecordViolations(folder).errors, []);
+  }
+});

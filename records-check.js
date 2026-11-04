@@ -7,7 +7,7 @@
 //
 //   soksak-records [repository]
 //   soksak-records --range <revision range> [repository]
-import { checkCompletedItems, itemIdentifier, retiredChecklistItems } from "./checklist.js";
+import { checkCompletedItems, checkRetiredIdentifiers, itemIdentifier, retiredChecklistItems } from "./checklist.js";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
@@ -254,7 +254,10 @@ function changeViolations(before, after) {
   const retired = retiredChecklistItems(after(CHANGELOGS[0]), after(CHANGELOGS[1]));
   const earlier = retiredChecklistItems(before(CHANGELOGS[0]), before(CHANGELOGS[1])).ids;
   const retiredHere = new Set([...retired.ids].filter((id) => !earlier.has(id)));
-  return [...retired.errors, ...FEATURES.flatMap((file) => checkCompletedItems(before(file), after(file), file, retiredHere))];
+  return [...retired.errors, ...FEATURES.flatMap((file) => [
+    ...checkCompletedItems(before(file), after(file), file, retiredHere),
+    ...checkRetiredIdentifiers(before(file), after(file), file, retired.ids),
+  ])];
 }
 
 /** The commit that a revision resolves to, or null. */

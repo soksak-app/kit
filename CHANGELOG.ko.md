@@ -4,6 +4,7 @@
 
 ## 미출시
 
+- KR15: 새 체크리스트 줄은 폐기된 identifier를 쓸 수 없고, renumber는 닫힌 항목처럼 열린 항목의 이전 identifier도 폐기한다.
 - KR14: 닫힌 체크리스트 항목은 commit이 폐기하지 않는 한 상태를 유지한다. `soksak-records`는 working tree를 `HEAD`와 비교하고, `soksak-records --range <revision range>`는 각 commit을 첫 parent와 비교한다.
 - KR13: term `stream`은 host가 element tree를 page가 `elements` stream을 구독하는 동안에만 모으고 document region의 request를 attach부터 close까지 모은다고 적는다. Red: stream term test가 실패했다. Green: 통과한다.
 - KR12: 저장소는 `pnpm install`이 쓰는 `pnpm-lock.yaml`을 추적하므로 `make test`가 추적되지 않은 파일을 남기지 않는다. Red: `make test` 뒤에 `git status --porcelain`이 `?? pnpm-lock.yaml`을 출력했다. Green: 아무것도 출력하지 않는다.
