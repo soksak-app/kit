@@ -8,10 +8,11 @@ test:
 check:
 	node records-check.js
 
-# The checks that a push needs: make test, make check, and the commit messages of the pushed range.
+# The checks that a push needs: make test, make check, and the commit messages and the checklist history of the pushed range.
 # RANGE holds the commits of the pushed refs; the pre-push hook sets it, and it defaults to origin/main..HEAD.
 push-check: test check
 	node commits-check.js "$(or $(RANGE),origin/main..HEAD)"
+	node records-check.js --range "$(or $(RANGE),origin/main..HEAD)"
 
 # The release of the kit: the npm pack file of this repository, which the other repositories pin by its release URL.
 release:

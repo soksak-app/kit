@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 // Checks that records state only facts about the repository. Documents are checked on every line outside code blocks, and configuration files (workflow, Makefile) only on comment lines,
 // a link of a document to a heading of a local Markdown document must name a heading that the document has, and violations are reported as `path:line`.
-// Each repository checks its own records with this command.
+// Each repository checks its own records with this command. A closed item keeps its state unless the commit retires it:
+// the command compares the working tree with HEAD, and with --range it compares each commit of a range with its first
+// parent, because no pre-commit hook runs in a rebase and a tree in CI equals its HEAD.
 //
 //   soksak-records [repository]
-import { itemIdentifier } from "./checklist.js";
+//   soksak-records --range <revision range> [repository]
+import { checkCompletedItems, itemIdentifier, retiredChecklistItems } from "./checklist.js";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
@@ -233,11 +236,66 @@ function declaredFiles(repository, tracked) {
   return exclude ? tracked.filter((file) => !exclude.test(file)) : tracked;
 }
 
+const FEATURES = ["docs/features.md", "docs/features.ko.md"];
+const CHANGELOGS = ["CHANGELOG.md", "CHANGELOG.ko.md"];
+
+/** The text of a file at a revision, and the empty text at no revision or where the revision has no such file. */
+function revisionText(repository, revision, file) {
+  if (!revision) return "";
+  const git = (args, options) => execFileSync("git", args, { cwd: repository, encoding: "utf8", ...options });
+  const listed = git(["ls-tree", "--long", revision, "--", file]).trim();
+  if (!listed) return "";
+  // The default output limit of execFileSync (1 MiB) is smaller than a checklist, so the size of the file is the limit.
+  return git(["cat-file", "blob", `${revision}:${file}`], { maxBuffer: Number(listed.split(/\s+/)[3]) + 1 });
+}
+
+/** The errors of one change of the checklist pair, whose texts `before` and `after` give by file. */
+function changeViolations(before, after) {
+  const retired = retiredChecklistItems(after(CHANGELOGS[0]), after(CHANGELOGS[1]));
+  const earlier = retiredChecklistItems(before(CHANGELOGS[0]), before(CHANGELOGS[1])).ids;
+  const retiredHere = new Set([...retired.ids].filter((id) => !earlier.has(id)));
+  return [...retired.errors, ...FEATURES.flatMap((file) => checkCompletedItems(before(file), after(file), file, retiredHere))];
+}
+
+/** The commit that a revision resolves to, or null. */
+function resolved(repository, revision) {
+  try {
+    return execFileSync("git", ["rev-parse", "-q", "--verify", `${revision}^{commit}`], { cwd: repository, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+  } catch (error) {
+    if (error.status === 1) return null;
+    throw error;
+  }
+}
+
+/** The errors of the working tree against HEAD. */
+function workingTreeViolations(repository) {
+  const head = resolved(repository, "HEAD");
+  const present = (file) => (existsSync(join(repository, file)) ? readFileSync(join(repository, file), "utf8") : "");
+  return changeViolations((file) => revisionText(repository, head, file), present);
+}
+
+/**
+ * The errors of each commit of a range against its first parent, as `<commit>: <error>`, one commit at a time. Only the
+ * commits that change the checklist or the changelog pair read their texts, so memory follows the largest pair.
+ */
+export function rangeRecordViolations(repository, range) {
+  const git = (...args) => execFileSync("git", args, { cwd: repository, encoding: "utf8" });
+  const commits = git("rev-list", "--reverse", ...range.split(" ")).split("\n").filter(Boolean);
+  const errors = commits.flatMap((commit) => {
+    const parent = resolved(repository, `${commit}^`);
+    const changed = git("diff-tree", "--root", "--no-commit-id", "--name-only", "-r", ...(parent ? [parent] : []), commit, "--", ...FEATURES, ...CHANGELOGS);
+    if (!changed.trim()) return [];
+    return changeViolations((file) => revisionText(repository, parent, file), (file) => revisionText(repository, commit, file))
+      .map((error) => `${commit.slice(0, 12)}: ${error}`);
+  });
+  return { commits: commits.length, errors };
+}
+
 export function repositoryRecordViolations(repository) {
   const tracked = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], { cwd: repository, encoding: "utf8" })
     .split("\0").filter((file) => file && existsSync(join(repository, file)));
   const files = declaredFiles(repository, tracked).filter((file) => recordKind(file) !== null || termChecked(file));
-  return { files, errors: files.flatMap((file) => {
+  return { files, errors: [...files.flatMap((file) => {
     const text = readFileSync(join(repository, file), "utf8");
     return [
       ...(recordKind(file) ? recordViolations(text, file, recordKind(file)) : []),
@@ -245,13 +303,28 @@ export function repositoryRecordViolations(repository) {
       ...(termChecked(file) ? termViolations(text, file) : []),
       ...(/(?:^|\/)features(?:\.[a-z]+)?\.md$/.test(file) ? checklistViolations(text, file) : []),
     ];
-  }) };
+  }), ...workingTreeViolations(repository)] };
 }
 
 // A package manager places a package as a link, so the started path is resolved before it is compared with this module.
 if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href) {
+  const ranged = process.argv[2] === "--range";
+  if (ranged && !process.argv[3]) {
+    process.stderr.write("usage: soksak-records --range <revision range> [repository]\n");
+    process.exit(2);
+  }
   // default: when [repository] of the usage is omitted, the repository in the current folder is checked.
-  const { files, errors } = repositoryRecordViolations(resolve(process.argv[2] ?? "."));
+  const repository = resolve(process.argv[ranged ? 4 : 2] ?? ".");
+  if (ranged) {
+    const { commits, errors } = rangeRecordViolations(repository, process.argv[3]);
+    if (errors.length) {
+      process.stderr.write(errors.map((error) => `${error}\n`).join(""));
+      process.exit(1);
+    }
+    process.stdout.write(`Checklist history checks passed: ${commits} commits\n`);
+    process.exit(0);
+  }
+  const { files, errors } = repositoryRecordViolations(repository);
   if (errors.length) {
     process.stderr.write(errors.map((error) => `${error}\n`).join(""));
     process.stderr.write(`${errors.length} record lines state something other than facts about this repository\n`);

@@ -119,3 +119,55 @@ export function checklist(text, file, errors) {
   }
   return entries;
 }
+
+/**
+ * Compares a checklist with its earlier text. A closed item keeps its state on every line of its identifier, and an open
+ * item leaves the checklist through a recorded state, unless retiredIds retires its identifier.
+ */
+export function checkCompletedItems(previous, current, file, retiredIds = new Set()) {
+  const errors = [];
+  const after = new Map();
+  for (const { id, state } of checklist(current, file, [])) {
+    if (!id) continue;
+    if (!after.has(id)) after.set(id, []);
+    after.get(id).push(state);
+  }
+  for (const { id, state } of checklist(previous, file, [])) {
+    if (!id || retiredIds.has(id)) continue;
+    const states = after.get(id);
+    if (state === "o" && !(states && states.every((other) => other === "o"))) {
+      errors.push(`${file}: completed checklist item ${id} must remain complete; add a linked follow-up identifier`);
+    }
+    if (state === "-" && !(states && states.every((other) => other === "-"))) {
+      errors.push(`${file}: closed checklist item ${id} must remain closed; add a linked follow-up identifier`);
+    }
+    if ([" ", "~", "!"].includes(state) && !states) {
+      errors.push(`${file}: open checklist item ${id} was removed; record its completion or closure, or retire it`);
+    }
+  }
+  return errors;
+}
+
+/**
+ * The identifiers that a changelog pair retires, with the errors of its retirement lines. The identifier of a line is the
+ * one of itemIdentifier. Any error leaves no identifier retired, so a defective line excuses no removal.
+ */
+export function retiredChecklistItems(english, korean) {
+  const parse = (text, pattern, file) => {
+    const entries = new Set();
+    const errors = [];
+    for (const [, id, reason] of text.matchAll(pattern)) {
+      if (itemIdentifier(`${id} — `).id !== id) errors.push(`${file}: retired checklist entry ${id} is not an identifier`);
+      if (!reason.trim()) errors.push(`${file}: retired checklist entry ${id} requires a reason`);
+      if (entries.has(id)) errors.push(`${file}: duplicate retired checklist entry ${id}`);
+      entries.add(id);
+    }
+    return { entries, errors };
+  };
+  const en = parse(english, /^- Retired checklist entry `([^`]+)`:(.*)$/gm, "CHANGELOG.md");
+  const ko = parse(korean, /^- 체크리스트 항목 `([^`]+)` 폐기:(.*)$/gm, "CHANGELOG.ko.md");
+  const errors = [...en.errors, ...ko.errors];
+  const sorted = (entries) => JSON.stringify([...entries].sort());
+  if (sorted(en.entries) !== sorted(ko.entries)) errors.push("retired checklist entries differ between changelog translations");
+  return { ids: errors.length ? new Set() : en.entries, errors };
+}
