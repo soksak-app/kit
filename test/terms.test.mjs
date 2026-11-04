@@ -94,3 +94,12 @@ test("the element entry and element name terms name an exposure entry of the kin
   assert.match(name.definition, /name of an element entry/);
   assert.equal(name.rejected.length, 1, "element name rejects one phrase");
 });
+
+test("the stream term states the collection rule of the document streams", () => {
+  // The rule of core docs/spec/native-surfaces.md, section Document streams.
+  const rule = "The element tree is collected only while a page subscribes to the `elements` stream, so a region without an `elements` subscription posts no element data. The requests of a region are collected from its attach to its close, from the start of each of its documents, so a subscription that starts later receives the requests that the document made before it.";
+  const entry = terms.find((term) => term.term === "stream");
+  assert.ok(entry, "the term list defines stream");
+  assert.match(entry.definition, /element tree only while a page subscribes to the `elements` stream/, rule);
+  assert.match(entry.definition, /requests of the region from its attach to its close/, rule);
+});

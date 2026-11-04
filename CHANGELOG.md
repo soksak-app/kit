@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- KR13: The term `stream` states that the host collects the element tree only while a page subscribes to the `elements` stream and the requests of a document region from its attach to its close. Red: the stream term test failed. Green: it passes.
 - KR12: The repository tracks the `pnpm-lock.yaml` that `pnpm install` writes, so `make test` leaves no untracked file. Red: `git status --porcelain` printed `?? pnpm-lock.yaml` after `make test`. Green: it prints nothing.
 - KR11: The pattern that finds a rejected phrase inside an identifier escapes the regular expression characters of its words, as the main pattern does, so `a.b entry` no longer matches `AxbEntry`. Red: the escape test failed. Green: it passes.
 - KR10: The version is 0.0.7, so the release run publishes KR7, KR8 and KR9 as v0.0.7, where the tag v0.0.6 held the release gate.

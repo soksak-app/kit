@@ -132,7 +132,7 @@
     },
     {
       "term": "stream",
-      "definition": "One kind of data of a document region, its elements or its requests, that the host collects only while a page subscribes to it (docs/spec/native-surfaces.md#document-streams).",
+      "definition": "One kind of data of a document region, its elements or its requests: the host collects the element tree only while a page subscribes to the `elements` stream, and the requests of the region from its attach to its close, whatever the subscriptions (docs/spec/native-surfaces.md#document-streams).",
       "rejected": [],
       "allowed": []
     },
