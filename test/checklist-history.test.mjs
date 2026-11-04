@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -159,4 +159,27 @@ test("a renumbering retires the old identifier of an open item as it does for a 
     write(`- [${state}] F2 — P2: first\n`, "- Retired checklist entry `F1`: reason\n", "- 체크리스트 항목 `F1` 폐기: 이유\n");
     assert.deepEqual(repositoryRecordViolations(folder).errors, []);
   }
+});
+
+test("the range check reads each blob once, also across a commit and its child", (t) => {
+  const { folder, write, commit, root } = repository(t);
+  write("- [o] F1 — P2: first\n- [ ] F2 — P2: second\n");
+  commit("change the checklist");
+  write("- [o] F1 — P2: first\n- [o] F2 — P2: second\n");
+  commit("close the item");
+  const log = join(folder, "reads");
+  const bin = join(folder, "bin");
+  mkdirSync(bin);
+  const git = join(bin, "git");
+  const real = execFileSync("which", ["git"], { encoding: "utf8" }).trim();
+  writeFileSync(git, `#!/bin/sh\n[ "$1" = cat-file ] && echo "$3" >> "${log}"\nexec "${real}" "$@"\n`);
+  chmodSync(git, 0o755);
+  const path = process.env.PATH;
+  t.after(() => { process.env.PATH = path; });
+  process.env.PATH = `${bin}:${path}`;
+  assert.deepEqual(rangeRecordViolations(folder, `${root}..HEAD`).errors, []);
+  const reads = existsSync(log) ? readFileSync(log, "utf8").trim().split("\n") : [];
+  // Both languages hold one text in this repository, so the range has three checklist blobs and two changelog blobs.
+  assert.equal(reads.length, 5);
+  assert.equal(new Set(reads).size, 5);
 });

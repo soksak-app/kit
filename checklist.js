@@ -125,14 +125,18 @@ export function checklist(text, file, errors) {
  * item leaves the checklist through a recorded state, unless retiredIds retires its identifier.
  */
 export function checkCompletedItems(previous, current, file, retiredIds = new Set()) {
+  return completedItemErrors(checklist(previous, file, []), checklist(current, file, []), file, retiredIds);
+}
+
+function completedItemErrors(earlierEntries, entries, file, retiredIds) {
   const errors = [];
   const after = new Map();
-  for (const { id, state } of checklist(current, file, [])) {
+  for (const { id, state } of entries) {
     if (!id) continue;
     if (!after.has(id)) after.set(id, []);
     after.get(id).push(state);
   }
-  for (const { id, state } of checklist(previous, file, [])) {
+  for (const { id, state } of earlierEntries) {
     if (!id || retiredIds.has(id)) continue;
     const states = after.get(id);
     if (state === "o" && !(states && states.every((other) => other === "o"))) {
@@ -150,10 +154,20 @@ export function checkCompletedItems(previous, current, file, retiredIds = new Se
 
 /** Compares a checklist with its earlier text: a line that the earlier text did not state takes no retired identifier. */
 export function checkRetiredIdentifiers(previous, current, file, retiredIds) {
-  const earlier = new Set(checklist(previous, file, []).map(({ id }) => id));
-  return [...new Set(checklist(current, file, []).map(({ id }) => id))]
+  return retiredIdentifierErrors(checklist(previous, file, []), checklist(current, file, []), file, retiredIds);
+}
+
+function retiredIdentifierErrors(earlierEntries, entries, file, retiredIds) {
+  const earlier = new Set(earlierEntries.map(({ id }) => id));
+  return [...new Set(entries.map(({ id }) => id))]
     .filter((id) => id && !earlier.has(id) && retiredIds.has(id))
     .map((id) => `${file}: retired checklist identifier ${id} must not name a new item; take the next free identifier`);
+}
+
+/** Both comparisons of one change of a checklist, which parse each text once. */
+export function checkChecklistChange(previous, current, file, retiredHere, retired) {
+  const [earlierEntries, entries] = [checklist(previous, file, []), checklist(current, file, [])];
+  return [...completedItemErrors(earlierEntries, entries, file, retiredHere), ...retiredIdentifierErrors(earlierEntries, entries, file, retired)];
 }
 
 /**

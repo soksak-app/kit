@@ -7,7 +7,7 @@
 //
 //   soksak-records [repository]
 //   soksak-records --range <revision range> [repository]
-import { checkCompletedItems, checkRetiredIdentifiers, itemIdentifier, retiredChecklistItems } from "./checklist.js";
+import { checkChecklistChange, itemIdentifier, retiredChecklistItems } from "./checklist.js";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
@@ -239,25 +239,33 @@ function declaredFiles(repository, tracked) {
 const FEATURES = ["docs/features.md", "docs/features.ko.md"];
 const CHANGELOGS = ["CHANGELOG.md", "CHANGELOG.ko.md"];
 
-/** The text of a file at a revision, and the empty text at no revision or where the revision has no such file. */
-function revisionText(repository, revision, file) {
-  if (!revision) return "";
+/**
+ * The blobs and texts of the checklist pair and the changelog pair at a revision, by file; no revision holds none. A blob
+ * that `earlier` holds is not read again.
+ */
+function snapshot(repository, revision, earlier = new Map()) {
   const git = (args, options) => execFileSync("git", args, { cwd: repository, encoding: "utf8", ...options });
-  const listed = git(["ls-tree", "--long", revision, "--", file]).trim();
-  if (!listed) return "";
-  // The default output limit of execFileSync (1 MiB) is smaller than a checklist, so the size of the file is the limit.
-  return git(["cat-file", "blob", `${revision}:${file}`], { maxBuffer: Number(listed.split(/\s+/)[3]) + 1 });
+  const files = new Map();
+  for (const file of revision ? [...FEATURES, ...CHANGELOGS] : []) {
+    const listed = git(["ls-tree", "--long", revision, "--", file]).trim();
+    if (!listed) continue;
+    const [, , blob, size] = listed.split(/\s+/);
+    const held = [...files.values(), ...earlier.values()].find((entry) => entry.blob === blob);
+    // The default output limit of execFileSync (1 MiB) is smaller than a checklist, so the size of the file is the limit.
+    files.set(file, held ?? { blob, text: git(["cat-file", "blob", blob], { maxBuffer: Number(size) + 1 }) });
+  }
+  return files;
 }
+
+/** The text of a file of a snapshot, and the empty text where it holds no such file. */
+const textOf = (files) => (file) => files.get(file)?.text ?? "";
 
 /** The errors of one change of the checklist pair, whose texts `before` and `after` give by file. */
 function changeViolations(before, after) {
   const retired = retiredChecklistItems(after(CHANGELOGS[0]), after(CHANGELOGS[1]));
   const earlier = retiredChecklistItems(before(CHANGELOGS[0]), before(CHANGELOGS[1])).ids;
   const retiredHere = new Set([...retired.ids].filter((id) => !earlier.has(id)));
-  return [...retired.errors, ...FEATURES.flatMap((file) => [
-    ...checkCompletedItems(before(file), after(file), file, retiredHere),
-    ...checkRetiredIdentifiers(before(file), after(file), file, retired.ids),
-  ])];
+  return [...retired.errors, ...FEATURES.flatMap((file) => checkChecklistChange(before(file), after(file), file, retiredHere, retired.ids))];
 }
 
 /** The commit that a revision resolves to, or null. */
@@ -274,7 +282,7 @@ function resolved(repository, revision) {
 function workingTreeViolations(repository) {
   const head = resolved(repository, "HEAD");
   const present = (file) => (existsSync(join(repository, file)) ? readFileSync(join(repository, file), "utf8") : "");
-  return changeViolations((file) => revisionText(repository, head, file), present);
+  return changeViolations(textOf(snapshot(repository, head)), present);
 }
 
 /**
@@ -284,12 +292,15 @@ function workingTreeViolations(repository) {
 export function rangeRecordViolations(repository, range) {
   const git = (...args) => execFileSync("git", args, { cwd: repository, encoding: "utf8" });
   const commits = git("rev-list", "--reverse", ...range.split(" ")).split("\n").filter(Boolean);
+  // Only the snapshot of the last compared commit stays: it is usually the parent of the next commit.
+  let last = new Map();
   const errors = commits.flatMap((commit) => {
     const parent = resolved(repository, `${commit}^`);
     const changed = git("diff-tree", "--root", "--no-commit-id", "--name-only", "-r", ...(parent ? [parent] : []), commit, "--", ...FEATURES, ...CHANGELOGS);
     if (!changed.trim()) return [];
-    return changeViolations((file) => revisionText(repository, parent, file), (file) => revisionText(repository, commit, file))
-      .map((error) => `${commit.slice(0, 12)}: ${error}`);
+    const before = snapshot(repository, parent, last);
+    last = snapshot(repository, commit, before);
+    return changeViolations(textOf(before), textOf(last)).map((error) => `${commit.slice(0, 12)}: ${error}`);
   });
   return { commits: commits.length, errors };
 }
