@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- KR7-1: The release gate job sets up pnpm.
 - KR7: The kit is the checks kit with one executable, `soksak-check`, and it holds the census check. Red: `test/check.test.mjs` failed. Green: it passes.
 - KR6: The rejected synonym of `drawing` is `presenting state`, so records may state that the host presents a frame, and the version is 0.0.6. Red: the term check test failed. Green: it passes.
 - KR5: The term list defines `presentation mode` and `lease`, how the host presents the image of an image region, and the version is 0.0.5. Red: the term test failed. Green: it passes.
