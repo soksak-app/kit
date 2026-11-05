@@ -8,7 +8,7 @@
 //   sok-check docs --range <revision range> [repository]
 import { checkChecklistChange, itemIdentifier, retiredChecklistItems } from "./checklist.js";
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, lstatSync, readFileSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
 
 // The pattern source that matches text literally.
@@ -178,6 +178,19 @@ export function checklistViolations(text, file) {
   return errors;
 }
 
+/**
+ * The lines of a text that a merge left as conflict markers, as `file:line: conflict marker`: a line that starts with seven
+ * `<`, `|` or `>` followed by a space or its end, or a line of exactly seven `=`. A code block is no exception, and a longer
+ * rule or a heading underline of another length is no marker.
+ */
+export function conflictMarkerViolations(text, file) {
+  const errors = [];
+  text.split("\n").forEach((line, index) => {
+    if (/^(?:[<|>]{7}(?: |$)|={7}$)/.test(line.replace(/\r$/, "")) && /^(.)\1{6}/.test(line)) errors.push(`${file}:${index + 1}: conflict marker`);
+  });
+  return errors;
+}
+
 /** The kind of a file to check. A document is `.md`, and a configuration is a workflow or a Makefile. Any other file is null. */
 export function docKind(file) {
   if (file.endsWith(".md")) return "document";
@@ -312,7 +325,13 @@ export function repositoryDocViolations(repository) {
   // A log or a script of a run belongs to the temporary folder, so a repository holds only tracked and ignored files.
   const untracked = execFileSync("git", ["ls-files", "--others", "--exclude-standard", "-z"], { cwd: repository, encoding: "utf8" })
     .split("\0").filter(Boolean).map((file) => `${file}: untracked file: commit it, ignore it or remove it`);
-  return { files, errors: [...untracked, ...files.flatMap((file) => {
+  // A conflict leaves its markers in any text file, a record or not; a file with a NUL byte is binary and holds no lines, and a
+  // symbolic link holds no text of its own.
+  const conflicts = tracked.filter((file) => lstatSync(join(repository, file)).isFile()).flatMap((file) => {
+    const bytes = readFileSync(join(repository, file));
+    return bytes.includes(0) ? [] : conflictMarkerViolations(bytes.toString("utf8"), file);
+  });
+  return { files, errors: [...untracked, ...conflicts, ...files.flatMap((file) => {
     const text = readFileSync(join(repository, file), "utf8");
     return [
       ...(docKind(file) ? docViolations(text, file, docKind(file)) : []),

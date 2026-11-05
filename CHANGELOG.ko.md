@@ -7,6 +7,7 @@
 - KR16: 범위 검사는 각 blob을 한 번 읽고 각 text를 한 번 parse하므로 시간이 절반으로 준다. peak memory는 macOS allocator의 large block cache이고 그대로다.
 - KR15: 새 체크리스트 줄은 폐기된 identifier를 쓸 수 없고, renumber는 닫힌 항목처럼 열린 항목의 이전 identifier도 폐기한다.
 - KR14: 닫힌 체크리스트 항목은 commit이 폐기하지 않는 한 상태를 유지한다. `soksak-records`는 working tree를 `HEAD`와 비교하고, `soksak-records --range <revision range>`는 각 commit을 첫 parent와 비교한다.
+- KR24: `sok-check docs`는 tracked text 파일의 conflict marker 줄을 파일과 줄로 거부한다.
 - KR23: term `stream`은 host가 element tree를 page가 `elements` stream을 구독하는 동안에만 모으고 document region의 request를 attach부터 close까지 모은다고 적는다. Red: stream term test가 실패했다. Green: 통과한다.
 - KR22: 저장소는 `pnpm install`이 쓰는 `pnpm-lock.yaml`을 추적하므로 `make test`가 추적되지 않은 파일을 남기지 않는다. Red: `make test` 뒤에 `git status --porcelain`이 `?? pnpm-lock.yaml`을 출력했다. Green: 아무것도 출력하지 않는다.
 - KR21: identifier 안의 거부어를 찾는 pattern은 main pattern처럼 단어의 정규식 문자를 escape하므로, `a.b entry`가 더는 `AxbEntry`에 맞지 않는다. Red: escape test가 실패했다. Green: 통과한다.

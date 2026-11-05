@@ -7,6 +7,7 @@
 - KR16: The range check reads each blob once and parses each text once, so a range takes half the time; its peak memory is the large block cache of the macOS allocator and stays.
 - KR15: A new checklist line takes no retired identifier, and a renumbering retires the old identifier of an open item as it does for a closed item.
 - KR14: A closed checklist item keeps its state unless the commit retires it: `soksak-records` compares the working tree with `HEAD`, and `soksak-records --range <revision range>` judges each commit against its first parent.
+- KR24: `sok-check docs` refuses each conflict marker line of a tracked text file with its file and line.
 - KR23: The term `stream` states that the host collects the element tree only while a page subscribes to the `elements` stream and the requests of a document region from its attach to its close. Red: the stream term test failed. Green: it passes.
 - KR22: The repository tracks the `pnpm-lock.yaml` that `pnpm install` writes, so `make test` leaves no untracked file. Red: `git status --porcelain` printed `?? pnpm-lock.yaml` after `make test`. Green: it prints nothing.
 - KR21: The pattern that finds a rejected phrase inside an identifier escapes the regular expression characters of its words, as the main pattern does, so `a.b entry` no longer matches `AxbEntry`. Red: the escape test failed. Green: it passes.

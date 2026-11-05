@@ -315,3 +315,42 @@ test("a repository has no untracked file", () => {
   writeFileSync(join(repository, "stray.log"), "output\n");
   assert.deepEqual(repositoryDocViolations(repository).errors, ["stray.log: untracked file: commit it, ignore it or remove it"]);
 });
+
+// The markers are built from their characters, so that this file holds none at the start of a line.
+const ours = `${"<".repeat(7)} HEAD`;
+const base = `${"|".repeat(7)} base`;
+const middle = "=".repeat(7);
+const theirs = `${">".repeat(7)} fa48e56 (fix(input): Hold input)`;
+
+test("the document check refuses each line of a conflict in a record, a code block and any tracked text file, with its file and line", () => {
+  const repository = mkdtempSync(join(tmpdir(), "records-conflict-"));
+  execSync("git init -q .", { cwd: repository });
+  mkdirSync(join(repository, "docs"));
+  writeFileSync(join(repository, "docs/features.md"), `# Features\n\n${ours}\n- [o] P2 — P1: Two.\n${middle}\n- [o] P1 — P1: One.\n${theirs}\n`);
+  writeFileSync(join(repository, "README.md"), `# Read\n\n\`\`\`\n${ours}\n${base}\n${middle}\n${theirs}\n\`\`\`\n`);
+  writeFileSync(join(repository, "index.js"), `export const a = 1;\n${ours}\n${middle}\n${theirs}\n`);
+  writeFileSync(join(repository, "build.py"), `${ours}\n`);
+  writeFileSync(join(repository, "image.bin"), Buffer.from([0, 1, 2, 10, ...Buffer.from(`${ours}\n`)]));
+  execSync("git add .", { cwd: repository });
+  assert.deepEqual(repositoryDocViolations(repository).errors.filter((error) => error.includes("conflict marker")).sort(), [
+    "README.md:4: conflict marker",
+    "README.md:5: conflict marker",
+    "README.md:6: conflict marker",
+    "README.md:7: conflict marker",
+    "build.py:1: conflict marker",
+    "docs/features.md:3: conflict marker",
+    "docs/features.md:5: conflict marker",
+    "docs/features.md:7: conflict marker",
+    "index.js:2: conflict marker",
+    "index.js:3: conflict marker",
+    "index.js:4: conflict marker",
+  ]);
+});
+
+test("the document check passes a heading underline, a longer rule and a marker inside a line", () => {
+  const repository = mkdtempSync(join(tmpdir(), "records-no-conflict-"));
+  execSync("git init -q .", { cwd: repository });
+  writeFileSync(join(repository, "README.md"), `Title\n${"=".repeat(8)}\n\nA line that quotes ${ours} inside it.\n\n${"=".repeat(5)}\n`);
+  execSync("git add .", { cwd: repository });
+  assert.deepEqual(repositoryDocViolations(repository).errors, []);
+});
