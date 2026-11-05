@@ -2,6 +2,7 @@
 
 [English](features.md)
 
+- [o] KR10 — P1, core F467 연결: 저장소는 `soksak-app/kit`이고 package는 `@soksak/kit`이다. 입력: 이 저장소는 workspace의 유일한 kit인데 이름에 `-checks`가 붙어 있었다. Red: `test/check.test.mjs`가 `@soksak/kit-checks`를 읽었다. Green: `@soksak/kit`을 읽고 kit의 모든 test가 통과한다.
 - [o] KR9 — P1, core F465 연결: record는 local build 폴더의 log를 인용하지 않는다. 입력: local build 폴더의 logs 폴더 아래 log를 적은 checklist 줄. 동작: 그 폴더는 추적되지 않아 다른 checkout에서 인용을 따라갈 수 없는데도 record 검사가 통과했다. 기대: 검사가 `local build log`를 보고한다. Red: `test/records.test.mjs`의 새 test가 위반 0개를 읽었다. Green: 1개를 읽는다.
 - [o] KR8 — P0, KR7 연결: 각 검사는 자기 module만 읽고 kit에는 설치 단계가 없다. 입력: 의존성이 설치되지 않은 저장소의 release gate. 동작: `check.js`가 모든 검사에서 census 검사와 `ajv`를 읽어 gate에 설치가 필요했다. 기대: `commits`, `records`, `release`는 설치 없이 실행되고, `census`는 빠진 의존성을 밝히며, CI의 설치 단계만 package manager를 실행한다. Red: `test/check.test.mjs`의 새 test가 `commits`에서 빠진 `ajv`로 실패했다. Green: 통과한다.
 - [o] KR7-1 — P0, KR7 연결: release gate job이 pnpm을 설치한다. 입력: lock된 의존성 `ajv`를 가진 main push. 동작: gate job이 `make: pnpm: No such file or directory`로 멈췄다. 기대: gate가 release를 결정한다. 결과: job에 pnpm 설치 단계가 있다.

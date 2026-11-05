@@ -1,4 +1,4 @@
-# Tests and releases the checks kit (docs/features.md). The kit checks its own records with its own source.
+# Tests and releases the kit (docs/features.md). The kit checks its own records with its own source.
 .PHONY: test check push-check release hooks
 
 # Each test reports its result and its elapsed time, and each test has a limit of 60 seconds.

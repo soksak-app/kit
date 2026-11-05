@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- KR10: The repository is `soksak-app/kit`, and the package is `@soksak/kit`.
 - KR9: The record check reports a citation of a log of the local build folder. Red: the new test of `test/records.test.mjs` failed. Green: it passes.
 - KR8: A check loads only its own module, and the kit holds no installation step. Red: the new test of `test/check.test.mjs` failed. Green: it passes.
 - KR7-1: The release gate job sets up pnpm.

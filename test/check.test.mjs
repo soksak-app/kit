@@ -11,14 +11,14 @@ const run = (args, cwd) => spawnSync(process.execPath, [command, ...args], { cwd
 const GOOD = "fix(kit): Reject an unknown check (#KR7)\n\nThe executable names each check, so an unknown name is an error.\n";
 
 function folder(t) {
-  const path = mkdtempSync(join(tmpdir(), "kit-checks-"));
+  const path = mkdtempSync(join(tmpdir(), "kit-"));
   t.after(() => rmSync(path, { recursive: true, force: true }));
   return path;
 }
 
 test("the kit has one executable, soksak-check", () => {
   const manifest = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
-  assert.equal(manifest.name, "@soksak/kit-checks");
+  assert.equal(manifest.name, "@soksak/kit");
   assert.deepEqual(manifest.bin, { "soksak-check": "./check.js" });
 });
 

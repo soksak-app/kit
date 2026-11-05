@@ -1,12 +1,12 @@
 {
-  "name": "@soksak/kit-checks",
-  "version": "0.0.9",
+  "name": "@soksak/kit",
+  "version": "0.0.10",
   "private": true,
-  "description": "Checks kit: the commit message check, the record check, the census check, the release gate and the term list that every soksak repository runs.",
+  "description": "Kit: the commit message check, the record check, the census check, the release gate and the term list that every soksak repository runs.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/soksak-app/kit-checks.git"
+    "url": "git+https://github.com/soksak-app/kit.git"
   },
   "type": "module",
   "packageManager": "pnpm@11.24.0",
