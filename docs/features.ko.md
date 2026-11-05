@@ -2,6 +2,7 @@
 
 [English](features.md)
 
+- [o] KR8 — P0, KR7 연결: 각 검사는 자기 module만 읽고 kit에는 설치 단계가 없다. 입력: 의존성이 설치되지 않은 저장소의 release gate. 동작: `check.js`가 모든 검사에서 census 검사와 `ajv`를 읽어 gate에 설치가 필요했다. 기대: `commits`, `records`, `release`는 설치 없이 실행되고, `census`는 빠진 의존성을 밝히며, CI의 설치 단계만 package manager를 실행한다. Red: `test/check.test.mjs`의 새 test가 `commits`에서 빠진 `ajv`로 실패했다. Green: 통과한다.
 - [o] KR7-1 — P0, KR7 연결: release gate job이 pnpm을 설치한다. 입력: lock된 의존성 `ajv`를 가진 main push. 동작: gate job이 `make: pnpm: No such file or directory`로 멈췄다. 기대: gate가 release를 결정한다. 결과: job에 pnpm 설치 단계가 있다.
 - [o] KR7 — P0, core F463 연결: kit은 checks kit이고 `soksak-check`가 하나뿐인 실행 파일이다. 입력: repository는 kit 2개를 pin하고 command 4개(`soksak-commits`, `soksak-records`, `soksak-release-gate`, `soksak-events`)를 실행했다. 기대: `soksak-check commits|records|census|release`가 각 검사를 실행하고, usage에 없는 이름, option, 인자 개수는 2로 끝난다. Red: `test/check.test.mjs`가 `@soksak/kit-checks` 대신 `@soksak/kit-records`를 읽어 실패했고, 모르는 이름은 1로 끝났다. Green: kit의 test 83개가 모두 통과하고 `make check`가 통과한다.
 - [o] KR6 — P0, core F388 연결: `drawing`의 거부어는 동사 `presenting`이 아니라 `presenting state`이다. 입력: entry `drawing`이 `presenting`을 거부하므로, term `presentation mode`와 `lease`가 가리키는 호스트의 frame 표시를 적은 record가 record 검사에서 실패한다. 기대: record 검사는 동사 `presenting`을 받아들이고, `drawing` 대신 쓴 `presenting state`는 여전히 거절하며, version은 0.0.6이다. Red: `the verb of presentation is not a synonym of drawing`이 `rejected term "presenting", use "drawing"`으로 실패했다. Green: 통과한다.

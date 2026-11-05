@@ -1,9 +1,5 @@
 # Tests and releases the checks kit (docs/features.md). The kit checks its own records with its own source.
-.PHONY: install test check push-check release hooks
-
-# The installation stage: the locked dependencies.
-install:
-	pnpm install --frozen-lockfile
+.PHONY: test check push-check release hooks
 
 # Each test reports its result and its elapsed time, and each test has a limit of 60 seconds.
 test:

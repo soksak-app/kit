@@ -29,10 +29,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
-      - uses: pnpm/action-setup@v4
       - name: Decide the release
         id: gate
-        run: make install && node check.js release package.json docs/features.md
+        run: node check.js release package.json docs/features.md
 
   release:
     needs: gate

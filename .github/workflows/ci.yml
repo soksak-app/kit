@@ -20,7 +20,7 @@ jobs:
           node-version-file: .node-version
       - uses: pnpm/action-setup@v4
       - name: Install
-        run: make install
+        run: pnpm install --frozen-lockfile
       - name: Test
         run: make test
       - name: Check

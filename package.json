@@ -1,6 +1,6 @@
 {
   "name": "@soksak/kit-checks",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "private": true,
   "description": "Checks kit: the commit message check, the record check, the census check, the release gate and the term list that every soksak repository runs.",
   "license": "MIT",

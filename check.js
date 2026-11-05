@@ -7,35 +7,32 @@
 //   soksak-check release <package.json> <checklist>
 //
 // A name, an option or a count of arguments that the usage does not declare exits with 2; a failed check exits with 1.
+// Each check loads only its own module, so a check without a dependency needs no installation.
 import { parseArgs } from "node:util";
-import { checkCensus } from "./census.js";
-import { checkCommits } from "./commits.js";
-import { checkRecords } from "./records.js";
-import { checkRelease } from "./release.js";
 
 const CHECKS = {
   commits: {
     usage: "commits <message file | revision range...>", least: 1, most: Infinity,
-    run: (_values, positionals) => checkCommits(positionals),
+    run: async (_values, positionals) => (await import("./commits.js")).checkCommits(positionals),
   },
   records: {
     usage: "records [repository]", least: 0, most: 1,
-    run: (_values, [repository]) => checkRecords(repository),
+    run: async (_values, [repository]) => (await import("./records.js")).checkRecords(repository),
   },
   census: {
     usage: "census [--config <file>] [--catalog <file>] [--list] [repository]", least: 0, most: 1,
     options: { config: { type: "string" }, catalog: { type: "string" }, list: { type: "boolean" } },
-    run: (values, [repository]) => checkCensus(values, repository),
+    run: async (values, [repository]) => (await import("./census.js")).checkCensus(values, repository),
   },
   release: {
     usage: "release <package.json> <checklist>", least: 2, most: 2,
-    run: (_values, [manifest, list]) => checkRelease(manifest, list),
+    run: async (_values, [manifest, list]) => (await import("./release.js")).checkRelease(manifest, list),
   },
 };
 
 const usage = (check) => `usage: soksak-check ${check.usage}\n`;
 
-function main([name, ...argv]) {
+async function main([name, ...argv]) {
   const check = Object.hasOwn(CHECKS, name ?? "") ? CHECKS[name] : null;
   if (!check) {
     process.stderr.write(Object.values(CHECKS).map(usage).join(""));
@@ -54,11 +51,11 @@ function main([name, ...argv]) {
     return 2;
   }
   try {
-    return check.run(values, positionals);
+    return await check.run(values, positionals);
   } catch (error) {
     process.stderr.write(`${error.message}\n`);
     return 1;
   }
 }
 
-process.exitCode = main(process.argv.slice(2));
+process.exitCode = await main(process.argv.slice(2));

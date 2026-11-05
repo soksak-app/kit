@@ -4,6 +4,7 @@
 
 ## 미출시
 
+- KR8: 각 검사는 자기 module만 읽고 kit에는 설치 단계가 없다. Red: `test/check.test.mjs`의 새 test가 실패했다. Green: 통과한다.
 - KR7-1: release gate job이 pnpm을 설치한다.
 - KR7: kit은 실행 파일 하나 `soksak-check`를 가진 checks kit이고 census 검사를 담는다. Red: `test/check.test.mjs`가 실패했다. Green: 통과한다.
 - KR6: `drawing`의 거부어는 `presenting state`이므로 record가 호스트의 frame 표시를 적을 수 있고, version은 0.0.6이다. Red: term 검사 test가 실패했다. Green: 통과한다.

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -81,4 +81,19 @@ test("release reports an error of its input and exits with 1", (t) => {
   const result = run(["release", join(path, "package.json"), join(path, "features.md")]);
   assert.equal(result.status, 1);
   assert.match(result.stderr, /release gate: /);
+});
+
+test("a check loads only its own module, so commits runs without an installed dependency and census names what is missing", (t) => {
+  const path = folder(t);
+  for (const file of ["census-rules.json", "census.js", "check.js", "checklist.js", "commits.js", "records.js", "release.js", "terms.json"]) {
+    copyFileSync(fileURLToPath(new URL(`../${file}`, import.meta.url)), join(path, file));
+  }
+  writeFileSync(join(path, "package.json"), '{ "type": "module" }');
+  writeFileSync(join(path, "message"), GOOD);
+  const start = (args) => spawnSync(process.execPath, [join(path, "check.js"), ...args], { cwd: path, encoding: "utf8" });
+  const commits = start(["commits", join(path, "message")]);
+  assert.equal(commits.status, 0, commits.stderr);
+  const census = start(["census"]);
+  assert.equal(census.status, 1);
+  assert.match(census.stderr, /ajv/);
 });
