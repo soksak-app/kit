@@ -2,8 +2,8 @@
 // Runs one check of a repository, as its hooks, checks and release workflow call it:
 //
 //   soksak-check commits <message file | revision range...>
-//   soksak-check records [repository]
-//   soksak-check census [--config <file>] [--catalog <file>] [--list] [repository]
+//   soksak-check docs [repository]
+//   soksak-check events [--config <file>] [--catalog <file>] [--list] [repository]
 //   soksak-check release <package.json> <checklist>
 //
 // A name, an option or a count of arguments that the usage does not declare exits with 2; a failed check exits with 1.
@@ -15,14 +15,14 @@ const CHECKS = {
     usage: "commits <message file | revision range...>", least: 1, most: Infinity,
     run: async (_values, positionals) => (await import("./commits.js")).checkCommits(positionals),
   },
-  records: {
-    usage: "records [repository]", least: 0, most: 1,
-    run: async (_values, [repository]) => (await import("./records.js")).checkRecords(repository),
+  docs: {
+    usage: "docs [repository]", least: 0, most: 1,
+    run: async (_values, [repository]) => (await import("./docs.js")).checkDocs(repository),
   },
-  census: {
-    usage: "census [--config <file>] [--catalog <file>] [--list] [repository]", least: 0, most: 1,
+  events: {
+    usage: "events [--config <file>] [--catalog <file>] [--list] [repository]", least: 0, most: 1,
     options: { config: { type: "string" }, catalog: { type: "string" }, list: { type: "boolean" } },
-    run: async (values, [repository]) => (await import("./census.js")).checkCensus(values, repository),
+    run: async (values, [repository]) => (await import("./events.js")).checkEvents(values, repository),
   },
   release: {
     usage: "release <package.json> <checklist>", least: 2, most: 2,

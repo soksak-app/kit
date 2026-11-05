@@ -2,6 +2,7 @@
 
 [English](features.md)
 
+- [o] KR12 — P1, core F468 연결: 검사 이름은 읽는 대상을 말한다: `soksak-check docs`와 `soksak-check events`이고, `docs`는 추적되지 않은 파일마다 보고한다. 입력: `records`와 `census`라는 이름은 검사가 무엇을 읽는지 말하지 않았고, 저장소에 남은 log에서 검사가 통과했다. 기대: `docs`와 `events`가 검사를 실행하고 이전 이름은 모르는 이름이며 선언 파일은 `event-sources.json`이고 추적되지 않은 파일은 오류이다. Red: `test/check.test.mjs`가 `docs`에서 exit 2로 실패했고 추적되지 않은 파일의 새 test가 위반을 읽지 못했다. Green: 둘 다 통과한다.
 - [o] KR11 — P1, core F466 연결: record는 임시 폴더의 log를 인용하지 않는다. 입력: 그런 log를 적은 checklist 줄. 동작: 나중에 그 파일을 열 수 없는데도 record 검사가 통과했다. 기대: 검사가 `temporary log`를 보고한다. Red: `test/records.test.mjs`의 새 test가 위반 0개를 읽었다. Green: 1개를 읽는다.
 - [o] KR10 — P1, core F467 연결: 저장소는 `soksak-app/kit`이고 package는 `@soksak/kit`이다. 입력: 이 저장소는 workspace의 유일한 kit인데 이름에 `-checks`가 붙어 있었다. Red: `test/check.test.mjs`가 `@soksak/kit-checks`를 읽었다. Green: `@soksak/kit`을 읽고 kit의 모든 test가 통과한다.
 - [o] KR9 — P1, core F465 연결: record는 local build 폴더의 log를 인용하지 않는다. 입력: local build 폴더의 logs 폴더 아래 log를 적은 checklist 줄. 동작: 그 폴더는 추적되지 않아 다른 checkout에서 인용을 따라갈 수 없는데도 record 검사가 통과했다. 기대: 검사가 `local build log`를 보고한다. Red: `test/records.test.mjs`의 새 test가 위반 0개를 읽었다. Green: 1개를 읽는다.

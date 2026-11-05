@@ -6,10 +6,10 @@ import test from "node:test";
 const root = new URL("../", import.meta.url);
 const manifest = JSON.parse(readFileSync(new URL("package.json", root), "utf8"));
 
-test("the release holds the checks, the checklist reader, the census rules and the term list, and its executable is in it", () => {
+test("the release holds the checks, the checklist reader, the event source rules and the term list, and its executable is in it", () => {
   const [{ files }] = JSON.parse(execFileSync("npm", ["pack", "--dry-run", "--json", "--silent"], { cwd: root, encoding: "utf8" }));
   const paths = files.map(({ path }) => path).sort();
-  assert.deepEqual(paths, ["README.ko.md", "README.md", "census-rules.json", "census.js", "check.js", "checklist.js", "commits.js", "package.json", "records.js", "release.js", "terms.json"]);
+  assert.deepEqual(paths, ["README.ko.md", "README.md", "check.js", "checklist.js", "commits.js", "docs.js", "event-rules.json", "events.js", "package.json", "release.js", "terms.json"]);
   for (const target of Object.values(manifest.bin)) assert.ok(paths.includes(target.replace(/^\.\//, "")), target);
 });
 

@@ -22,8 +22,12 @@ test("the kit has one executable, soksak-check", () => {
   assert.deepEqual(manifest.bin, { "soksak-check": "./check.js" });
 });
 
+test("the earlier check name is unknown", () => {
+  assert.equal(run(["records"]).status, 2);
+});
+
 test("a missing or an unknown check name is rejected with the usage", () => {
-  for (const args of [[], ["unknown"], ["--census"]]) {
+  for (const args of [[], ["unknown"], ["--unknown"]]) {
     const result = run(args);
     assert.equal(result.status, 2, args.join(" "));
     assert.match(result.stderr, /usage: soksak-check commits/);
@@ -34,9 +38,9 @@ test("an option or a count of arguments that a check does not declare is rejecte
   for (const [args, usage] of [
     [["commits"], /usage: soksak-check commits/],
     [["commits", "--unknown", "HEAD"], /usage: soksak-check commits/],
-    [["records", "a", "b"], /usage: soksak-check records/],
-    [["census", "--census", "census.json"], /usage: soksak-check census/],
-    [["census", "--config"], /usage: soksak-check census/],
+    [["docs", "a", "b"], /usage: soksak-check docs/],
+    [["events", "--unknown", "event-sources.json"], /usage: soksak-check events/],
+    [["events", "--config"], /usage: soksak-check events/],
     [["release", "package.json"], /usage: soksak-check release/],
   ]) {
     const result = run(args);
@@ -55,23 +59,23 @@ test("commits checks a message file", (t) => {
   assert.equal(run(["commits", join(path, "bad")]).status, 1);
 });
 
-test("records checks the repository that it names and the current folder without one", (t) => {
+test("docs checks the repository that it names and the current folder without one", (t) => {
   const path = folder(t);
   execFileSync("git", ["init", "-q"], { cwd: path });
-  for (const result of [run(["records", path]), run(["records"], path)]) {
+  for (const result of [run(["docs", path]), run(["docs"], path)]) {
     assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stdout, /Record checks passed/);
+    assert.match(result.stdout, /Document checks passed/);
   }
 });
 
-test("census reads its declaration from --config", (t) => {
+test("event source check reads its declaration from --config", (t) => {
   const path = folder(t);
   execFileSync("git", ["init", "-q"], { cwd: path });
   writeFileSync(join(path, "a.rs"), "fn f() {\n    let v = x.unwrap_or(0);\n}\n");
-  writeFileSync(join(path, "census.json"), JSON.stringify({ pending: { "rs.unwrap-or": "F1" } }));
-  execFileSync("git", ["add", "a.rs", "census.json"], { cwd: path });
-  assert.equal(run(["census"], path).status, 1);
-  const declared = run(["census", "--config", "census.json"], path);
+  writeFileSync(join(path, "event-sources.json"), JSON.stringify({ pending: { "rs.unwrap-or": "F1" } }));
+  execFileSync("git", ["add", "a.rs", "event-sources.json"], { cwd: path });
+  assert.equal(run(["events"], path).status, 1);
+  const declared = run(["events", "--config", "event-sources.json"], path);
   assert.equal(declared.status, 0, declared.stderr);
   assert.match(declared.stdout, /pending F1: rs.unwrap-or is not enforced/);
 });
@@ -83,9 +87,9 @@ test("release reports an error of its input and exits with 1", (t) => {
   assert.match(result.stderr, /release gate: /);
 });
 
-test("a check loads only its own module, so commits runs without an installed dependency and census names what is missing", (t) => {
+test("a check loads only its own module, so commits runs without an installed dependency and event source check names what is missing", (t) => {
   const path = folder(t);
-  for (const file of ["census-rules.json", "census.js", "check.js", "checklist.js", "commits.js", "records.js", "release.js", "terms.json"]) {
+  for (const file of ["event-rules.json", "events.js", "check.js", "checklist.js", "commits.js", "docs.js", "release.js", "terms.json"]) {
     copyFileSync(fileURLToPath(new URL(`../${file}`, import.meta.url)), join(path, file));
   }
   writeFileSync(join(path, "package.json"), '{ "type": "module" }');
@@ -93,7 +97,7 @@ test("a check loads only its own module, so commits runs without an installed de
   const start = (args) => spawnSync(process.execPath, [join(path, "check.js"), ...args], { cwd: path, encoding: "utf8" });
   const commits = start(["commits", join(path, "message")]);
   assert.equal(commits.status, 0, commits.stderr);
-  const census = start(["census"]);
-  assert.equal(census.status, 1);
-  assert.match(census.stderr, /ajv/);
+  const events = start(["events"]);
+  assert.equal(events.status, 1);
+  assert.match(events.stderr, /ajv/);
 });

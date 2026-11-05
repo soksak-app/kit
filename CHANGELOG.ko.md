@@ -4,6 +4,7 @@
 
 ## 미출시
 
+- KR12: 검사는 `soksak-check docs`와 `soksak-check events`이고 선언 파일은 `event-sources.json`이며 `docs`는 추적되지 않은 파일마다 보고한다. Red: `test/check.test.mjs`가 실패했다. Green: 통과한다.
 - KR11: record 검사가 임시 폴더 log의 인용을 보고한다. Red: `test/records.test.mjs`의 새 test가 실패했다. Green: 통과한다.
 - KR10: 저장소는 `soksak-app/kit`이고 package는 `@soksak/kit`이다.
 - KR9: record 검사가 local build 폴더 log의 인용을 보고한다. Red: `test/records.test.mjs`의 새 test가 실패했다. Green: 통과한다.

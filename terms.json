@@ -151,9 +151,11 @@
       "allowed": []
     },
     {
-      "term": "census",
+      "term": "event source rules",
       "definition": "The rules by language that list each source of occurrences (an empty catch, a discarded result, a goroutine, a registered observer, an error return) and require an event in its function or a reason marker.",
-      "rejected": [],
+      "rejected": [
+        "census"
+      ],
       "allowed": []
     },
     {

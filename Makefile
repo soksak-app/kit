@@ -6,8 +6,8 @@ test:
 	pnpm test
 
 check:
-	node check.js records
-	node check.js census --config census.json
+	node check.js docs
+	node check.js events --config event-sources.json
 
 # The checks that a push needs: make test, make check, and the commit messages of the pushed range.
 # RANGE holds the commits of the pushed refs; the pre-push hook sets it, and it defaults to origin/main..HEAD.

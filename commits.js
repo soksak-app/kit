@@ -4,7 +4,7 @@
 //   soksak-check commits <message file | revision range...>
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
-import { commitMessageErrors } from "./records.js";
+import { commitMessageErrors } from "./docs.js";
 
 /** [name, message] for each message of targets. A single file is that one message; ranges give each commit that is not a merge. */
 export function commitMessages(targets) {

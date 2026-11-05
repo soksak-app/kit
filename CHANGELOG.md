@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- KR12: The checks are `soksak-check docs` and `soksak-check events`, the declaration file is `event-sources.json`, and `docs` reports each untracked file. Red: `test/check.test.mjs` failed. Green: it passes.
 - KR11: The record check reports a citation of a log of the temporary folder. Red: the new test of `test/records.test.mjs` failed. Green: it passes.
 - KR10: The repository is `soksak-app/kit`, and the package is `@soksak/kit`.
 - KR9: The record check reports a citation of a log of the local build folder. Red: the new test of `test/records.test.mjs` failed. Green: it passes.

@@ -1,7 +1,7 @@
 // Checks that records state only facts about the repository. Documents are checked on every line outside code blocks, and configuration files (workflow, Makefile) only on comment lines,
 // and violations are reported as `path:line`. Each repository checks its own records with this command.
 //
-//   soksak-check records [repository]
+//   soksak-check docs [repository]
 import { itemIdentifier } from "./checklist.js";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
@@ -51,13 +51,13 @@ export function termViolations(text, file) {
  * changes in the words of their time.
  */
 export function termChecked(file) {
-  if (/(?:^|\/)terms\.json$/.test(file) || /(?:^|\/)records\.test\.mjs$/.test(file) || /(?:^|\/)CHANGELOG(?:\.[a-z]+)?\.md$/.test(file) || /(?:^|\/)features(?:\.[a-z]+)?\.md$/.test(file)) return false;
+  if (/(?:^|\/)terms\.json$/.test(file) || /(?:^|\/)docs\.test\.mjs$/.test(file) || /(?:^|\/)CHANGELOG(?:\.[a-z]+)?\.md$/.test(file) || /(?:^|\/)features(?:\.[a-z]+)?\.md$/.test(file)) return false;
   if (/\.(?:md|js|mjs|cjs|ts|go|rs|m|h|json|ya?ml|toml)$/.test(file)) return true;
   return /(?:^|\/)Makefile$/.test(file);
 }
 
 /** The expressions that records do not use, with their categories. Hexadecimal values such as color codes and UUIDs are not commit references. */
-export const RECORD_PATTERNS = [
+export const DOC_PATTERNS = [
   ["commit reference", /\((?:[0-9a-f]{7,40})\)|`[0-9a-f]{7,40}`|\b(?:commit|pin) [0-9a-f]{7,40}\b|\b[0-9a-f]{7,40}\.\.[0-9a-f]{7,40}\b/i],
   ["pull request number", /\bPR #?\d+\b|\bpull request #?\d+\b/i],
   ["CI run number", /\brun \d{8,}\b/i],
@@ -73,12 +73,12 @@ export const RECORD_PATTERNS = [
 const withoutCode = (text) => text.replace(/^(`{3,}|~{3,}).*\n[\s\S]*?^\1\s*$/gm, (block) => block.replace(/[^\n]/g, ""));
 
 /** Returns the lines of text that break a record rule as `file:line: category: match`. kind is `document` or `config`. */
-export function recordViolations(text, file, kind = "document") {
+export function docViolations(text, file, kind = "document") {
   const lines = (kind === "document" ? withoutCode(text) : text).split("\n");
   const errors = [];
   lines.forEach((line, index) => {
     if (kind === "config" && !/^\s*#/.test(line)) return;
-    for (const [category, pattern] of RECORD_PATTERNS) {
+    for (const [category, pattern] of DOC_PATTERNS) {
       const match = pattern.exec(line);
       if (match) errors.push(`${file}:${index + 1}: ${category}: ${match[0]}`);
     }
@@ -104,7 +104,7 @@ export function checklistViolations(text, file) {
 }
 
 /** The kind of a file to check. A document is `.md`, and a configuration is a workflow or a Makefile. Any other file is null. */
-export function recordKind(file) {
+export function docKind(file) {
   if (file.endsWith(".md")) return "document";
   if (/^\.github\/workflows\/[^/]+\.ya?ml$/.test(file) || /(?:^|\/)Makefile$/.test(file)) return "config";
   return null;
@@ -133,57 +133,60 @@ export function commitMessageErrors(message) {
     if (line.length > 72) errors.push(`body line ${index + 3} is ${line.length} characters, above 72`);
     if (FOOTER.test(line)) errors.push(`body line ${index + 3} is a footer: ${line}`);
   });
-  for (const error of recordViolations(lines.join("\n"), "message")) errors.push(error.replace(/^message:/, "line "));
+  for (const error of docViolations(lines.join("\n"), "message")) errors.push(error.replace(/^message:/, "line "));
   for (const error of termViolations(lines.join("\n"), "message")) errors.push(error.replace(/^message:/, "line "));
   return errors;
 }
 
 /** The violations of the record files that the repository tracks. */
-/** The tracked files of the repository that its census declaration does not exclude; an excluded file, a vendored third-party bundle, is not a record of the repository. */
+/** The tracked files of the repository that its event source declaration does not exclude; an excluded file, a vendored third-party bundle, is not a record of the repository. */
 function declaredFiles(repository, tracked) {
-  const census = join(repository, "census.json");
-  // default: a census declaration without an exclude excludes nothing, so every tracked file is a record of the repository.
-  const declaration = existsSync(census) ? JSON.parse(readFileSync(census, "utf8")) : undefined;
+  const declarationFile = join(repository, "event-sources.json");
+  // default: a event source declaration without an exclude excludes nothing, so every tracked file is a record of the repository.
+  const declaration = existsSync(declarationFile) ? JSON.parse(readFileSync(declarationFile, "utf8")) : undefined;
   if (declaration !== undefined && (declaration === null || typeof declaration !== "object" || Array.isArray(declaration))) {
-    throw new Error(`${census}: declaration must be an object; found ${declaration === null ? "null" : Array.isArray(declaration) ? "array" : typeof declaration} ${JSON.stringify(declaration)}`);
+    throw new Error(`${declarationFile}: declaration must be an object; found ${declaration === null ? "null" : Array.isArray(declaration) ? "array" : typeof declaration} ${JSON.stringify(declaration)}`);
   }
   if (declaration && Object.hasOwn(declaration, "exclude") && typeof declaration.exclude !== "string") {
-    throw new Error(`${census}: exclude must be a string; found ${typeof declaration.exclude} ${JSON.stringify(declaration.exclude)}`);
+    throw new Error(`${declarationFile}: exclude must be a string; found ${typeof declaration.exclude} ${JSON.stringify(declaration.exclude)}`);
   }
   let exclude = null;
   if (declaration && Object.hasOwn(declaration, "exclude")) {
     try {
       exclude = new RegExp(declaration.exclude);
     } catch (error) {
-      throw new Error(`${census}: exclude pattern ${JSON.stringify(declaration.exclude)} is invalid: ${error.message}`, { cause: error });
+      throw new Error(`${declarationFile}: exclude pattern ${JSON.stringify(declaration.exclude)} is invalid: ${error.message}`, { cause: error });
     }
   }
   return exclude ? tracked.filter((file) => !exclude.test(file)) : tracked;
 }
 
-export function repositoryRecordViolations(repository) {
+export function repositoryDocViolations(repository) {
   const tracked = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], { cwd: repository, encoding: "utf8" })
     .split("\0").filter((file) => file && existsSync(join(repository, file)));
-  const files = declaredFiles(repository, tracked).filter((file) => recordKind(file) !== null || termChecked(file));
-  return { files, errors: files.flatMap((file) => {
+  const files = declaredFiles(repository, tracked).filter((file) => docKind(file) !== null || termChecked(file));
+  // A log or a script of a run belongs to the temporary folder, so a repository holds only tracked and ignored files.
+  const untracked = execFileSync("git", ["ls-files", "--others", "--exclude-standard", "-z"], { cwd: repository, encoding: "utf8" })
+    .split("\0").filter(Boolean).map((file) => `${file}: untracked file: commit it, ignore it or remove it`);
+  return { files, errors: [...untracked, ...files.flatMap((file) => {
     const text = readFileSync(join(repository, file), "utf8");
     return [
-      ...(recordKind(file) ? recordViolations(text, file, recordKind(file)) : []),
+      ...(docKind(file) ? docViolations(text, file, docKind(file)) : []),
       ...(termChecked(file) ? termViolations(text, file) : []),
       ...(/(?:^|\/)features(?:\.[a-z]+)?\.md$/.test(file) ? checklistViolations(text, file) : []),
     ];
-  }) };
+  })] };
 }
 
 /** Checks the records of repository, reports each violation, and returns the exit code. */
-export function checkRecords(repository) {
+export function checkDocs(repository) {
   // default: when [repository] of the usage is omitted, the repository in the current folder is checked.
-  const { files, errors } = repositoryRecordViolations(resolve(repository ?? "."));
+  const { files, errors } = repositoryDocViolations(resolve(repository ?? "."));
   if (errors.length) {
     process.stderr.write(errors.map((error) => `${error}\n`).join(""));
     process.stderr.write(`${errors.length} record lines state something other than facts about this repository\n`);
     return 1;
   }
-  process.stdout.write(`Record checks passed: ${files.length} files\n`);
+  process.stdout.write(`Document checks passed: ${files.length} files\n`);
   return 0;
 }

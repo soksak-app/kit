@@ -1,8 +1,8 @@
 {
   "name": "@soksak/kit",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "private": true,
-  "description": "Kit: the commit message check, the record check, the census check, the release gate and the term list that every soksak repository runs.",
+  "description": "Kit: the commit message check, the document check, the event source check, the release gate and the term list that every soksak repository runs.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -16,17 +16,17 @@
   "exports": {
     "./check": "./check.js",
     "./checklist": "./checklist.js",
-    "./census": "./census.js",
-    "./terms.json": "./terms.json",
-    "./package.json": "./package.json"
+    "./events": "./events.js",
+    "./package.json": "./package.json",
+    "./terms.json": "./terms.json"
   },
   "files": [
-    "census-rules.json",
-    "census.js",
     "check.js",
     "checklist.js",
     "commits.js",
-    "records.js",
+    "docs.js",
+    "event-rules.json",
+    "events.js",
     "release.js",
     "terms.json"
   ],
