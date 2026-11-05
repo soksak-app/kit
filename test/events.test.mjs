@@ -414,7 +414,7 @@ test('functionRange holds the offset in the named function of Go and Rust, the f
   assert.deepEqual(checker.functionRange(checker.lexSource('a.js', 'y();\n'), 0), [0, 5]);
 });
 
-test('soksak-check events fails with the file and line of a source that has neither an event nor a reason', () => {
+test('sok-check events fails with the file and line of a source that has neither an event nor a reason', () => {
   const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
   assert.ok(manifest.files.includes('events.js') && manifest.files.includes('event-rules.json'));
   const command = fileURLToPath(new URL('../check.js', import.meta.url));
@@ -445,7 +445,7 @@ test('soksak-check events fails with the file and line of a source that has neit
   assert.equal(result.status, 1);
   assert.match(result.stderr, /^docs\/events\.json: host\.never\.emitted is declared and no source emits it$/m);
   assert.equal(run('--unknown').status, 2);
-  assert.match(run('--unknown').stderr, /usage: soksak-check events/);
+  assert.match(run('--unknown').stderr, /usage: sok-check events/);
 });
 
 test('the record calls of the native library are emit sites of the declared records, and a record in another function does not accept a return', () => {
@@ -623,7 +623,7 @@ test('a declaration of emitters outside the form is an error naming the file, th
   assert.throws(parse({ rs: [{ call: 'emit', level: 0, event: 1, only: '(' }] }), /event-sources\.json: emitters\.rs\[0\]: only is not a pattern/);
 });
 
-test('soksak-check events --catalog finds the emit sites of a Rust sidecar through the emitters of its event source declaration', () => {
+test('sok-check events --catalog finds the emit sites of a Rust sidecar through the emitters of its event source declaration', () => {
   const command = fileURLToPath(new URL('../check.js', import.meta.url));
   const repository = mkdtempSync(join(tmpdir(), 'event-sources-'));
   const run = (...args) => spawnSync(process.execPath, [command, 'events', ...args], { cwd: repository, encoding: 'utf8' });

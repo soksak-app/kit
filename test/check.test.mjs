@@ -16,10 +16,10 @@ function folder(t) {
   return path;
 }
 
-test("the kit has one executable, soksak-check", () => {
+test("the kit has one executable, sok-check", () => {
   const manifest = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
   assert.equal(manifest.name, "@soksak/kit");
-  assert.deepEqual(manifest.bin, { "soksak-check": "./check.js" });
+  assert.deepEqual(manifest.bin, { "sok-check": "./check.js" });
 });
 
 test("the earlier check name is unknown", () => {
@@ -30,18 +30,18 @@ test("a missing or an unknown check name is rejected with the usage", () => {
   for (const args of [[], ["unknown"], ["--unknown"]]) {
     const result = run(args);
     assert.equal(result.status, 2, args.join(" "));
-    assert.match(result.stderr, /usage: soksak-check commits/);
+    assert.match(result.stderr, /usage: sok-check commits/);
   }
 });
 
 test("an option or a count of arguments that a check does not declare is rejected with its usage", () => {
   for (const [args, usage] of [
-    [["commits"], /usage: soksak-check commits/],
-    [["commits", "--unknown", "HEAD"], /usage: soksak-check commits/],
-    [["docs", "a", "b"], /usage: soksak-check docs/],
-    [["events", "--unknown", "event-sources.json"], /usage: soksak-check events/],
-    [["events", "--config"], /usage: soksak-check events/],
-    [["release", "package.json"], /usage: soksak-check release/],
+    [["commits"], /usage: sok-check commits/],
+    [["commits", "--unknown", "HEAD"], /usage: sok-check commits/],
+    [["docs", "a", "b"], /usage: sok-check docs/],
+    [["events", "--unknown", "event-sources.json"], /usage: sok-check events/],
+    [["events", "--config"], /usage: sok-check events/],
+    [["release", "package.json"], /usage: sok-check release/],
   ]) {
     const result = run(args);
     assert.equal(result.status, 2, args.join(" "));
@@ -89,7 +89,7 @@ test("release reports an error of its input and exits with 1", (t) => {
 
 test("a check loads only its own module, so commits runs without an installed dependency and event source check names what is missing", (t) => {
   const path = folder(t);
-  for (const file of ["event-rules.json", "events.js", "check.js", "checklist.js", "commits.js", "docs.js", "release.js", "terms.json"]) {
+  for (const file of ["event-rules.json", "events.js", "check.js", "checklist.js", "commands.js", "commits.js", "docs.js", "release.js", "terms.json"]) {
     copyFileSync(fileURLToPath(new URL(`../${file}`, import.meta.url)), join(path, file));
   }
   writeFileSync(join(path, "package.json"), '{ "type": "module" }');

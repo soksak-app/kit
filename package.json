@@ -1,6 +1,6 @@
 {
   "name": "@soksak/kit",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "private": true,
   "description": "Kit: the commit message check, the document check, the event source check, the release gate and the term list that every soksak repository runs.",
   "license": "MIT",
@@ -11,7 +11,7 @@
   "type": "module",
   "packageManager": "pnpm@11.24.0",
   "bin": {
-    "soksak-check": "./check.js"
+    "sok-check": "./check.js"
   },
   "exports": {
     "./check": "./check.js",
@@ -23,6 +23,7 @@
   "files": [
     "check.js",
     "checklist.js",
+    "commands.js",
     "commits.js",
     "docs.js",
     "event-rules.json",
@@ -31,7 +32,8 @@
     "terms.json"
   ],
   "dependencies": {
-    "ajv": "8.20.0"
+    "ajv": "8.20.0",
+    "smol-toml": "1.9.1"
   },
   "scripts": {
     "test": "node --test --test-reporter=spec --test-timeout=60000 test/"

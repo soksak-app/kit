@@ -1,6 +1,6 @@
 // Checks that the sources of a repository record their occurrences (docs/spec/logging.md#event-sources), as every repository calls it:
 //
-//   soksak-check events [--config <file>] [--catalog <file>] [--list] [repository]
+//   sok-check events [--config <file>] [--catalog <file>] [--list] [repository]
 //
 // The event source rules (event-rules.json) list, per language, each source of occurrences that has neither an event in its function
 // nor a reason comment `(default|silent): <reason>`. `--config` names the file in which the repository declares its entrance

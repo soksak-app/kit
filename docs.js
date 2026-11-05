@@ -1,7 +1,7 @@
 // Checks that records state only facts about the repository. Documents are checked on every line outside code blocks, and configuration files (workflow, Makefile) only on comment lines,
 // and violations are reported as `path:line`. Each repository checks its own records with this command.
 //
-//   soksak-check docs [repository]
+//   sok-check docs [repository]
 import { itemIdentifier } from "./checklist.js";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
