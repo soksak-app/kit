@@ -195,3 +195,9 @@ test("a record does not cite a log of the local build folder", () => {
   assert.equal(violations.length, 1);
   assert.match(violations[0], /local build log/);
 });
+
+test("a record does not cite a log of the temporary folder", () => {
+  const violations = recordViolations("Red: the test failed (`/tmp/F1-red.log`).\n", "docs/features.md");
+  assert.equal(violations.length, 1);
+  assert.match(violations[0], /temporary log/);
+});

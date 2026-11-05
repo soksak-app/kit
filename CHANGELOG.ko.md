@@ -4,6 +4,7 @@
 
 ## 미출시
 
+- KR11: record 검사가 임시 폴더 log의 인용을 보고한다. Red: `test/records.test.mjs`의 새 test가 실패했다. Green: 통과한다.
 - KR10: 저장소는 `soksak-app/kit`이고 package는 `@soksak/kit`이다.
 - KR9: record 검사가 local build 폴더 log의 인용을 보고한다. Red: `test/records.test.mjs`의 새 test가 실패했다. Green: 통과한다.
 - KR8: 각 검사는 자기 module만 읽고 kit에는 설치 단계가 없다. Red: `test/check.test.mjs`의 새 test가 실패했다. Green: 통과한다.
