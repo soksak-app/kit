@@ -1,17 +1,15 @@
-#!/usr/bin/env node
 // Checks that records state only facts about the repository. Documents are checked on every line outside code blocks, and configuration files (workflow, Makefile) only on comment lines,
 // a link of a document to a heading of a local Markdown document must name a heading that the document has, and violations are reported as `path:line`.
 // Each repository checks its own records with this command. A closed item keeps its state unless the commit retires it:
 // the command compares the working tree with HEAD, and with --range it compares each commit of a range with its first
 // parent, because no pre-commit hook runs in a rebase and a tree in CI equals its HEAD.
 //
-//   soksak-records [repository]
-//   soksak-records --range <revision range> [repository]
+//   soksak-check records [repository]
+//   soksak-check records --range <revision range> [repository]
 import { checkChecklistChange, itemIdentifier, retiredChecklistItems } from "./checklist.js";
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, realpathSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
 
 // The pattern source that matches text literally.
 const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -64,7 +62,7 @@ export function termViolations(text, file) {
  * changes in the words of their time.
  */
 export function termChecked(file) {
-  if (/(?:^|\/)terms\.json$/.test(file) || /(?:^|\/)records-check\.test\.mjs$/.test(file) || /(?:^|\/)CHANGELOG(?:\.[a-z]+)?\.md$/.test(file) || /(?:^|\/)features(?:\.[a-z]+)?\.md$/.test(file)) return false;
+  if (/(?:^|\/)terms\.json$/.test(file) || /(?:^|\/)records\.test\.mjs$/.test(file) || /(?:^|\/)CHANGELOG(?:\.[a-z]+)?\.md$/.test(file) || /(?:^|\/)features(?:\.[a-z]+)?\.md$/.test(file)) return false;
   if (/\.(?:md|js|mjs|cjs|ts|go|rs|m|h|json|ya?ml|toml)$/.test(file)) return true;
   return /(?:^|\/)Makefile$/.test(file);
 }
@@ -75,6 +73,7 @@ export const RECORD_PATTERNS = [
   ["pull request number", /\bPR #?\d+\b|\bpull request #?\d+\b/i],
   ["CI run number", /\brun \d{8,}\b/i],
   ["personal path", /\/Users\/|~\/backup/],
+  ["local build log", /\bbuild\/logs\//],
   ["account of who found or requested", /\bFound (?:on|while)\b|\b(?:Requested|Reported|Found|Decided) by\b|\bthe user's (?:decision|request|report)\b|사용자 결정|사용자가 (?:보고|발견|결정)|\bas the user asked\b|\bthe user (?:asked|decided|requested)\b|사용자 요청|사용자가 요청|발견:|\d{4}-\d{2}-\d{2}(?:[^.\n]|\.(?! )){0,80}?발견했|사용자가(?:[^.\n]|\.(?! )){0,120}?보고했/i],
   // macOS is an operating system name. "Mac" refers to that computer only when no letter follows it.
   ["local environment", /\b[Tt]his (?:machine|Mac)(?![A-Za-z])|이 (?:머신|Mac)(?![A-Za-z])/],
@@ -320,29 +319,25 @@ export function repositoryRecordViolations(repository) {
   }), ...workingTreeViolations(repository)] };
 }
 
-// A package manager places a package as a link, so the started path is resolved before it is compared with this module.
-if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href) {
-  const ranged = process.argv[2] === "--range";
-  if (ranged && !process.argv[3]) {
-    process.stderr.write("usage: soksak-records --range <revision range> [repository]\n");
-    process.exit(2);
-  }
+/** Checks the records of repository, or of each commit of range when a range is given, reports each violation, and returns the exit code. */
+export function checkRecords(repository, range) {
   // default: when [repository] of the usage is omitted, the repository in the current folder is checked.
-  const repository = resolve(process.argv[ranged ? 4 : 2] ?? ".");
-  if (ranged) {
-    const { commits, errors } = rangeRecordViolations(repository, process.argv[3]);
+  const root = resolve(repository ?? ".");
+  if (range) {
+    const { commits, errors } = rangeRecordViolations(root, range);
     if (errors.length) {
       process.stderr.write(errors.map((error) => `${error}\n`).join(""));
-      process.exit(1);
+      return 1;
     }
     process.stdout.write(`Checklist history checks passed: ${commits} commits\n`);
-    process.exit(0);
+    return 0;
   }
-  const { files, errors } = repositoryRecordViolations(repository);
+  const { files, errors } = repositoryRecordViolations(root);
   if (errors.length) {
     process.stderr.write(errors.map((error) => `${error}\n`).join(""));
     process.stderr.write(`${errors.length} record lines state something other than facts about this repository\n`);
-    process.exit(1);
+    return 1;
   }
   process.stdout.write(`Record checks passed: ${files.length} files\n`);
+  return 0;
 }

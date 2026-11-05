@@ -10,7 +10,7 @@ const zero = "0".repeat(40);
 
 /** Runs the pre-push hook in a new repository with one commit, with a make that records its arguments. */
 function prePush(t, remoteRef) {
-  const folder = mkdtempSync(join(tmpdir(), "kit-records-hook-"));
+  const folder = mkdtempSync(join(tmpdir(), "kit-hook-"));
   t.after(() => rmSync(folder, { recursive: true, force: true }));
   const git = (...args) => execFileSync("git", args, { cwd: folder, encoding: "utf8" }).trim();
   git("init", "-q", "-b", "main");

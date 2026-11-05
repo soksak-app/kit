@@ -1,34 +1,39 @@
 {
-  "name": "@soksak/kit-records",
-  "version": "0.0.7",
+  "name": "@soksak/kit",
+  "version": "0.0.11",
   "private": true,
-  "description": "Records kit: the commit message check, the record check, the release gate and the term list that every soksak repository runs on its own records.",
+  "description": "Kit: the commit message check, the record check, the census check, the release gate and the term list that every soksak repository runs.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/soksak-app/kit-records.git"
+    "url": "git+https://github.com/soksak-app/kit.git"
   },
   "type": "module",
   "packageManager": "pnpm@11.24.0",
   "bin": {
-    "soksak-commits": "./commits-check.js",
-    "soksak-records": "./records-check.js",
-    "soksak-release-gate": "./release-gate.js"
+    "soksak-check": "./check.js"
   },
   "exports": {
+    "./check": "./check.js",
     "./checklist": "./checklist.js",
-    "./records-check": "./records-check.js",
-    "./release-gate": "./release-gate.js",
+    "./records": "./records.js",
+    "./census": "./census.js",
     "./terms.json": "./terms.json",
     "./package.json": "./package.json"
   },
   "files": [
+    "census-rules.json",
+    "census.js",
+    "check.js",
     "checklist.js",
-    "commits-check.js",
-    "records-check.js",
-    "release-gate.js",
+    "commits.js",
+    "records.js",
+    "release.js",
     "terms.json"
   ],
+  "dependencies": {
+    "ajv": "8.20.0"
+  },
   "scripts": {
     "test": "node --test --test-reporter=spec --test-timeout=60000 test/"
   }

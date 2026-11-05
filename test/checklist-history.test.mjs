@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { checkCompletedItems, retiredChecklistItems } from "../checklist.js";
-import { rangeRecordViolations, repositoryRecordViolations } from "../records-check.js";
+import { rangeRecordViolations, repositoryRecordViolations } from "../records.js";
 
 const FILE = "docs/features.md";
 

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { checklistViolations, commitMessageErrors, recordKind, repositoryRecordViolations, recordViolations, termChecked, termViolations } from "../records-check.js";
+import { checklistViolations, commitMessageErrors, recordKind, repositoryRecordViolations, recordViolations, termChecked, termViolations } from "../records.js";
 import { execSync } from "node:child_process";
 import { copyFileSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -125,7 +125,7 @@ test("the verb of presentation is not a synonym of drawing", () => {
 test("the term list, the changelogs and the checklists are not checked for rejected terms", () => {
   assert.equal(termChecked("packages/plugin-api/terms.json"), false);
   assert.equal(termChecked("CHANGELOG.ko.md"), false);
-  assert.equal(termChecked("packages/plugin-api/test/records-check.test.mjs"), false);
+  assert.equal(termChecked("packages/plugin-api/test/records.test.mjs"), false);
   assert.equal(termChecked("docs/features.md"), false);
   assert.equal(termChecked("docs/spec/plugins.md"), true);
   assert.equal(termChecked("src/install.rs"), true);
@@ -251,7 +251,7 @@ test("a link to a third repeated heading, a missing heading of the same document
 });
 
 test("the package exports the anchor rule of the record check for the documentation checks of other repositories", async () => {
-  const { headingAnchors, markdownLinks } = await import("@soksak/kit-records/records-check");
+  const { headingAnchors, markdownLinks } = await import("@soksak/kit/records");
   assert.equal(typeof headingAnchors, "function", "the package exports headingAnchors");
   assert.equal(typeof markdownLinks, "function", "the package exports markdownLinks");
   assert.deepEqual([...headingAnchors("# A b\n\n## A b\n\n```\n## Fenced\n```\n\n### 그림, frame!\n#### snake_case  two\n")],
@@ -282,11 +282,17 @@ test("dom entry and dom name are rejected for element entry and element name, al
 test("a rejected phrase with a regular expression character matches only its own words, also in identifiers", async () => {
   // A copy of the check with a term list whose rejected phrase holds `.`, which a pattern must match literally.
   const kit = mkdtempSync(join(tmpdir(), "records-escape-"));
-  for (const file of ["records-check.js", "checklist.js"]) copyFileSync(new URL(`../${file}`, import.meta.url), join(kit, file));
+  for (const file of ["records.js", "checklist.js"]) copyFileSync(new URL(`../${file}`, import.meta.url), join(kit, file));
   writeFileSync(join(kit, "terms.json"), JSON.stringify({ terms: [{ term: "dotted term", definition: "A term.", rejected: ["a.b entry"], allowed: [] }] }));
-  const { termViolations: check } = await import(pathToFileURL(join(kit, "records-check.js")).href);
+  const { termViolations: check } = await import(pathToFileURL(join(kit, "records.js")).href);
   assert.deepEqual(check("const value = makeAxbEntry();\nThe a.b entry is used.\nconst value = makeA.bEntry();", "a.js"), [
     'a.js:2: rejected term "a.b entry", use "dotted term": a.b entry',
     'a.js:3: rejected term "a.b entry", use "dotted term": A.bEntry',
   ]);
+});
+
+test("a record does not cite a log of the local build folder", () => {
+  const violations = recordViolations("Red: the test failed (`build/logs/F1/red.log`).\n", "docs/features.md");
+  assert.equal(violations.length, 1);
+  assert.match(violations[0], /local build log/);
 });
