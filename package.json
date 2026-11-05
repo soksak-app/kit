@@ -1,8 +1,8 @@
 {
   "name": "@soksak/kit",
-  "version": "0.0.12",
+  "version": "0.0.14",
   "private": true,
-  "description": "Kit: the commit message check, the record check, the census check, the release gate and the term list that every soksak repository runs.",
+  "description": "Kit: the commit message check, the document check, the event source check, the release gate and the term list that every soksak repository runs.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -11,28 +11,30 @@
   "type": "module",
   "packageManager": "pnpm@11.24.0",
   "bin": {
-    "soksak-check": "./check.js"
+    "sok-check": "./check.js"
   },
   "exports": {
     "./check": "./check.js",
     "./checklist": "./checklist.js",
-    "./records": "./records.js",
-    "./census": "./census.js",
-    "./terms.json": "./terms.json",
-    "./package.json": "./package.json"
+    "./docs": "./docs.js",
+    "./events": "./events.js",
+    "./package.json": "./package.json",
+    "./terms.json": "./terms.json"
   },
   "files": [
-    "census-rules.json",
-    "census.js",
     "check.js",
     "checklist.js",
+    "commands.js",
     "commits.js",
-    "records.js",
+    "docs.js",
+    "event-rules.json",
+    "events.js",
     "release.js",
     "terms.json"
   ],
   "dependencies": {
-    "ajv": "8.20.0"
+    "ajv": "8.20.0",
+    "smol-toml": "1.9.1"
   },
   "scripts": {
     "test": "node --test --test-reporter=spec --test-timeout=60000 test/"

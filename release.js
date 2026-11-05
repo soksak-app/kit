@@ -4,7 +4,7 @@
 // the decision lists those items. The decision reads only the files and the remote tags of the repository, so no other
 // repository takes part in it.
 //
-//   soksak-check release <package.json> <checklist>
+//   sok-check release <package.json> <checklist>
 //
 // It prints the decision and, when GITHUB_OUTPUT names a file, writes `release` (`true` or `false`) and `version` to it.
 import { execFileSync } from "node:child_process";

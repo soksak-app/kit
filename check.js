@@ -1,29 +1,34 @@
 #!/usr/bin/env node
 // Runs one check of a repository, as its hooks, checks and release workflow call it:
 //
-//   soksak-check commits <message file | revision range...>
-//   soksak-check records [--range <revision range>] [repository]
-//   soksak-check census [--config <file>] [--catalog <file>] [--list] [repository]
-//   soksak-check release <package.json> <checklist>
+//   sok-check commands [repository]
+//   sok-check commits <message file | revision range...>
+//   sok-check docs [--range <revision range>] [repository]
+//   sok-check events [--config <file>] [--catalog <file>] [--list] [repository]
+//   sok-check release <package.json> <checklist>
 //
 // A name, an option or a count of arguments that the usage does not declare exits with 2; a failed check exits with 1.
 // Each check loads only its own module, so a check without a dependency needs no installation.
 import { parseArgs } from "node:util";
 
 const CHECKS = {
+  commands: {
+    usage: "commands [repository]", least: 0, most: 1,
+    run: async (_values, [repository]) => (await import("./commands.js")).checkCommands(repository),
+  },
   commits: {
     usage: "commits <message file | revision range...>", least: 1, most: Infinity,
     run: async (_values, positionals) => (await import("./commits.js")).checkCommits(positionals),
   },
-  records: {
-    usage: "records [--range <revision range>] [repository]", least: 0, most: 1,
+  docs: {
+    usage: "docs [--range <revision range>] [repository]", least: 0, most: 1,
     options: { range: { type: "string" } },
-    run: async (values, [repository]) => (await import("./records.js")).checkRecords(repository, values.range),
+    run: async (values, [repository]) => (await import("./docs.js")).checkDocs(repository, values.range),
   },
-  census: {
-    usage: "census [--config <file>] [--catalog <file>] [--list] [repository]", least: 0, most: 1,
+  events: {
+    usage: "events [--config <file>] [--catalog <file>] [--list] [repository]", least: 0, most: 1,
     options: { config: { type: "string" }, catalog: { type: "string" }, list: { type: "boolean" } },
-    run: async (values, [repository]) => (await import("./census.js")).checkCensus(values, repository),
+    run: async (values, [repository]) => (await import("./events.js")).checkEvents(values, repository),
   },
   release: {
     usage: "release <package.json> <checklist>", least: 2, most: 2,
@@ -31,7 +36,7 @@ const CHECKS = {
   },
 };
 
-const usage = (check) => `usage: soksak-check ${check.usage}\n`;
+const usage = (check) => `usage: sok-check ${check.usage}\n`;
 
 async function main([name, ...argv]) {
   const check = Object.hasOwn(CHECKS, name ?? "") ? CHECKS[name] : null;

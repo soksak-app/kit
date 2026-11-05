@@ -1,8 +1,8 @@
-// Checks that the sources of a repository record their occurrences (docs/spec/logging.md#census), as every repository calls it:
+// Checks that the sources of a repository record their occurrences (docs/spec/logging.md#event-sources), as every repository calls it:
 //
-//   soksak-check census [--config <file>] [--catalog <file>] [--list] [repository]
+//   sok-check events [--config <file>] [--catalog <file>] [--list] [repository]
 //
-// The census rules (census-rules.json) list, per language, each source of occurrences that has neither an event in its function
+// The event source rules (event-rules.json) list, per language, each source of occurrences that has neither an event in its function
 // nor a reason comment `(default|silent): <reason>`. `--config` names the file in which the repository declares its entrance
 // files, the files it leaves out and the rules that wait for an entrance item (`pending`). `--catalog` also checks the emit
 // sites of the sources against the event catalog (docs/spec/events.json of core): every emit site names a declared event with its
@@ -638,9 +638,9 @@ export function functionRange(source, at) {
   return [chosen, matchClose(source, chosen)];
 }
 
-/** The census rules of the package. */
-export function censusRules() {
-  return JSON.parse(readFileSync(new URL('./census-rules.json', import.meta.url), 'utf8')).rules;
+/** The event source rules of the package. */
+export function eventRules() {
+  return JSON.parse(readFileSync(new URL('./event-rules.json', import.meta.url), 'utf8')).rules;
 }
 
 const EMITTER_KEYS = ['call', 'level', 'fixed', 'event', 'fields', 'name', 'only', 'prefix', 'bare'];
@@ -693,11 +693,11 @@ function parseEmitters(file, emitters) {
 }
 
 /**
- * Reads the census declaration of a repository (`file`, its text `text`): `exclude` (a pattern of the paths that the census
+ * Reads the event source declaration of a repository (`file`, its text `text`): `exclude` (a pattern of the paths that the event source check
  * leaves out), `entrances` (rule id to the patterns of the entrance files that may hold the rule's source) and `pending` (rule
  * id to the checklist item that enables it). A rule id that no rule has is an error.
  */
-export function parseCensusConfig(file, text, rules = censusRules()) {
+export function parseEventSources(file, text, rules = eventRules()) {
   const fail = (message) => { throw new Error(`${file}: ${message}`); };
   let config;
   try {
@@ -711,7 +711,7 @@ export function parseCensusConfig(file, text, rules = censusRules()) {
   // default: a declaration without entrances declares none.
   const entrances = config.entrances ?? {};
   const pending = config.pending ?? {}; // default: a declaration without pending rules enforces every rule.
-  for (const id of [...Object.keys(entrances), ...Object.keys(pending)]) if (!known.includes(id)) fail(`names the rule ${id}, which no census rule has`);
+  for (const id of [...Object.keys(entrances), ...Object.keys(pending)]) if (!known.includes(id)) fail(`names the rule ${id}, which no event source check rule has`);
   for (const [id, item] of Object.entries(pending)) if (!/^F\d+(?:[.-]\d+)*$/.test(item)) fail(`gives the rule ${id} the pending item ${JSON.stringify(item)}, which is no checklist id`);
   for (const [id, patterns] of Object.entries(entrances)) {
     if (!Array.isArray(patterns) || patterns.some((pattern) => typeof pattern !== 'string')) fail(`gives the rule ${id} entrances that are not a list of patterns`);
@@ -725,12 +725,12 @@ export function parseCensusConfig(file, text, rules = censusRules()) {
 }
 
 /**
- * The census of the sources (a map of path to text): every match of a rule of the language of the file that is outside the
+ * The event source check of the sources (a map of path to text): every match of a rule of the language of the file that is outside the
  * entrance files of the rule and has neither an event in its function nor a reason marker on its lines or in the comment above
  * it (a rule that requires an entrance accepts neither). A finding is `{file, line, rule, message, pending}`; `pending` is the
  * item that waits to enable the rule, or null.
  */
-export function censusFindings(sources, config, rules = censusRules()) {
+export function eventSourceFindings(sources, config, rules = eventRules()) {
   const findings = [];
   for (const [path, text] of sources) {
     if (config.exclude && config.exclude.test(path)) continue;
@@ -785,44 +785,44 @@ export function censusFindings(sources, config, rules = censusRules()) {
   return findings.sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : a.line - b.line));
 }
 
-/** The census declaration of the repository at `root` in `configFile`; a repository without one declares nothing. */
-function censusConfig(root, configFile) {
-  return configFile === undefined ? parseCensusConfig('(no census declaration)', '{}') : parseCensusConfig(configFile, readFileSync(join(root, configFile), 'utf8'));
+/** The event source declaration of the repository at `root` in `configFile`; a repository without one declares nothing. */
+function eventSourcesConfig(root, configFile) {
+  return configFile === undefined ? parseEventSources('(no event source declaration)', '{}') : parseEventSources(configFile, readFileSync(join(root, configFile), 'utf8'));
 }
 
-/** The tracked sources of the repository that its census declaration does not exclude; an excluded file (a vendored bundle) is not read. */
+/** The tracked sources of the repository that its event source declaration does not exclude; an excluded file (a vendored bundle) is not read. */
 function viewSources(root, config) {
   return new Map([...trackedSources(root)].filter(([path]) => !(config.exclude && config.exclude.test(path))));
 }
 
-/** The result of the census of the repository at `root`: the findings, the pending rules, the marker errors and the number of sources. */
-export function census(root, configFile) {
-  const config = censusConfig(root, configFile);
+/** The result of the event source check of the repository at `root`: the findings, the pending rules, the marker errors and the number of sources. */
+export function eventSourceReport(root, configFile) {
+  const config = eventSourcesConfig(root, configFile);
   const sources = viewSources(root, config);
-  const findings = censusFindings(sources, config);
+  const findings = eventSourceFindings(sources, config);
   const markers = [...sources].flatMap(([path, text]) => markerErrors(path, text));
   return { findings, pending: config.pending, markers, sources: sources.size };
 }
 
 /**
  * The findings of the emit sites of the repository at `root` against the catalog at `catalogPath`, and the emit site counts.
- * The sources are those that the census declaration `configFile` does not exclude.
+ * The sources are those that the event source declaration `configFile` does not exclude.
  */
 export function catalogReport(root, catalogPath, configFile) {
   const catalog = JSON.parse(readFileSync(join(root, catalogPath), 'utf8'));
-  const config = censusConfig(root, configFile);
+  const config = eventSourcesConfig(root, configFile);
   const sources = viewSources(root, config);
   const findings = [...catalogFindings(catalog, catalogPath), ...emitFindings(catalog, sources, catalogPath, config)];
   const sites = Object.entries(siteCounts(sources, config.emitters)).map(([language, { literal, built }]) => `${language} ${literal} literal ${built} built`).join(', ');
   return { findings, declared: Object.keys(catalog.events).length, sites };
 }
 
-/** Runs the census and the catalog check on the repository, reports each finding, and returns the exit code. */
-export function checkCensus(options, repository) {
+/** Runs the event source check and the catalog check on the repository, reports each finding, and returns the exit code. */
+export function checkEvents(options, repository) {
   // default: when [repository] of the usage is omitted, the repository in the current folder is checked.
   const root = resolve(repository ?? '.');
   if (!existsSync(root)) throw new Error(`${root}: the repository does not exist`);
-  const { findings, pending, markers, sources } = census(root, options.config);
+  const { findings, pending, markers, sources } = eventSourceReport(root, options.config);
   const failing = findings.filter((finding) => finding.pending === null);
   for (const text of [...markers, ...failing.map((finding) => finding.message)]) process.stderr.write(`${text}\n`);
   for (const [rule, item] of Object.entries(pending)) {
@@ -831,7 +831,7 @@ export function checkCensus(options, repository) {
     if (options.list) for (const finding of waiting) process.stdout.write(`  ${finding.message}\n`);
   }
   const failed = markers.length + failing.length;
-  process.stdout.write(`${failed === 0 ? 'Census passed' : `Census failed: ${failed} findings`}: ${sources} sources, ${Object.keys(pending).length} rules pending\n`);
+  process.stdout.write(`${failed === 0 ? 'Event source check passed' : `Event source check failed: ${failed} findings`}: ${sources} sources, ${Object.keys(pending).length} rules pending\n`);
   let code = failed === 0 ? 0 : 1;
   if (options.catalog !== undefined) {
     const report = catalogReport(root, options.catalog, options.config);

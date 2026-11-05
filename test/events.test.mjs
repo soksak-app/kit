@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
-import * as checker from '../census.js';
+import * as checker from '../events.js';
 
 const CATALOG = 'docs/spec/events.json';
 const fieldSchema = (properties = {}, required = Object.keys(properties)) => ({
@@ -191,13 +191,13 @@ test('the placed variants of the host emit functions are emit sites, and a built
   ]);
 });
 
-const EVENT_RULES = checker.censusRules();
-const noConfig = () => checker.parseCensusConfig('census.json', '{}');
-const census = (files, config = noConfig()) => checker.censusFindings(new Map(Object.entries(files)), config)
+const EVENT_RULES = checker.eventRules();
+const noConfig = () => checker.parseEventSources('event-sources.json', '{}');
+const sourceFindings = (files, config = noConfig()) => checker.eventSourceFindings(new Map(Object.entries(files)), config)
   .map(({ file, line, rule }) => `${file}:${line} ${rule}`);
 
 test('a source of occurrences with neither an event in its function nor a reason marker is a finding of its language rule', () => {
-  assert.deepEqual(census({
+  assert.deepEqual(sourceFindings({
     'a.js': 'export function f() {\n  try { g(); } catch (error) {}\n  p.catch(() => {});\n}\n',
     'b.rs': 'fn f() {\n    let n = text.parse::<u32>().ok();\n    let v = x.unwrap_or(0);\n    let _ = sender.send(1);\n}\n',
     'c.go': 'package a\n\nfunc f() {\n\tgo run()\n\tgo func() {\n\t\tdefer func() { recover() }()\n\t}()\n}\n',
@@ -211,9 +211,9 @@ test('a source of occurrences with neither an event in its function nor a reason
 });
 
 test('the message of a finding names the file, the line and the rule', () => {
-  const [finding] = checker.censusFindings(new Map([['a/b.rs', 'fn f() {\n    x.unwrap_or(1);\n}\n']]), noConfig());
+  const [finding] = checker.eventSourceFindings(new Map([['a/b.rs', 'fn f() {\n    x.unwrap_or(1);\n}\n']]), noConfig());
   assert.equal(finding.message, 'a/b.rs:2: rs.unwrap-or has neither an event nor a stated reason');
-  const [outside] = checker.censusFindings(new Map([['a.go', 'package a\n\nfunc f() {\n\tgo run()\n}\n']]), noConfig());
+  const [outside] = checker.eventSourceFindings(new Map([['a.go', 'package a\n\nfunc f() {\n\tgo run()\n}\n']]), noConfig());
   assert.equal(outside.message, 'a.go:4: go.go-statement is outside its entrance files');
 });
 
@@ -244,7 +244,7 @@ test('an unhandled lock result or condition wait is a finding, while propagated 
     '}',
     '',
   ].join('\n');
-  const findings = checker.censusFindings(new Map([['a.rs', source]]), noConfig()).filter(({ rule }) => rule === 'rs.lock-result');
+  const findings = checker.eventSourceFindings(new Map([['a.rs', source]]), noConfig()).filter(({ rule }) => rule === 'rs.lock-result');
   assert.deepEqual(findings.map(({ file, line, rule }) => `${file}:${line} ${rule}`), [
     'a.rs:2 rs.lock-result', 'a.rs:6 rs.lock-result', 'a.rs:7 rs.lock-result',
     'a.rs:16 rs.lock-result', 'a.rs:18 rs.lock-result',
@@ -263,7 +263,7 @@ test('a poisoned lock error may be explicitly propagated, while recovery default
     '    Ok(())',
     '}',
   ].join('\n');
-  const findings = checker.censusFindings(new Map([['a.rs', source]]), noConfig())
+  const findings = checker.eventSourceFindings(new Map([['a.rs', source]]), noConfig())
     .filter(({ rule }) => rule === 'rs.lock-result');
   assert.deepEqual(findings.map(({ line }) => line), [5, 6, 7]);
 });
@@ -277,7 +277,7 @@ test('lock and condition-wait fallback combinators are findings', () => {
     '    let _ = wake.wait(guard).or_else(|_| Ok(fallback_guard));',
     '}',
   ].join('\n');
-  const findings = checker.censusFindings(new Map([['fallback.rs', source]]), noConfig())
+  const findings = checker.eventSourceFindings(new Map([['fallback.rs', source]]), noConfig())
     .filter(({ rule }) => rule === 'rs.lock-result');
   assert.deepEqual(findings.map(({ line }) => line), [2, 3, 4, 5]);
 });
@@ -291,7 +291,7 @@ test('lock and condition-wait map_or defaults are findings', () => {
     '    let _ = wake.wait(guard).map_or_else(|_| fallback_guard, |guard| guard);',
     '}',
   ].join('\n');
-  const findings = checker.censusFindings(new Map([['map-default.rs', source]]), noConfig())
+  const findings = checker.eventSourceFindings(new Map([['map-default.rs', source]]), noConfig())
     .filter(({ rule }) => rule === 'rs.lock-result');
   assert.deepEqual(findings.map(({ line }) => line), [2, 3, 4, 5]);
 });
@@ -305,7 +305,7 @@ test('condition wait recovery checks include nested calls and closure blocks', (
     '    wake.wait_timeout_while(guard, duration(), |state| { state.ready().is_none() }).ok();',
     '}',
   ].join('\n');
-  const findings = checker.censusFindings(new Map([['wait.rs', source]]), noConfig())
+  const findings = checker.eventSourceFindings(new Map([['wait.rs', source]]), noConfig())
     .filter(({ rule }) => rule === 'rs.lock-result');
   assert.deepEqual(findings.map(({ line }) => line), [2, 4, 5]);
 });
@@ -313,7 +313,7 @@ test('condition wait recovery checks include nested calls and closure blocks', (
 test('condition wait argument boundaries ignore string and comment brackets', () => {
   for (const predicate of ['state.has(") [ }")', 'state.has(r#") { ("#)', 'state.ready(/* ) } */).is_none()']) {
     const source = `fn run(guard: Guard) {\n    wake.wait_while(guard, |state| ${predicate}).unwrap();\n}`;
-    const findings = checker.censusFindings(new Map([['wait.rs', source]]), noConfig())
+    const findings = checker.eventSourceFindings(new Map([['wait.rs', source]]), noConfig())
       .filter(({ rule }) => rule === 'rs.lock-result');
     assert.deepEqual(findings.map(({ line }) => line), [2], predicate);
   }
@@ -330,11 +330,11 @@ test('condition wait checks preserve recovered waits and lexical exclusions', ()
     '    let example = r#"wake.wait_while(guard, |state| state.ready.is_none()).unwrap()"#;',
     '}',
   ].join('\n');
-  assert.deepEqual(checker.censusFindings(new Map([['wait.rs', source]]), noConfig()), []);
+  assert.deepEqual(checker.eventSourceFindings(new Map([['wait.rs', source]]), noConfig()), []);
 });
 
 test('a reason marker on the line, in the comment above it or inside an empty catch accepts a source', () => {
-  assert.deepEqual(census({
+  assert.deepEqual(sourceFindings({
     'a.js': [
       'export function f() {',
       '  try { g(); } catch (error) { /* silent: g only warms a cache that is rebuilt on use. */ }',
@@ -349,18 +349,18 @@ test('a reason marker on the line, in the comment above it or inside an empty ca
     ].join('\n'),
     'b.rs': 'fn f() {\n    // default: a missing count means zero for the declared total.\n    let v = x.unwrap_or(0);\n}\n',
   }), []);
-  assert.deepEqual(census({ 'a.js': 'export function f() {\n  // a note without a marker\n  try { g(); } catch (error) {}\n}\n' }), ['a.js:3 js.empty-catch']);
-  assert.deepEqual(census({ 'a.js': 'export function f() {\n  try { g(); } catch (error) {} // silent: short\n}\n' }), ['a.js:2 js.empty-catch']);
+  assert.deepEqual(sourceFindings({ 'a.js': 'export function f() {\n  // a note without a marker\n  try { g(); } catch (error) {}\n}\n' }), ['a.js:3 js.empty-catch']);
+  assert.deepEqual(sourceFindings({ 'a.js': 'export function f() {\n  try { g(); } catch (error) {} // silent: short\n}\n' }), ['a.js:2 js.empty-catch']);
 });
 
 test('an event in the function of a source accepts it, and an event in another function does not', () => {
-  assert.deepEqual(census({
+  assert.deepEqual(sourceFindings({
     'a.rs': 'fn f() {\n    let n = text.parse::<u32>().ok();\n    emit_host(Level::Warn, "host.window.event", json!({}));\n}\n',
     'b.go': 'package a\n\nfunc f() {\n\tif err != nil {\n\t\tEmitHost(LevelWarn, "host.window.event", nil)\n\t}\n}\n',
     'c.js': 'export const f = () => {\n  try { g(); } catch (error) {\n    emitEvent("warn", "page.record.warn", {});\n  }\n};\n',
     'd.m': '- (BOOL)f {\n    dispatch_async(q, ^{\n        sp_event(SP_CLASS_CALL, SP_EVENT_WARN, "native.x", "{}");\n    });\n    return NO;\n}\n',
   }), []);
-  assert.deepEqual(census({
+  assert.deepEqual(sourceFindings({
     'a.rs': 'fn f() {\n    emit_host(Level::Warn, "host.window.event", json!({}));\n}\n\nfn g() {\n    let n = text.parse::<u32>().ok();\n}\n',
     'b.go': 'package a\n\nfunc f() {\n\tEmitHost(LevelWarn, "host.window.event", nil)\n}\n\nfunc (r *R) g() {\n\tgo r.run()\n}\n',
     'c.js': 'export const f = () => { emitEvent("warn", "page.record.warn", {}); };\nexport const g = () => {\n  try { h(); } catch (error) {}\n};\n',
@@ -369,27 +369,27 @@ test('an event in the function of a source accepts it, and an event in another f
 });
 
 test('a source in a comment or a string is not a finding, and an entrance file may hold its rule', () => {
-  assert.deepEqual(census({ 'a.rs': '// x.unwrap_or(0)\nfn f() { let s = "y.ok()"; }\n' }), []);
-  const config = checker.parseCensusConfig('census.json', JSON.stringify({ entrances: { 'go.go-statement': ['^spawn\\.go$'], 'go.recover': ['^spawn\\.go$'] } }));
+  assert.deepEqual(sourceFindings({ 'a.rs': '// x.unwrap_or(0)\nfn f() { let s = "y.ok()"; }\n' }), []);
+  const config = checker.parseEventSources('event-sources.json', JSON.stringify({ entrances: { 'go.go-statement': ['^spawn\\.go$'], 'go.recover': ['^spawn\\.go$'] } }));
   const entrance = 'package a\n\nfunc Go(name string, fn func()) {\n\tgo func() {\n\t\tdefer func() { recover() }()\n\t\tfn()\n\t}()\n}\n';
-  assert.deepEqual(census({ 'spawn.go': entrance }, config), []);
-  assert.deepEqual(census({ 'other.go': entrance }, config), ['other.go:4 go.go-statement', 'other.go:5 go.recover']);
+  assert.deepEqual(sourceFindings({ 'spawn.go': entrance }, config), []);
+  assert.deepEqual(sourceFindings({ 'other.go': entrance }, config), ['other.go:4 go.go-statement', 'other.go:5 go.recover']);
 });
 
 test('a pending rule reports its findings with the item that enables it and is not enforced', () => {
-  const config = checker.parseCensusConfig('census.json', JSON.stringify({ pending: { 'go.go-statement': 'F160.4' } }));
-  const findings = checker.censusFindings(new Map([['a.go', 'package a\n\nfunc f() {\n\tgo run()\n}\n'], ['b.rs', 'fn f() { x.unwrap_or(1); }\n']]), config);
+  const config = checker.parseEventSources('event-sources.json', JSON.stringify({ pending: { 'go.go-statement': 'F160.4' } }));
+  const findings = checker.eventSourceFindings(new Map([['a.go', 'package a\n\nfunc f() {\n\tgo run()\n}\n'], ['b.rs', 'fn f() { x.unwrap_or(1); }\n']]), config);
   assert.deepEqual(findings.map(({ rule, pending }) => `${rule} ${pending}`), ['go.go-statement F160.4', 'rs.unwrap-or null']);
 });
 
-test('a census declaration with an unknown key, an unknown rule or a pending value that is no checklist id is an error naming the file', () => {
-  const parse = (value) => () => checker.parseCensusConfig('scripts/census.json', JSON.stringify(value));
-  assert.throws(parse({ skip: [] }), /^Error: scripts\/census\.json: has the key skip/);
-  assert.throws(parse({ pending: { 'go.nothing': 'F1' } }), /scripts\/census\.json: names the rule go\.nothing, which no census rule has/);
+test('a event source declaration with an unknown key, an unknown rule or a pending value that is no checklist id is an error naming the file', () => {
+  const parse = (value) => () => checker.parseEventSources('scripts/event-sources.json', JSON.stringify(value));
+  assert.throws(parse({ skip: [] }), /^Error: scripts\/event-sources\.json: has the key skip/);
+  assert.throws(parse({ pending: { 'go.nothing': 'F1' } }), /scripts\/event-sources\.json: names the rule go\.nothing, which no event source check rule has/);
   assert.throws(parse({ entrances: { 'go.nothing': [] } }), /names the rule go\.nothing/);
   assert.throws(parse({ pending: { 'go.recover': 'later' } }), /gives the rule go\.recover the pending item "later", which is no checklist id/);
   assert.throws(parse({ entrances: { 'go.recover': 'a.go' } }), /entrances that are not a list of patterns/);
-  assert.throws(() => checker.parseCensusConfig('scripts/census.json', '{'), /^Error: scripts\/census\.json: /);
+  assert.throws(() => checker.parseEventSources('scripts/event-sources.json', '{'), /^Error: scripts\/event-sources\.json: /);
   assert.equal(EVENT_RULES.every((rule) => rule.language && rule.pattern && ['entrance', 'event-or-reason', 'recovery'].includes(rule.requires) && rule.description), true);
 });
 
@@ -414,27 +414,27 @@ test('functionRange holds the offset in the named function of Go and Rust, the f
   assert.deepEqual(checker.functionRange(checker.lexSource('a.js', 'y();\n'), 0), [0, 5]);
 });
 
-test('soksak-check census fails with the file and line of a source that has neither an event nor a reason', () => {
+test('sok-check events fails with the file and line of a source that has neither an event nor a reason', () => {
   const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
-  assert.ok(manifest.files.includes('census.js') && manifest.files.includes('census-rules.json'));
+  assert.ok(manifest.files.includes('events.js') && manifest.files.includes('event-rules.json'));
   const command = fileURLToPath(new URL('../check.js', import.meta.url));
-  const repository = mkdtempSync(join(tmpdir(), 'census-'));
-  const run = (...args) => spawnSync(process.execPath, [command, 'census', ...args], { cwd: repository, encoding: 'utf8' });
+  const repository = mkdtempSync(join(tmpdir(), 'event-sources-'));
+  const run = (...args) => spawnSync(process.execPath, [command, 'events', ...args], { cwd: repository, encoding: 'utf8' });
   const git = (...args) => assert.equal(spawnSync('git', args, { cwd: repository }).status, 0);
   git('init', '-q');
   mkdirSync(join(repository, 'src'));
   writeFileSync(join(repository, 'src', 'a.rs'), 'fn f() {\n    let v = x.unwrap_or(0);\n}\n');
-  writeFileSync(join(repository, 'census.json'), JSON.stringify({ pending: { 'rs.unwrap-or': 'F1.1' } }));
-  git('add', 'src/a.rs', 'census.json');
+  writeFileSync(join(repository, 'event-sources.json'), JSON.stringify({ pending: { 'rs.unwrap-or': 'F1.1' } }));
+  git('add', 'src/a.rs', 'event-sources.json');
   let result = run();
   assert.equal(result.status, 1);
   assert.match(result.stderr, /^src\/a\.rs:2: rs\.unwrap-or has neither an event nor a stated reason$/m);
-  result = run('--config', 'census.json');
+  result = run('--config', 'event-sources.json');
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /^pending F1\.1: rs\.unwrap-or is not enforced; 1 findings wait for it$/m);
-  assert.match(result.stdout, /^Census passed: 1 sources, 1 rules pending$/m);
+  assert.match(result.stdout, /^Event source check passed: 1 sources, 1 rules pending$/m);
   writeFileSync(join(repository, 'src', 'a.rs'), 'fn f() {\n    // Default: a missing count means zero.\n    let v = x.unwrap_or(0);\n}\n');
-  result = run('--config', 'census.json');
+  result = run('--config', 'event-sources.json');
   assert.equal(result.status, 1);
   assert.match(result.stderr, /^src\/a\.rs:2: reason marker "Default: a missing count means zero\." is not the form/m);
   writeFileSync(join(repository, 'src', 'a.rs'), 'fn f() {\n    // default: a missing count means zero.\n    let v = x.unwrap_or(0);\n}\n');
@@ -445,24 +445,24 @@ test('soksak-check census fails with the file and line of a source that has neit
   assert.equal(result.status, 1);
   assert.match(result.stderr, /^docs\/events\.json: host\.never\.emitted is declared and no source emits it$/m);
   assert.equal(run('--unknown').status, 2);
-  assert.match(run('--unknown').stderr, /usage: soksak-check census/);
+  assert.match(run('--unknown').stderr, /usage: sok-check events/);
 });
 
 test('the record calls of the native library are emit sites of the declared records, and a record in another function does not accept a return', () => {
-  assert.deepEqual(census({
+  assert.deepEqual(sourceFindings({
     'a.m': '- (BOOL)f {\n    sp_log_error("where", "text");\n    return NO;\n}\n- (BOOL)g {\n    sp_log_info("where", "text");\n    return NO;\n}\n',
   }), []);
-  assert.deepEqual(census({
+  assert.deepEqual(sourceFindings({
     'a.m': '- (BOOL)f {\n    sp_log_error("where", "text");\n    return YES;\n}\n- (BOOL)g {\n    return NO;\n}\n',
   }), ['a.m:6 m.error-return']);
   const records = { ...catalog, events: { 'native.record.<level>': { layer: 'host', class: 'lifecycle', level: ['error', 'info'], fields: fieldSchema({'where': { type: 'string' }, 'text': { type: 'string' }}, ['where', 'text']) } } };
   assert.deepEqual(checker.emitFindings(records, new Map([['a.m', 'void f(void) {\n    sp_log_error("w", "t");\n    sp_log_info("w", "t");\n}\n']]), CATALOG), []);
 });
 
-test('the census exclude removes a vendored file before the catalog check parses it', () => {
+test('the event source exclude removes a vendored file before the catalog check parses it', () => {
   const command = fileURLToPath(new URL('../check.js', import.meta.url));
-  const repository = mkdtempSync(join(tmpdir(), 'census-'));
-  const run = (...args) => spawnSync(process.execPath, [command, 'census', ...args], { cwd: repository, encoding: 'utf8' });
+  const repository = mkdtempSync(join(tmpdir(), 'event-sources-'));
+  const run = (...args) => spawnSync(process.execPath, [command, 'events', ...args], { cwd: repository, encoding: 'utf8' });
   const git = (...args) => assert.equal(spawnSync('git', args, { cwd: repository }).status, 0);
   git('init', '-q');
   mkdirSync(join(repository, 'docs'));
@@ -470,15 +470,15 @@ test('the census exclude removes a vendored file before the catalog check parses
   writeFileSync(join(repository, 'docs', 'events.json'), JSON.stringify({ schema: 3, layers: ['plugin'], events: {} }));
   // The vendored file holds a string that does not end, which the lexer of the check rejects.
   writeFileSync(join(repository, 'ui', 'vendor', 'bundle.js'), 'export const a = "never ends;\n');
-  writeFileSync(join(repository, 'census.json'), JSON.stringify({ exclude: '^ui/vendor/' }));
-  git('add', 'docs/events.json', 'ui/vendor/bundle.js', 'census.json');
+  writeFileSync(join(repository, 'event-sources.json'), JSON.stringify({ exclude: '^ui/vendor/' }));
+  git('add', 'docs/events.json', 'ui/vendor/bundle.js', 'event-sources.json');
   let result = run('--catalog', 'docs/events.json');
   assert.equal(result.status, 1);
   assert.match(result.stderr, /^ui\/vendor\/bundle\.js:1: a string that starts here does not end$/m);
-  result = run('--config', 'census.json', '--catalog', 'docs/events.json');
+  result = run('--config', 'event-sources.json', '--catalog', 'docs/events.json');
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /^Event catalog checks passed: 0 declared events/m);
-  assert.deepEqual(checker.catalogReport(repository, 'docs/events.json', 'census.json').findings, []);
+  assert.deepEqual(checker.catalogReport(repository, 'docs/events.json', 'event-sources.json').findings, []);
 });
 
 // A plugin stores its events through `context.runtime.log` (docs/spec/plugins.md#logging): the call names the event without the
@@ -506,10 +506,10 @@ test('runtime.log entrances of plugin events are resolved by the plugin prefix',
     'ui/a.js:2: the name of this emit is not a literal; write a comment `events: <declared names>` above it, or `events: forwarded` when it passes the name of its caller',
     'events.json: plugin.fixture.input.key is declared and no source emits it',
   ]);
-  // A call in a function accepts the rules of the census like any other entrance.
-  const rules = checker.censusRules();
-  const config = checker.parseCensusConfig('census.json', '{}', rules);
-  assert.deepEqual(checker.censusFindings(new Map([['ui/a.js', 'export function f(runtime) {\n  try { g(); } catch (error) { runtime.log.error("input.key", {}); }\n}\n']]), config, rules), []);
+  // A call in a function accepts the rules of the event source check like any other entrance.
+  const rules = checker.eventRules();
+  const config = checker.parseEventSources('event-sources.json', '{}', rules);
+  assert.deepEqual(checker.eventSourceFindings(new Map([['ui/a.js', 'export function f(runtime) {\n  try { g(); } catch (error) { runtime.log.error("input.key", {}); }\n}\n']]), config, rules), []);
 });
 
 test('plugin runtime contextual fields satisfy catalog requirements only at runtime.log entrances', () => {
@@ -579,7 +579,7 @@ const RUST = [
 ].join('\n');
 
 test('the emitters of a repository declaration make the writer methods of a Rust sidecar emit sites, with their argument positions', () => {
-  const config = checker.parseCensusConfig('census.json', JSON.stringify(EMITTERS));
+  const config = checker.parseEventSources('event-sources.json', JSON.stringify(EMITTERS));
   const sources = new Map([['src/a.rs', RUST]]);
   assert.deepEqual(checker.emitFindings(sidecar, sources, 'events.json', config), [
     'src/a.rs:3: the name of this emit is not a literal; write a comment `events: <declared names>` above it, or `events: forwarded` when it passes the name of its caller',
@@ -599,45 +599,45 @@ test('the emitters of a repository declaration make the writer methods of a Rust
   assert.deepEqual(checker.siteCounts(new Map([['lib/a.rs', RUST]]), config.emitters), { rs: { literal: 3, built: 1 } });
 });
 
-test('an emitter is an event of its function for the census, and a repository without emitters finds no site of these methods', () => {
-  const config = checker.parseCensusConfig('census.json', JSON.stringify(EMITTERS));
+test('an emitter is an event of its function for the event source check, and a repository without emitters finds no site of these methods', () => {
+  const config = checker.parseEventSources('event-sources.json', JSON.stringify(EMITTERS));
   const source = 'fn f(log: &Writer) {\n    let _ = g().ok();\n    log.record_error("g", "failed");\n}\nfn h() {\n    let _ = g().ok();\n}\n';
-  assert.deepEqual(checker.censusFindings(new Map([['a.rs', source]]), config).map(({ file, line, rule }) => `${file}:${line} ${rule}`), ['a.rs:6 rs.ok-discard']);
-  const bare = checker.parseCensusConfig('census.json', '{}');
-  assert.deepEqual(checker.censusFindings(new Map([['a.rs', source]]), bare).map(({ line }) => line), [2, 6]);
+  assert.deepEqual(checker.eventSourceFindings(new Map([['a.rs', source]]), config).map(({ file, line, rule }) => `${file}:${line} ${rule}`), ['a.rs:6 rs.ok-discard']);
+  const bare = checker.parseEventSources('event-sources.json', '{}');
+  assert.deepEqual(checker.eventSourceFindings(new Map([['a.rs', source]]), bare).map(({ line }) => line), [2, 6]);
   assert.deepEqual(checker.siteCounts(new Map([['src/a.rs', RUST]]), bare.emitters), { rs: { literal: 0, built: 0 } });
 });
 
 test('a declaration of emitters outside the form is an error naming the file, the language and the emitter', () => {
-  const parse = (emitters) => () => checker.parseCensusConfig('census.json', JSON.stringify({ emitters }));
-  assert.throws(parse({ cobol: [] }), /^Error: census\.json: emitters names the language cobol, which is not one of go, rs, m, js/);
-  assert.throws(parse({ rs: {} }), /census\.json: emitters\.rs is not a list/);
-  assert.throws(parse({ rs: [{ call: 'emit-for', level: 0, event: 1 }] }), /census\.json: emitters\.rs\[0\]: call "emit-for" is not an identifier/);
-  assert.throws(parse({ rs: [{ call: 'emit', level: 0, event: 1, shape: 1 }] }), /census\.json: emitters\.rs\[0\]: has the key shape, which is not one of/);
-  assert.throws(parse({ rs: [{ call: 'emit', event: 1 }] }), /census\.json: emitters\.rs\[0\]: needs level \(the position of the level argument\) or fixed/);
-  assert.throws(parse({ rs: [{ call: 'emit', level: 0, fixed: 'info', event: 1 }] }), /census\.json: emitters\.rs\[0\]: has level and fixed/);
-  assert.throws(parse({ rs: [{ call: 'emit', level: 0 }] }), /census\.json: emitters\.rs\[0\]: event must be a non-negative integer/);
-  assert.throws(parse({ rs: [{ call: 'emit', level: -1, event: 1 }] }), /census\.json: emitters\.rs\[0\]: level must be a non-negative integer/);
-  assert.throws(parse({ rs: [{ call: 'emit', fixed: 'loud', event: 0 }] }), /census\.json: emitters\.rs\[0\]: fixed "loud" is not a level/);
-  assert.throws(parse({ rs: [{ call: 'emit', level: 0, event: 1 }, { call: 'emit', level: 0, event: 1 }] }), /census\.json: emitters\.rs\[1\]: call emit is declared twice/);
-  assert.throws(parse({ rs: [{ call: 'emit', level: 0, event: 1, only: '(' }] }), /census\.json: emitters\.rs\[0\]: only is not a pattern/);
+  const parse = (emitters) => () => checker.parseEventSources('event-sources.json', JSON.stringify({ emitters }));
+  assert.throws(parse({ cobol: [] }), /^Error: event-sources\.json: emitters names the language cobol, which is not one of go, rs, m, js/);
+  assert.throws(parse({ rs: {} }), /event-sources\.json: emitters\.rs is not a list/);
+  assert.throws(parse({ rs: [{ call: 'emit-for', level: 0, event: 1 }] }), /event-sources\.json: emitters\.rs\[0\]: call "emit-for" is not an identifier/);
+  assert.throws(parse({ rs: [{ call: 'emit', level: 0, event: 1, shape: 1 }] }), /event-sources\.json: emitters\.rs\[0\]: has the key shape, which is not one of/);
+  assert.throws(parse({ rs: [{ call: 'emit', event: 1 }] }), /event-sources\.json: emitters\.rs\[0\]: needs level \(the position of the level argument\) or fixed/);
+  assert.throws(parse({ rs: [{ call: 'emit', level: 0, fixed: 'info', event: 1 }] }), /event-sources\.json: emitters\.rs\[0\]: has level and fixed/);
+  assert.throws(parse({ rs: [{ call: 'emit', level: 0 }] }), /event-sources\.json: emitters\.rs\[0\]: event must be a non-negative integer/);
+  assert.throws(parse({ rs: [{ call: 'emit', level: -1, event: 1 }] }), /event-sources\.json: emitters\.rs\[0\]: level must be a non-negative integer/);
+  assert.throws(parse({ rs: [{ call: 'emit', fixed: 'loud', event: 0 }] }), /event-sources\.json: emitters\.rs\[0\]: fixed "loud" is not a level/);
+  assert.throws(parse({ rs: [{ call: 'emit', level: 0, event: 1 }, { call: 'emit', level: 0, event: 1 }] }), /event-sources\.json: emitters\.rs\[1\]: call emit is declared twice/);
+  assert.throws(parse({ rs: [{ call: 'emit', level: 0, event: 1, only: '(' }] }), /event-sources\.json: emitters\.rs\[0\]: only is not a pattern/);
 });
 
-test('soksak-check census --catalog finds the emit sites of a Rust sidecar through the emitters of its census declaration', () => {
+test('sok-check events --catalog finds the emit sites of a Rust sidecar through the emitters of its event source declaration', () => {
   const command = fileURLToPath(new URL('../check.js', import.meta.url));
-  const repository = mkdtempSync(join(tmpdir(), 'census-'));
-  const run = (...args) => spawnSync(process.execPath, [command, 'census', ...args], { cwd: repository, encoding: 'utf8' });
+  const repository = mkdtempSync(join(tmpdir(), 'event-sources-'));
+  const run = (...args) => spawnSync(process.execPath, [command, 'events', ...args], { cwd: repository, encoding: 'utf8' });
   const git = (...args) => assert.equal(spawnSync('git', args, { cwd: repository }).status, 0);
   git('init', '-q');
   mkdirSync(join(repository, 'src'));
   writeFileSync(join(repository, 'events.json'), JSON.stringify(sidecar));
   writeFileSync(join(repository, 'src', 'a.rs'), RUST.replace('self.emit_for(level, event, Subject::NONE, fields)', '// events: forwarded\n        self.emit_for(level, event, Subject::NONE, fields)'));
-  writeFileSync(join(repository, 'census.json'), JSON.stringify(EMITTERS));
-  git('add', 'events.json', 'src/a.rs', 'census.json');
+  writeFileSync(join(repository, 'event-sources.json'), JSON.stringify(EMITTERS));
+  git('add', 'events.json', 'src/a.rs', 'event-sources.json');
   let result = run('--catalog', 'events.json');
   assert.equal(result.status, 1);
   assert.match(result.stdout, /emit sites: rs 0 literal 0 built/);
-  result = run('--config', 'census.json', '--catalog', 'events.json');
+  result = run('--config', 'event-sources.json', '--catalog', 'events.json');
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /^Event catalog checks passed: 3 declared events, emit sites: rs 4 literal 1 built/m);
 });
@@ -645,8 +645,8 @@ test('soksak-check census --catalog finds the emit sites of a Rust sidecar throu
 test('the emitter declaration of the repository counts the trace call of the workbench, and the SDK default counts none', () => {
   // The workbench rule is declared by the repository, not built into the SDK: without that declaration a trace
   // call is not an emit site, so the catalog finds the event declared and not emitted.
-  // The declaration of the repository, as the core census file states it (an inline fixture: this test reads no other path).
-  const declared = checker.parseCensusConfig('census.json', JSON.stringify({ emitters: { js: [
+  // The declaration of the repository, as the core event source check file states it (an inline fixture: this test reads no other path).
+  const declared = checker.parseEventSources('event-sources.json', JSON.stringify({ emitters: { js: [
     { call: 'trace', fixed: 'debug', prefix: 'page.trace.', event: 0, fields: 1, bare: true, only: '^packages/workbench/' },
   ] } }));
   const traced = { schema: 3, layers: ['page'], events: {
@@ -694,7 +694,7 @@ test('a recovery closure that reports the poison and ends with the recovered gua
     '    let named = state.lock().unwrap_or_else(|error| recovered(error.into_inner(), "state"));',
     '}',
   ].join('\n');
-  const findings = checker.censusFindings(new Map([['report.rs', source]]), noConfig())
+  const findings = checker.eventSourceFindings(new Map([['report.rs', source]]), noConfig())
     .filter(({ rule }) => rule === 'rs.lock-result');
   assert.deepEqual(findings.map(({ line }) => line), [8]);
 });
@@ -718,7 +718,7 @@ test('a wait recovery closure that reports the poison and ends with the recovere
     '    let named = ready.wait_while(other, |state| !state.done).unwrap_or_else(|error| recovered(error.into_inner(), "state"));',
     '}',
   ].join('\n');
-  const findings = checker.censusFindings(new Map([['report.rs', source]]), noConfig())
+  const findings = checker.eventSourceFindings(new Map([['report.rs', source]]), noConfig())
     .filter(({ rule }) => rule === 'rs.lock-result');
   assert.deepEqual(findings.map(({ line }) => line), [10]);
 });

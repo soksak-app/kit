@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { checklistViolations, commitMessageErrors, recordKind, repositoryRecordViolations, recordViolations, termChecked, termViolations } from "../records.js";
+import { checklistViolations, commitMessageErrors, docKind, repositoryDocViolations, docViolations, termChecked, termViolations } from "../docs.js";
 import { execSync } from "node:child_process";
 import { copyFileSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -45,8 +45,8 @@ test("record checks report each statement that is not a fact about the repositor
     ["이 머신에서 통과한다.", "local environment"],
   ];
   for (const [line, category] of cases) {
-    assert.deepEqual(recordViolations(`# Title\n\n${line}\n`, "doc.md").map((error) => error.split(": ")[1]), [category], line);
-    assert.match(recordViolations(`# Title\n\n${line}\n`, "doc.md")[0], /^doc\.md:3: /, line);
+    assert.deepEqual(docViolations(`# Title\n\n${line}\n`, "doc.md").map((error) => error.split(": ")[1]), [category], line);
+    assert.match(docViolations(`# Title\n\n${line}\n`, "doc.md")[0], /^doc\.md:3: /, line);
   }
 });
 
@@ -61,17 +61,17 @@ test("record checks accept facts that contain hexadecimal values and the rule's 
     "The user's settings are kept.",
     "The build-machine rehearsal이 macOS에서 통과했다.",
     "The rehearsal of this macOS runner passed.",
-  ]) assert.deepEqual(recordViolations(line, "doc.md"), [], line);
-  assert.deepEqual(recordViolations("```\nFound on 2026-10-05\n```\n", "doc.md"), [], "a code block is not a record statement");
+  ]) assert.deepEqual(docViolations(line, "doc.md"), [], line);
+  assert.deepEqual(docViolations("```\nFound on 2026-10-05\n```\n", "doc.md"), [], "a code block is not a record statement");
 });
 
 test("configuration files are checked in their comments only", () => {
-  assert.equal(recordKind(".github/workflows/release.yml"), "config");
-  assert.equal(recordKind("Makefile"), "config");
-  assert.equal(recordKind("native/darwin/Makefile"), "config");
-  assert.equal(recordKind("docs/spec/plugins.md"), "document");
-  assert.equal(recordKind("scripts/records.mjs"), null);
-  assert.deepEqual(recordViolations("# Found on 2026-10-05\nrun: echo 'Found on 2026-10-05'\n", "Makefile", "config"),
+  assert.equal(docKind(".github/workflows/release.yml"), "config");
+  assert.equal(docKind("Makefile"), "config");
+  assert.equal(docKind("native/darwin/Makefile"), "config");
+  assert.equal(docKind("docs/spec/plugins.md"), "document");
+  assert.equal(docKind("scripts/records.mjs"), null);
+  assert.deepEqual(docViolations("# Found on 2026-10-05\nrun: echo 'Found on 2026-10-05'\n", "Makefile", "config"),
     ["Makefile:1: account of who found or requested: Found on"]);
 });
 
@@ -125,7 +125,7 @@ test("the verb of presentation is not a synonym of drawing", () => {
 test("the term list, the changelogs and the checklists are not checked for rejected terms", () => {
   assert.equal(termChecked("packages/plugin-api/terms.json"), false);
   assert.equal(termChecked("CHANGELOG.ko.md"), false);
-  assert.equal(termChecked("packages/plugin-api/test/records.test.mjs"), false);
+  assert.equal(termChecked("packages/plugin-api/test/docs.test.mjs"), false);
   assert.equal(termChecked("docs/features.md"), false);
   assert.equal(termChecked("docs/spec/plugins.md"), true);
   assert.equal(termChecked("src/install.rs"), true);
@@ -139,56 +139,56 @@ test("a commit message that uses a rejected synonym is refused", () => {
     commitMessageErrors(message).join("\n"));
 });
 
-test("a file the census declaration excludes is not a record of the repository", () => {
+test("a file the event source declaration excludes is not a record of the repository", () => {
   const repository = mkdtempSync(join(tmpdir(), "records-exclude-"));
   execSync("git init -q .", { cwd: repository });
-  writeFileSync(join(repository, "census.json"), JSON.stringify({ exclude: "^ui/vendor/" }));
+  writeFileSync(join(repository, "event-sources.json"), JSON.stringify({ exclude: "^ui/vendor/" }));
   mkdirSync(join(repository, "ui", "vendor"), { recursive: true });
   writeFileSync(join(repository, "ui/vendor/bundle.js"), "// The plugin package holds pages.\n");
   writeFileSync(join(repository, "own.md"), "The plugin package holds pages.\n");
   execSync("git add .", { cwd: repository });
-  const { errors } = repositoryRecordViolations(repository);
+  const { errors } = repositoryDocViolations(repository);
   assert.deepEqual(errors.map((error) => error.split(":")[0]), ["own.md"]);
 });
 
-test("a census declaration without an exclude checks every tracked record", () => {
+test("a event source declaration without an exclude checks every tracked record", () => {
   const repository = mkdtempSync(join(tmpdir(), "records-no-exclude-"));
   execSync("git init -q .", { cwd: repository });
-  writeFileSync(join(repository, "census.json"), JSON.stringify({}));
+  writeFileSync(join(repository, "event-sources.json"), JSON.stringify({}));
   writeFileSync(join(repository, "own.md"), "The plugin package holds pages.\n");
   execSync("git add .", { cwd: repository });
-  const { files, errors } = repositoryRecordViolations(repository);
+  const { files, errors } = repositoryDocViolations(repository);
   assert.ok(files.includes("own.md"));
   assert.deepEqual(errors.map((error) => error.split(":")[0]), ["own.md"]);
 });
 
-test("a census declaration rejects a non-string exclude with its file and value", () => {
+test("a event source declaration rejects a non-string exclude with its file and value", () => {
   const repository = mkdtempSync(join(tmpdir(), "records-invalid-exclude-"));
   execSync("git init -q .", { cwd: repository });
-  writeFileSync(join(repository, "census.json"), JSON.stringify({ exclude: 3 }));
+  writeFileSync(join(repository, "event-sources.json"), JSON.stringify({ exclude: 3 }));
   writeFileSync(join(repository, "own.md"), "Repository facts.\n");
   execSync("git add .", { cwd: repository });
-  assert.throws(() => repositoryRecordViolations(repository), /census\.json.*exclude.*number.*3/);
+  assert.throws(() => repositoryDocViolations(repository), /event-sources\.json.*exclude.*number.*3/);
 });
 
-test("a census declaration rejects null and array roots with its file and value", () => {
+test("a event source declaration rejects null and array roots with its file and value", () => {
   for (const declaration of [null, []]) {
-    const repository = mkdtempSync(join(tmpdir(), "records-invalid-census-"));
+    const repository = mkdtempSync(join(tmpdir(), "invalid-event-sources-"));
     execSync("git init -q .", { cwd: repository });
-    writeFileSync(join(repository, "census.json"), JSON.stringify(declaration));
+    writeFileSync(join(repository, "event-sources.json"), JSON.stringify(declaration));
     writeFileSync(join(repository, "own.md"), "Repository facts.\n");
     execSync("git add .", { cwd: repository });
-    assert.throws(() => repositoryRecordViolations(repository), /census\.json.*declaration.*object.*found/);
+    assert.throws(() => repositoryDocViolations(repository), /event-sources\.json.*declaration.*object.*found/);
   }
 });
 
-test("a census declaration reports an invalid exclude pattern with its file and value", () => {
+test("a event source declaration reports an invalid exclude pattern with its file and value", () => {
   const repository = mkdtempSync(join(tmpdir(), "records-invalid-pattern-"));
   execSync("git init -q .", { cwd: repository });
-  writeFileSync(join(repository, "census.json"), JSON.stringify({ exclude: "[" }));
+  writeFileSync(join(repository, "event-sources.json"), JSON.stringify({ exclude: "[" }));
   writeFileSync(join(repository, "own.md"), "Repository facts.\n");
   execSync("git add .", { cwd: repository });
-  assert.throws(() => repositoryRecordViolations(repository), /census\.json.*exclude pattern.*\[.*invalid/);
+  assert.throws(() => repositoryDocViolations(repository), /event-sources\.json.*exclude pattern.*\[.*invalid/);
 });
 
 /** A git repository in a new temporary folder that tracks files, a map from a path in the repository to its text. */
@@ -208,7 +208,7 @@ test("a link to a heading that its target document does not have is reported wit
     "docs/features.md": "# Features\n\n- [ ] S1-1 — P0: The frame follows [the core](spec/core.md#gpu-frame).\n",
     "docs/spec/core.md": "# Core\n\n## Strip frame\n\nThe strip holds the frame.\n",
   });
-  assert.deepEqual(repositoryRecordViolations(repository).errors, ["docs/features.md:3: missing heading spec/core.md#gpu-frame"]);
+  assert.deepEqual(repositoryDocViolations(repository).errors, ["docs/features.md:3: missing heading spec/core.md#gpu-frame"]);
 });
 
 test("a link to a heading that its target has passes, also a repeated heading, a heading of the same document and an encoded fragment", () => {
@@ -228,7 +228,7 @@ test("a link to a heading that its target has passes, also a repeated heading, a
     ].join("\n"),
     "docs/spec/core.md": "# Core\n\n## Strip frame\n\n## Strip frame\n\n## 그림 frame\n",
   });
-  assert.deepEqual(repositoryRecordViolations(repository).errors, []);
+  assert.deepEqual(repositoryDocViolations(repository).errors, []);
 });
 
 test("a link to a third repeated heading, a missing heading of the same document, a fenced heading and a missing document is reported", () => {
@@ -242,7 +242,7 @@ test("a link to a third repeated heading, a missing heading of the same document
     ].join("\n"),
     "docs/spec/core.md": "# Core\n\n## Strip frame\n\n## Strip frame\n\n```md\n## Fenced heading\n```\n",
   });
-  assert.deepEqual(repositoryRecordViolations(repository).errors, [
+  assert.deepEqual(repositoryDocViolations(repository).errors, [
     "docs/features.md:3: missing heading spec/core.md#strip-frame-2",
     "docs/features.md:4: missing heading #items",
     "docs/features.md:5: missing heading spec/core.md#fenced-heading",
@@ -251,7 +251,7 @@ test("a link to a third repeated heading, a missing heading of the same document
 });
 
 test("the package exports the anchor rule of the record check for the documentation checks of other repositories", async () => {
-  const { headingAnchors, markdownLinks } = await import("@soksak/kit/records");
+  const { headingAnchors, markdownLinks } = await import("@soksak/kit/docs");
   assert.equal(typeof headingAnchors, "function", "the package exports headingAnchors");
   assert.equal(typeof markdownLinks, "function", "the package exports markdownLinks");
   assert.deepEqual([...headingAnchors("# A b\n\n## A b\n\n```\n## Fenced\n```\n\n### 그림, frame!\n#### snake_case  two\n")],
@@ -264,7 +264,7 @@ test("a link target that is not URI-encoded is an error with its file and line",
     "docs/features.md": "# Features\n\n[the frame](spec/core.md#strip%E0frame)\n",
     "docs/spec/core.md": "# Core\n",
   });
-  assert.throws(() => repositoryRecordViolations(repository), /^Error: docs\/features\.md:3: link target spec\/core\.md#strip%E0frame is not URI-encoded/);
+  assert.throws(() => repositoryDocViolations(repository), /^Error: docs\/features\.md:3: link target spec\/core\.md#strip%E0frame is not URI-encoded/);
 });
 
 test("dom entry and dom name are rejected for element entry and element name, also in their plurals and in identifiers", () => {
@@ -282,9 +282,9 @@ test("dom entry and dom name are rejected for element entry and element name, al
 test("a rejected phrase with a regular expression character matches only its own words, also in identifiers", async () => {
   // A copy of the check with a term list whose rejected phrase holds `.`, which a pattern must match literally.
   const kit = mkdtempSync(join(tmpdir(), "records-escape-"));
-  for (const file of ["records.js", "checklist.js"]) copyFileSync(new URL(`../${file}`, import.meta.url), join(kit, file));
+  for (const file of ["docs.js", "checklist.js"]) copyFileSync(new URL(`../${file}`, import.meta.url), join(kit, file));
   writeFileSync(join(kit, "terms.json"), JSON.stringify({ terms: [{ term: "dotted term", definition: "A term.", rejected: ["a.b entry"], allowed: [] }] }));
-  const { termViolations: check } = await import(pathToFileURL(join(kit, "records.js")).href);
+  const { termViolations: check } = await import(pathToFileURL(join(kit, "docs.js")).href);
   assert.deepEqual(check("const value = makeAxbEntry();\nThe a.b entry is used.\nconst value = makeA.bEntry();", "a.js"), [
     'a.js:2: rejected term "a.b entry", use "dotted term": a.b entry',
     'a.js:3: rejected term "a.b entry", use "dotted term": A.bEntry',
@@ -292,13 +292,26 @@ test("a rejected phrase with a regular expression character matches only its own
 });
 
 test("a record does not cite a log of the local build folder", () => {
-  const violations = recordViolations("Red: the test failed (`build/logs/F1/red.log`).\n", "docs/features.md");
+  const violations = docViolations("Red: the test failed (`build/logs/F1/red.log`).\n", "docs/features.md");
   assert.equal(violations.length, 1);
   assert.match(violations[0], /local build log/);
 });
 
 test("a record does not cite a log of the temporary folder", () => {
-  const violations = recordViolations("Red: the test failed (`/tmp/F1-red.log`).\n", "docs/features.md");
+  const violations = docViolations("Red: the test failed (`/tmp/F1-red.log`).\n", "docs/features.md");
   assert.equal(violations.length, 1);
   assert.match(violations[0], /temporary log/);
+});
+
+test("a repository has no untracked file", () => {
+  const repository = mkdtempSync(join(tmpdir(), "kit-untracked-"));
+  execSync("git init -q", { cwd: repository });
+  writeFileSync(join(repository, ".gitignore"), "/ignored/\n");
+  writeFileSync(join(repository, "tracked.md"), "A record.\n");
+  execSync("git add .gitignore tracked.md", { cwd: repository });
+  mkdirSync(join(repository, "ignored"));
+  writeFileSync(join(repository, "ignored", "output.log"), "output\n");
+  assert.deepEqual(repositoryDocViolations(repository).errors, []);
+  writeFileSync(join(repository, "stray.log"), "output\n");
+  assert.deepEqual(repositoryDocViolations(repository).errors, ["stray.log: untracked file: commit it, ignore it or remove it"]);
 });
