@@ -31,7 +31,7 @@ jobs:
           node-version-file: .node-version
       - name: Decide the release
         id: gate
-        run: node release-gate.js package.json docs/features.md
+        run: make install && node check.js release package.json docs/features.md
 
   release:
     needs: gate

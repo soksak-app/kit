@@ -1,17 +1,22 @@
-# Tests and releases the records kit (docs/features.md). The kit checks its own records with its own source.
-.PHONY: test check push-check release hooks
+# Tests and releases the checks kit (docs/features.md). The kit checks its own records with its own source.
+.PHONY: install test check push-check release hooks
+
+# The installation stage: the locked dependencies.
+install:
+	pnpm install --frozen-lockfile
 
 # Each test reports its result and its elapsed time, and each test has a limit of 60 seconds.
 test:
 	pnpm test
 
 check:
-	node records-check.js
+	node check.js records
+	node check.js census --config census.json
 
 # The checks that a push needs: make test, make check, and the commit messages of the pushed range.
 # RANGE holds the commits of the pushed refs; the pre-push hook sets it, and it defaults to origin/main..HEAD.
 push-check: test check
-	node commits-check.js "$(or $(RANGE),origin/main..HEAD)"
+	node check.js commits "$(or $(RANGE),origin/main..HEAD)"
 
 # The release of the kit: the npm pack file of this repository, which the other repositories pin by its release URL.
 release:

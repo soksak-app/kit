@@ -19,10 +19,12 @@ jobs:
         with:
           node-version-file: .node-version
       - uses: pnpm/action-setup@v4
+      - name: Install
+        run: make install
       - name: Test
         run: make test
       - name: Check
         run: make check
       - name: Commit messages
         if: github.event_name == 'pull_request' || github.event.before != '0000000000000000000000000000000000000000'
-        run: node commits-check.js ${{ github.event_name == 'pull_request' && format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha) || format('{0}..{1}', github.event.before, github.sha) }}
+        run: node check.js commits ${{ github.event_name == 'pull_request' && format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha) || format('{0}..{1}', github.event.before, github.sha) }}

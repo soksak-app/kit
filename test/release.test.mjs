@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { declaredVersion, openItems, releaseDecision } from "../release-gate.js";
+import { declaredVersion, openItems, releaseDecision } from "../release.js";
 
 const decision = (checklistText, tags = []) => releaseDecision({
   manifestName: "package.json", manifestText: '{ "version": "0.0.3" }',

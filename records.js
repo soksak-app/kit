@@ -1,13 +1,11 @@
-#!/usr/bin/env node
 // Checks that records state only facts about the repository. Documents are checked on every line outside code blocks, and configuration files (workflow, Makefile) only on comment lines,
 // and violations are reported as `path:line`. Each repository checks its own records with this command.
 //
-//   soksak-records [repository]
+//   soksak-check records [repository]
 import { itemIdentifier } from "./checklist.js";
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, realpathSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
 
 /**
  * The rejected synonyms of terms.json, each with the term to use, the names that may hold it, such as names of external
@@ -53,7 +51,7 @@ export function termViolations(text, file) {
  * changes in the words of their time.
  */
 export function termChecked(file) {
-  if (/(?:^|\/)terms\.json$/.test(file) || /(?:^|\/)records-check\.test\.mjs$/.test(file) || /(?:^|\/)CHANGELOG(?:\.[a-z]+)?\.md$/.test(file) || /(?:^|\/)features(?:\.[a-z]+)?\.md$/.test(file)) return false;
+  if (/(?:^|\/)terms\.json$/.test(file) || /(?:^|\/)records\.test\.mjs$/.test(file) || /(?:^|\/)CHANGELOG(?:\.[a-z]+)?\.md$/.test(file) || /(?:^|\/)features(?:\.[a-z]+)?\.md$/.test(file)) return false;
   if (/\.(?:md|js|mjs|cjs|ts|go|rs|m|h|json|ya?ml|toml)$/.test(file)) return true;
   return /(?:^|\/)Makefile$/.test(file);
 }
@@ -175,14 +173,15 @@ export function repositoryRecordViolations(repository) {
   }) };
 }
 
-// A package manager places a package as a link, so the started path is resolved before it is compared with this module.
-if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href) {
+/** Checks the records of repository, reports each violation, and returns the exit code. */
+export function checkRecords(repository) {
   // default: when [repository] of the usage is omitted, the repository in the current folder is checked.
-  const { files, errors } = repositoryRecordViolations(resolve(process.argv[2] ?? "."));
+  const { files, errors } = repositoryRecordViolations(resolve(repository ?? "."));
   if (errors.length) {
     process.stderr.write(errors.map((error) => `${error}\n`).join(""));
     process.stderr.write(`${errors.length} record lines state something other than facts about this repository\n`);
-    process.exit(1);
+    return 1;
   }
   process.stdout.write(`Record checks passed: ${files.length} files\n`);
+  return 0;
 }

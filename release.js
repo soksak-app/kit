@@ -1,16 +1,14 @@
-#!/usr/bin/env node
 // Decides whether a repository releases the version that its package.json declares. The repository releases when the
 // remote has no tag of that version. The checks of the release workflow decide whether the code is releasable; an item
 // of the checklist in the state `[ ]`, `[~]` or `[!]` does not hold the release and is carried into the next version, and
 // the decision lists those items. The decision reads only the files and the remote tags of the repository, so no other
 // repository takes part in it.
 //
-//   soksak-release-gate <package.json> <checklist>
+//   soksak-check release <package.json> <checklist>
 //
 // It prints the decision and, when GITHUB_OUTPUT names a file, writes `release` (`true` or `false`) and `version` to it.
 import { execFileSync } from "node:child_process";
-import { appendFileSync, readFileSync, realpathSync } from "node:fs";
-import { pathToFileURL } from "node:url";
+import { appendFileSync, readFileSync } from "node:fs";
 import { checklist } from "./checklist.js";
 
 const OPEN = new Set([" ", "~", "!"]);
@@ -54,13 +52,8 @@ export function remoteTagExists(tag) {
   return execFileSync("git", ["ls-remote", "--tags", "origin", `refs/tags/${tag}`], { encoding: "utf8" }).trim() !== "";
 }
 
-// A package manager places a package as a link, so the started path is resolved before it is compared with this module.
-if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href) {
-  const [manifestName, checklistName, ...rest] = process.argv.slice(2);
-  if (!manifestName || !checklistName || rest.length) {
-    process.stderr.write("usage: soksak-release-gate <package.json> <checklist>\n");
-    process.exit(2);
-  }
+/** Decides the release of the repository, reports the decision, and returns the exit code. */
+export function checkRelease(manifestName, checklistName) {
   let decision;
   try {
     decision = releaseDecision({
@@ -69,10 +62,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(process.ar
     });
   } catch (error) {
     process.stderr.write(`release gate: ${error.message}\n`);
-    process.exit(1);
+    return 1;
   }
   const { release, version, reasons, carried } = decision;
   process.stdout.write(release ? `release v${version}\n` : `no release of v${version}: ${reasons.join("; ")}\n`);
   process.stdout.write(`${carried.length} open items carried into the next version${carried.length ? `: ${carried.join(", ")}` : ""}\n`);
   if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `release=${release}\nversion=${version}\n`);
+  return 0;
 }

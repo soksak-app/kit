@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { checklistViolations, commitMessageErrors, recordKind, repositoryRecordViolations, recordViolations, termChecked, termViolations } from "../records-check.js";
+import { checklistViolations, commitMessageErrors, recordKind, repositoryRecordViolations, recordViolations, termChecked, termViolations } from "../records.js";
 import { execSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -124,7 +124,7 @@ test("the verb of presentation is not a synonym of drawing", () => {
 test("the term list, the changelogs and the checklists are not checked for rejected terms", () => {
   assert.equal(termChecked("packages/plugin-api/terms.json"), false);
   assert.equal(termChecked("CHANGELOG.ko.md"), false);
-  assert.equal(termChecked("packages/plugin-api/test/records-check.test.mjs"), false);
+  assert.equal(termChecked("packages/plugin-api/test/records.test.mjs"), false);
   assert.equal(termChecked("docs/features.md"), false);
   assert.equal(termChecked("docs/spec/plugins.md"), true);
   assert.equal(termChecked("src/install.rs"), true);
