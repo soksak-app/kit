@@ -62,6 +62,7 @@ export const RECORD_PATTERNS = [
   ["pull request number", /\bPR #?\d+\b|\bpull request #?\d+\b/i],
   ["CI run number", /\brun \d{8,}\b/i],
   ["personal path", /\/Users\/|~\/backup/],
+  ["local build log", /\bbuild\/logs\//],
   ["account of who found or requested", /\bFound (?:on|while)\b|\b(?:Requested|Reported|Found|Decided) by\b|\bthe user's (?:decision|request|report)\b|사용자 결정|사용자가 (?:보고|발견|결정)|\bas the user asked\b|\bthe user (?:asked|decided|requested)\b|사용자 요청|사용자가 요청|발견:|\d{4}-\d{2}-\d{2}(?:[^.\n]|\.(?! )){0,80}?발견했|사용자가(?:[^.\n]|\.(?! )){0,120}?보고했/i],
   // macOS is an operating system name. "Mac" refers to that computer only when no letter follows it.
   ["local environment", /\b[Tt]his (?:machine|Mac)(?![A-Za-z])|이 (?:머신|Mac)(?![A-Za-z])/],

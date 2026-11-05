@@ -189,3 +189,9 @@ test("a census declaration reports an invalid exclude pattern with its file and 
   execSync("git add .", { cwd: repository });
   assert.throws(() => repositoryRecordViolations(repository), /census\.json.*exclude pattern.*\[.*invalid/);
 });
+
+test("a record does not cite a log of the local build folder", () => {
+  const violations = recordViolations("Red: the test failed (`build/logs/F1/red.log`).\n", "docs/features.md");
+  assert.equal(violations.length, 1);
+  assert.match(violations[0], /local build log/);
+});
