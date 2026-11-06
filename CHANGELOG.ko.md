@@ -4,6 +4,7 @@
 
 ## 미출시
 
+- KR25: CI는 push된 범위를 `make check-push`로 검사하므로 이전 이름 `records` 대신 Makefile의 검사를 실행하고, `sok-check commands`는 변수도 정하는 make 줄의 target을 검사한다.
 - KR16: 범위 검사는 각 blob을 한 번 읽고 각 text를 한 번 parse하므로 시간이 절반으로 준다. peak memory는 macOS allocator의 large block cache이고 그대로다.
 - KR15: 새 체크리스트 줄은 폐기된 identifier를 쓸 수 없고, renumber는 닫힌 항목처럼 열린 항목의 이전 identifier도 폐기한다.
 - KR14: 닫힌 체크리스트 항목은 commit이 폐기하지 않는 한 상태를 유지한다. `soksak-records`는 working tree를 `HEAD`와 비교하고, `soksak-records --range <revision range>`는 각 commit을 첫 parent와 비교한다.

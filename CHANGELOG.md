@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- KR25: CI checks the pushed range with `make check-push`, so it runs the checks of the Makefile instead of the earlier name `records`, and `sok-check commands` checks the target of a make line that also sets a variable.
 - KR16: The range check reads each blob once and parses each text once, so a range takes half the time; its peak memory is the large block cache of the macOS allocator and stays.
 - KR15: A new checklist line takes no retired identifier, and a renumbering retires the old identifier of an open item as it does for a closed item.
 - KR14: A closed checklist item keeps its state unless the commit retires it: `soksak-records` compares the working tree with `HEAD`, and `soksak-records --range <revision range>` judges each commit against its first parent.

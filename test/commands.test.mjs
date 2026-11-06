@@ -66,9 +66,10 @@ test("an executable that is not sok or sok-<what> is reported in each declaratio
 test("a make target that a workflow runs must exist", (t) => {
   assert.deepEqual(violations(t, {
     Makefile: "test:\n\tpnpm test\n",
-    ".github/workflows/ci.yml": "jobs:\n  a:\n    steps:\n      - uses: actions/checkout@v5\n        with:\n          path: core\n      - run: make test check-docs\n      - run: make -C core check-tests\n      - run: |\n          make test\n          make -C native/darwin fetch\n",
+    ".github/workflows/ci.yml": "jobs:\n  a:\n    steps:\n      - uses: actions/checkout@v5\n        with:\n          path: core\n      - run: make test check-docs\n      - run: make -C core check-tests\n      - run: |\n          make test\n          make -C native/darwin fetch\n      - run: make check-pusx RANGE=a..b\n      - run: make test RANGE=${{ github.event.before && 'a' || 'b' }}\n",
   }), [
     ".github/workflows/ci.yml: make check-docs is not a target of Makefile",
     ".github/workflows/ci.yml: make check-tests is not a target of Makefile",
+    ".github/workflows/ci.yml: make check-pusx is not a target of Makefile",
   ]);
 });

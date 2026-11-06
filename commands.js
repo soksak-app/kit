@@ -62,14 +62,16 @@ function workflowViolations(file, text, root, declared) {
   const errors = [];
   // A workflow may check this repository out into a folder; a make -C path starts from that folder.
   const checkouts = [...text.matchAll(/^\s*path:\s*(\S+)\s*$/gm)].map((match) => match[1]);
-  for (const [, directory = "", words] of text.matchAll(/^[ \t-]*(?:run:\s*)?make(?: -C (\S+))? ((?:[a-z0-9][a-z0-9-]* ?)+)$/gm)) {
+  // A word NAME=value sets a variable and names no target; Actions replaces each ${{ }} expression before the shell reads the line.
+  const lines = text.replace(/\$\{\{.*?\}\}/g, "");
+  for (const [, directory = "", words] of lines.matchAll(/^[ \t-]*(?:run:\s*)?make(?: -C (\S+))? ((?:(?:[a-z0-9][a-z0-9-]*|[A-Z_][A-Z0-9_]*=\S*) ?)+)$/gm)) {
     const checkout = checkouts.find((folder) => directory === folder || directory.startsWith(`${folder}/`));
     const folder = checkout ? directory.slice(checkout.length + 1) : directory;
     const makefile = join(root, folder, "Makefile");
     const names = declared.get(makefile);
     if (!names) continue;
     for (const word of words.trim().split(/\s+/)) {
-      if (!names.has(word)) errors.push(`${file}: make ${word} is not a target of ${makefile.slice(root.length + 1)}`);
+      if (!word.includes("=") && !names.has(word)) errors.push(`${file}: make ${word} is not a target of ${makefile.slice(root.length + 1)}`);
     }
   }
   return errors;
