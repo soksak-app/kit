@@ -2,7 +2,7 @@
 
 [English](features.md)
 
-- [!] KR27 — KR26 기록 검사기 수정을 kit 릴리스로 공개한다. 보류: 로컬 수정과 core 고정 의존성 consumer는 검증됐지만 릴리스 공개는 현재 로컬 구현 범위에 포함되지 않는다. kit 릴리스 공개가 명시적으로 범위에 포함되면 재개한다. 이 수정은 미배포 상태다.
+- [!] KR27 — KR26 기록 검사기 수정을 kit 릴리스로 공개한다. 원인: 로컬 수정과 core 고정 의존성 consumer는 검증됐지만 릴리스 공개는 현재 로컬 구현 범위에 포함되지 않는다. 재시도 조건: kit 릴리스 공개가 명시적으로 범위에 포함될 때. 이 수정은 미배포 상태다.
 - [o] KR26 — P0, core F686-6과 연결: 기록 검사는 문두의 발견 경위 서술과 같은 단어가 들어간 기술적 사실을 구분한다. 입력: Go runtime의 invalid pointer found on stack 진단을 발견 경위 서술로 거부한다. 문장·체크리스트 절의 시작에 있는 발견 경위는 계속 거부하며 실제 진단과 파일 위치의 사실은 허용한다. Red: 진단 fixture가 account of who found or requested로 거부된다. 처음 절 시작만 확인한 수정은 주어가 있는 서술·Markdown prefix·세미콜론 뒤 발견 서술을 놓쳐 추가 사례에서 실패했다. Green: 문서 소유 사례 29개와 kit test 120개가 모두 통과하며 문서·명령·이벤트 검사도 통과한다. Markdown·주석 절 시작, 날짜를 포함한 발견, 결함 주어의 수동 발견과 found-while 서술은 계속 거부한다. 구현과 검증을 commit했다. 공개 릴리스는 KR27에서 별도로 추적한다.
 - [o] KR21 — P2: 거부어의 identifier pattern은 main pattern처럼 단어를 escape한다. 입력: `records-check.js:27`은 identifier 안의 거부어를 찾는 pattern을 정규식 문자를 escape하지 않은 단어로 만들었지만 main pattern은 escape했으므로, 거부어 `a.b entry`가 `AxbEntry`에 맞았다. 기대: identifier 매칭은 main pattern처럼 단어를 escape한다. Red: `a rejected phrase with a regular expression character matches only its own words, also in identifiers`가 추가된 줄 `a.js:1: rejected term "a.b entry", use "dotted term": AxbEntry`로 실패했다. Green: `node --test test/records-check.test.mjs`가 23개 test 중 23개를 통과하고 `make check`가 통과한다.
 - [o] KR20 — P0, KR17, KR18, KR19, KR14, KR15, KR16과 연결: KR17, KR18, KR19, KR14, KR15, KR16을 0.0.14로 release한다. 입력: package.json은 tag v0.0.13이 이미 있는 0.0.13을 선언하므로 release gate는 KR17–KR19, KR14–KR16의 commit에 대해 아무것도 release하지 않는다. 기대: package.json이 0.0.14을 선언하고, release run이 v0.0.14을 게시한다. 결과: package.json이 0.0.14을 선언하고, release run이 v0.0.14을 발행했다.
