@@ -4,6 +4,8 @@
 
 ## 미출시
 
+- KR26: 기록 검사는 invalid pointer found on stack 같은 기술적 진단과 파일 위치의 사실을 허용하며 Markdown·주석 경계·날짜·수동 결함 주어·found-while 절의 발견 경위 검사는 유지한다. 소유 회귀 사례와 kit test 120개가 통과한다. 이 수정은 아직 공개 릴리스에 포함되지 않았다.
+
 - KR25: CI는 push된 범위를 `make check-push`로 검사하므로 이전 이름 `records` 대신 Makefile의 검사를 실행하고, `sok-check commands`는 변수도 정하는 make 줄의 target을 검사한다.
 - KR16: 범위 검사는 각 blob을 한 번 읽고 각 text를 한 번 parse하므로 시간이 절반으로 준다. peak memory는 macOS allocator의 large block cache이고 그대로다.
 - KR15: 새 체크리스트 줄은 폐기된 identifier를 쓸 수 없고, renumber는 닫힌 항목처럼 열린 항목의 이전 identifier도 폐기한다.

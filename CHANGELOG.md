@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- KR26: Record validation accepts technical diagnostics such as invalid pointer found on stack and file-location facts, while retaining discovery-account checks at Markdown and comment boundaries, dates, passive defect subjects and found-while clauses. The owning regression cases and all 120 kit tests pass. This correction is not yet published.
+
 - KR25: CI checks the pushed range with `make check-push`, so it runs the checks of the Makefile instead of the earlier name `records`, and `sok-check commands` checks the target of a make line that also sets a variable.
 - KR16: The range check reads each blob once and parses each text once, so a range takes half the time; its peak memory is the large block cache of the macOS allocator and stays.
 - KR15: A new checklist line takes no retired identifier, and a renumbering retires the old identifier of an open item as it does for a closed item.

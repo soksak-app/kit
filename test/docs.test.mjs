@@ -50,6 +50,27 @@ test("record checks report each statement that is not a fact about the repositor
   }
 });
 
+test("record checks distinguish diagnostics from leading discovery accounts", () => {
+  for (const fact of [
+    "The callback failed with invalid pointer found on stack.",
+    "The runtime reports `invalid pointer found on stack` while copying a callback stack.",
+    "파일 위치 오류는 not found on disk를 반환한다.",
+    "The fixture file was found on disk.",
+  ]) assert.deepEqual(docViolations(fact, "doc.md"), [], fact);
+  for (const account of [
+    "Found on 2026-11-07 during a build.",
+    "The defect was found on 2026-11-07 during a build.",
+    "The defect was found on the release build.",
+    "- Found on the release build.",
+    "## Found on the release build.",
+    "> Found on the release build.",
+    "The check failed; Found on the release build.",
+    "The defect was found while the release was checked.",
+    "The release failed. Found while the host was checked.",
+    "- [~] KR26 — Found on 2026-11-07 during a build.",
+  ]) assert.ok(docViolations(account, "doc.md").some((error) => error.includes("account of who found or requested")), account);
+});
+
 test("record checks accept facts that contain hexadecimal values and the rule's own words", () => {
   for (const line of [
     "The session id is 4dc4a40a-1b2c-4d5e-8f90-123456789abc.",
