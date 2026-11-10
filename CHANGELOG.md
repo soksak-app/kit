@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- KR28: The term list defines `sidebar order`, the order of the four sides that the core setting `sidebarOrder` holds, which rejects `dock order` and `edge order`, and `sidebar instance` names `left`, `right`, `top`, `bottom` or `cardId:side`.
+
 - KR26: Record validation accepts technical diagnostics such as invalid pointer found on stack and file-location facts, while retaining discovery-account checks at Markdown and comment boundaries, dates, passive defect subjects and found-while clauses. The owning regression cases and all 120 kit tests pass. This correction is not yet published.
 
 - KR25: CI checks the pushed range with `make check-push`, so it runs the checks of the Makefile instead of the earlier name `records`, and `sok-check commands` checks the target of a make line that also sets a variable.

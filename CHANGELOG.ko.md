@@ -4,6 +4,8 @@
 
 ## 미출시
 
+- KR28: 용어 목록이 core 설정 `sidebarOrder`가 담는 네 변의 순서인 `sidebar order`를 정의하고 `dock order`와 `edge order`를 거부하며, `sidebar instance`는 `left`, `right`, `top`, `bottom`, `cardId:side`를 나열한다.
+
 - KR26: 기록 검사는 invalid pointer found on stack 같은 기술적 진단과 파일 위치의 사실을 허용하며 Markdown·주석 경계·날짜·수동 결함 주어·found-while 절의 발견 경위 검사는 유지한다. 소유 회귀 사례와 kit test 120개가 통과한다. 이 수정은 아직 공개 릴리스에 포함되지 않았다.
 
 - KR25: CI는 push된 범위를 `make check-push`로 검사하므로 이전 이름 `records` 대신 Makefile의 검사를 실행하고, `sok-check commands`는 변수도 정하는 make 줄의 target을 검사한다.
