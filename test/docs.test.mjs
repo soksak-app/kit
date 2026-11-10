@@ -288,6 +288,16 @@ test("a link target that is not URI-encoded is an error with its file and line",
   assert.throws(() => repositoryDocViolations(repository), /^Error: docs\/features\.md:3: link target spec\/core\.md#strip%E0frame is not URI-encoded/);
 });
 
+test("dock order and edge order are rejected for sidebar order, also in their plurals and in identifiers", () => {
+  assert.deepEqual(termViolations("The dock order of the window.\nTwo edge orders differ.\nconst dockOrder = readEdgeOrder();\n", "a.md"), [
+    'a.md:1: rejected term "dock order", use "sidebar order": dock order',
+    'a.md:2: rejected term "edge order", use "sidebar order": edge orders',
+    'a.md:3: rejected term "dock order", use "sidebar order": dockOrder',
+    'a.md:3: rejected term "edge order", use "sidebar order": EdgeOrder',
+  ]);
+  assert.deepEqual(termViolations("The sidebar order of the window and the order of its edge cards.", "a.md"), []);
+});
+
 test("dom entry and dom name are rejected for element entry and element name, also in their plurals and in identifiers", () => {
   assert.deepEqual(termViolations("A dom entry names an element.\nEach dom name is declared.\nThe DOM entries and dom names of a view.\nconst domName = exposeDomEntry();\n", "a.md"), [
     'a.md:1: rejected term "dom entry", use "element entry": dom entry',

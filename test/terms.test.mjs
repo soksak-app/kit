@@ -103,3 +103,16 @@ test("the stream term states the collection rule of the document streams", () =>
   assert.match(entry.definition, /element tree only while a page subscribes to the `elements` stream/, rule);
   assert.match(entry.definition, /requests of the region from its attach to its close/, rule);
 });
+
+test("the sidebar order term names the order of the four sides that the setting holds", () => {
+  const entry = terms.find((term) => term.term === "sidebar order");
+  assert.ok(entry, "the term list defines sidebar order");
+  assert.match(entry.definition, /sidebarOrder/);
+  for (const side of ["left", "right", "top", "bottom"]) assert.match(entry.definition, new RegExp(`\\b${side}\\b`), side);
+});
+
+test("the sidebar instance term names the sidebar of each of the four sides and of a card", () => {
+  const entry = terms.find((term) => term.term === "sidebar instance");
+  assert.ok(entry, "the term list defines sidebar instance");
+  assert.match(entry.definition, /left, right, top, bottom, or cardId:side/);
+});
