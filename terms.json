@@ -285,8 +285,17 @@
     },
     {
       "term": "sidebar instance",
-      "definition": "One sidebar as core.sidebars reports it, identified by left, right, or cardId:side.",
+      "definition": "One sidebar as core.sidebars reports it, identified by left, right, top, bottom, or cardId:side.",
       "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "sidebar order",
+      "definition": "The order of the four sides left, right, top and bottom that the setting sidebarOrder holds: the window sidebars take the room of the plane in that order, and the sidebar of the first side that holds one reaches across the whole plane along its side.",
+      "rejected": [
+        "dock order",
+        "edge order"
+      ],
       "allowed": []
     },
     {
