@@ -689,6 +689,24 @@
       "definition": "The one card of a party that carries the leader mark and the leader color, or none if the party has no leader.",
       "rejected": [],
       "allowed": []
+    },
+    {
+      "term": "card",
+      "definition": "A rectangle of the layout of a space, placed by the layout: a content card, which holds one or more tabs, or a window sidebar, which is a fixed card of the plane (docs/spec/external-sidebars.md).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "content card",
+      "definition": "A card of a space whose one or more tabs hold content, as opposed to a window sidebar, which is a fixed card of the plane and holds sections.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "space",
+      "definition": "One arrangement of the cards of a project, with its focused card, card sidebar widths and tabs, saved in the projects.json of the project (docs/spec/projects.md#persistence).",
+      "rejected": [],
+      "allowed": []
     }
   ]
 }

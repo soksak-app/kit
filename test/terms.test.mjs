@@ -129,3 +129,20 @@ test("the party and leader terms name the touching cards of one space and the le
   assert.match(leader.definition, /leader mark and the leader color/);
   assert.match(leader.definition, /or none/);
 });
+
+test("the card, content card and space terms name the layout of a space and its saved storage", () => {
+  const card = terms.find((term) => term.term === "card");
+  assert.ok(card, "the term list defines card");
+  assert.match(card.definition, /layout of a space/);
+  assert.match(card.definition, /content card/);
+  assert.match(card.definition, /window sidebar/);
+  const contentCard = terms.find((term) => term.term === "content card");
+  assert.ok(contentCard, "the term list defines content card");
+  assert.match(contentCard.definition, /one or more tabs/);
+  assert.match(contentCard.definition, /as opposed to a window sidebar/);
+  const space = terms.find((term) => term.term === "space");
+  assert.ok(space, "the term list defines space");
+  assert.match(space.definition, /arrangement of the cards of a project/);
+  assert.match(space.definition, /focused card/);
+  assert.match(space.definition, /projects\.json/);
+});

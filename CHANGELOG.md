@@ -4,11 +4,12 @@
 
 ## Unreleased
 
+- KR33: The term list defines `party`, a set of two or more touching content cards of one space drawn with one outer outline, with an optional leader card, and `leader`, the one card of a party that carries the leader mark and the leader color, or none. Red: the party and leader term test failed. Green: it passes.
+- KR29: The term list defines `card`, a rectangle of the layout of a space that is a content card or a window sidebar, `content card`, a card whose one or more tabs hold content as opposed to a window sidebar, and `space`, one arrangement of the cards of a project saved in its projects.json. Red: the card, content card and space term test failed. Green: it passes.
 - KR28: The term list defines `sidebar order`, the order of the four sides that the core setting `sidebarOrder` holds, which rejects `dock order` and `edge order`, and `sidebar instance` names `left`, `right`, `top`, `bottom` or `cardId:side`.
 
 - KR26: Record validation accepts technical diagnostics such as invalid pointer found on stack and file-location facts, while retaining discovery-account checks at Markdown and comment boundaries, dates, passive defect subjects and found-while clauses. The owning regression cases and all 120 kit tests pass. This correction is not yet published.
 
-- KR33: The term list defines `party`, a set of two or more touching content cards of one space drawn with one outer outline, with an optional leader card, and `leader`, the one card of a party that carries the leader mark and the leader color, or none. Red: the party and leader term test failed. Green: it passes.
 - KR25: CI checks the pushed range with `make check-push`, so it runs the checks of the Makefile instead of the earlier name `records`, and `sok-check commands` checks the target of a make line that also sets a variable.
 - KR16: The range check reads each blob once and parses each text once, so a range takes half the time; its peak memory is the large block cache of the macOS allocator and stays.
 - KR15: A new checklist line takes no retired identifier, and a renumbering retires the old identifier of an open item as it does for a closed item.
