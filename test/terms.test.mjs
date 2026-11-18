@@ -116,3 +116,16 @@ test("the sidebar instance term names the sidebar of each of the four sides and 
   assert.ok(entry, "the term list defines sidebar instance");
   assert.match(entry.definition, /left, right, top, bottom, or cardId:side/);
 });
+
+test("the party and leader terms name the touching cards of one space and the leader card", () => {
+  const party = terms.find((term) => term.term === "party");
+  assert.ok(party, "the term list defines party");
+  assert.match(party.definition, /two or more touching content cards of one space/);
+  assert.match(party.definition, /one outer outline/);
+  assert.match(party.definition, /optional leader card/);
+  const leader = terms.find((term) => term.term === "leader");
+  assert.ok(leader, "the term list defines leader");
+  assert.match(leader.definition, /one card of a party/);
+  assert.match(leader.definition, /leader mark and the leader color/);
+  assert.match(leader.definition, /or none/);
+});

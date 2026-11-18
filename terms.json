@@ -677,6 +677,18 @@
         "dom name"
       ],
       "allowed": []
+    },
+    {
+      "term": "party",
+      "definition": "A set of two or more touching content cards of one space that is drawn with one outer outline, with an optional leader card.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "leader",
+      "definition": "The one card of a party that carries the leader mark and the leader color, or none if the party has no leader.",
+      "rejected": [],
+      "allowed": []
     }
   ]
 }
