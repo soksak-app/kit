@@ -5,6 +5,8 @@
 ## 미출시
 
 - KR33: term 목록이 하나의 바깥 윤곽선으로 그려지는 공간의 맞닿은 두 개 이상의 content card 집합인 `party`와, leader 표식과 leader 색을 가진 party의 한 card 또는 none인 `leader`를 정의한다. Red: party와 leader term test가 실패했다. Green: 통과한다.
+
+- KR31: pre-commit hook은 record 검사만 실행하고, commit-msg hook은 `check.js docs --message <file>`로 commit message와 함께 체크리스트 변경을 판단하므로, rename이나 보류 항목은 message가 있는 시점에 판단된다. Red: commit 시점 rename test가 실패했다. Green: checklist 이력과 checklist test가 통과한다.
 - KR30: branch에만 있는 체크리스트 identifier는 body가 옛 identifier와 새 identifier를 밝히고, 영어 changelog가 옛 identifier를 밝히며, 새 줄이 상태를 유지하는 commit 하나로 rename할 수 있다. 닫힌 항목은 body가 Cause를 밝히는 commit에서 보류(`[!]`)가 될 수 있다. Red: rename과 보류 range test가 실패했다. Green: checklist 이력과 checklist test가 통과한다.
 - KR29: term 목록이 `card`, 하나 이상의 탭이 콘텐츠를 담는 `content card`(window sidebar와 대비), 그리고 프로젝트의 projects.json에 저장되는 카드 배치 하나인 `space`를 정의한다. `card`는 space 배치의 사각형으로서 content card 또는 window sidebar다. Red: card, content card, space term test가 실패했다. Green: 통과한다.
 - KR28: 용어 목록이 core 설정 `sidebarOrder`가 담는 네 변의 순서인 `sidebar order`를 정의하고 `dock order`와 `edge order`를 거부하며, `sidebar instance`는 `left`, `right`, `top`, `bottom`, `cardId:side`를 나열한다.

@@ -1,3 +1,5 @@
 #!/bin/sh
-# Checks the form of the commit message. `make install-hooks` sets this folder as the git hook folder.
-exec node "$(git rev-parse --show-toplevel)/check.js" commits "$1"
+# Checks the form of the commit message and the checklist changes that it judges. `make install-hooks` sets this folder as the git hook folder.
+root=$(git rev-parse --show-toplevel) || exit 1
+node "$root/check.js" commits "$1" || exit 1
+exec node "$root/check.js" docs --message "$1"

@@ -80,21 +80,21 @@ function repository(t, initial = "- [o] F1 — P2: first\n") {
 
 test("the record check compares the working tree with HEAD", (t) => {
   const { folder, write } = repository(t);
-  assert.deepEqual(repositoryDocViolations(folder).errors, []);
+  assert.deepEqual(repositoryDocViolations(folder, "").errors, []);
   write("");
-  assert.deepEqual(repositoryDocViolations(folder).errors, [
+  assert.deepEqual(repositoryDocViolations(folder, "").errors, [
     "docs/features.md: completed checklist item F1 must remain complete; add a linked follow-up identifier",
     "docs/features.ko.md: completed checklist item F1 must remain complete; add a linked follow-up identifier",
   ]);
   write("", "- Retired checklist entry `F1`: reason\n", "- 체크리스트 항목 `F1` 폐기: 이유\n");
-  assert.deepEqual(repositoryDocViolations(folder).errors, []);
+  assert.deepEqual(repositoryDocViolations(folder, "").errors, []);
 });
 
 test("a repository without a commit has no earlier checklist", (t) => {
   const folder = mkdtempSync(join(tmpdir(), "kit-records-unborn-"));
   t.after(() => rmSync(folder, { recursive: true, force: true }));
   execFileSync("git", ["init", "-q"], { cwd: folder });
-  assert.deepEqual(repositoryDocViolations(folder).errors, []);
+  assert.deepEqual(repositoryDocViolations(folder, "").errors, []);
 });
 
 test("the range check judges each commit against its parent, where the tree equals HEAD", (t) => {
@@ -103,7 +103,7 @@ test("the range check judges each commit against its parent, where the tree equa
   const removed = commit("remove");
   write("- [o] F1 — P2: first\n");
   commit("restore");
-  assert.deepEqual(repositoryDocViolations(folder).errors, []);
+  assert.deepEqual(repositoryDocViolations(folder, "").errors, []);
   const { commits, errors } = rangeDocViolations(folder, `${root}..HEAD`);
   assert.equal(commits, 2);
   assert.deepEqual(errors, [
@@ -118,7 +118,7 @@ test("a retirement of an earlier commit does not excuse a later removal", (t) =>
   write("- [o] F1 — P2: first\n", english, korean);
   commit("retire an earlier use of the identifier");
   write("", english, korean);
-  assert.match(repositoryDocViolations(folder).errors.join("\n"), /completed checklist item F1 must remain complete/);
+  assert.match(repositoryDocViolations(folder, "").errors.join("\n"), /completed checklist item F1 must remain complete/);
 });
 
 test("the range check reads a root commit and a merge", (t) => {
@@ -138,13 +138,13 @@ test("a new line of a retired identifier is refused, and a line older than the r
   const korean = "- 체크리스트 항목 `F2` 폐기: 이유\n- 체크리스트 항목 `F1` 폐기: 이유\n";
   write("- [o] F1 — P2: first\n", english, korean);
   commit("retire");
-  assert.deepEqual(repositoryDocViolations(folder).errors, []);
+  assert.deepEqual(repositoryDocViolations(folder, "").errors, []);
   write("- [o] F1 — P2: first\n- [ ] F2 — P2: another item\n", english, korean);
   const refused = [
     "docs/features.md: retired checklist identifier F2 must not name a new item; take the next free identifier",
     "docs/features.ko.md: retired checklist identifier F2 must not name a new item; take the next free identifier",
   ];
-  assert.deepEqual(repositoryDocViolations(folder).errors, refused);
+  assert.deepEqual(repositoryDocViolations(folder, "").errors, refused);
   const added = commit("reuse");
   assert.deepEqual(rangeDocViolations(folder, `${root}..HEAD`).errors, refused.map((error) => `${added.slice(0, 12)}: ${error}`));
 });
@@ -155,9 +155,9 @@ test("a renumbering retires the old identifier of an open item as it does for a 
     write(`- [${state}] F1 — P2: first\n`);
     commit("register");
     write(`- [${state}] F2 — P2: first\n`);
-    assert.match(repositoryDocViolations(folder).errors[0], /checklist item F1 /);
+    assert.match(repositoryDocViolations(folder, "").errors[0], /checklist item F1 /);
     write(`- [${state}] F2 — P2: first\n`, "- Retired checklist entry `F1`: reason\n", "- 체크리스트 항목 `F1` 폐기: 이유\n");
-    assert.deepEqual(repositoryDocViolations(folder).errors, []);
+    assert.deepEqual(repositoryDocViolations(folder, "").errors, []);
   }
 });
 

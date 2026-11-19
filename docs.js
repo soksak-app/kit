@@ -313,10 +313,18 @@ function resolved(repository, revision) {
 }
 
 /** The errors of the working tree against HEAD. */
-function workingTreeViolations(repository) {
+function workingTreeViolations(repository, message) {
   const head = resolved(repository, "HEAD");
   const present = (file) => (existsSync(join(repository, file)) ? readFileSync(join(repository, file), "utf8") : "");
-  return changeViolations(textOf(snapshot(repository, head)), present);
+  return changeViolations(textOf(snapshot(repository, head)), present, { body: message, carried: carriedOnTarget(repository) });
+}
+
+/**
+ * The identifiers that origin/main carries, the target of a commit that is not pushed yet, or null when the repository has
+ * no origin/main or no commit. A push judges its range against the same target, through rangeDocViolations.
+ */
+function carriedOnTarget(repository) {
+  return resolved(repository, "origin/main") && resolved(repository, "HEAD") ? carriedIdentifiers(repository, "origin/main..HEAD") : null;
 }
 
 /**
@@ -341,7 +349,12 @@ export function rangeDocViolations(repository, range) {
   return { commits: commits.length, errors };
 }
 
-export function repositoryDocViolations(repository) {
+/**
+ * The record violations of the working tree, and with `message` (the text of a commit message) the checklist changes of
+ * the working tree against HEAD that the message judges. The pre-commit hook runs before the message exists and checks the
+ * records only; the commit-msg hook judges the changes with the message.
+ */
+export function repositoryDocViolations(repository, message = null) {
   const tracked = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], { cwd: repository, encoding: "utf8" })
     .split("\0").filter((file) => file && existsSync(join(repository, file)));
   const files = declaredFiles(repository, tracked).filter((file) => docKind(file) !== null || termChecked(file));
@@ -362,13 +375,14 @@ export function repositoryDocViolations(repository) {
       ...(termChecked(file) ? termViolations(text, file) : []),
       ...(/(?:^|\/)features(?:\.[a-z]+)?\.md$/.test(file) ? checklistViolations(text, file) : []),
     ];
-  }), ...workingTreeViolations(repository)] };
+  }), ...(message === null ? [] : workingTreeViolations(repository, message))] };
 }
 
 /** Checks the records of repository, or of each commit of range when a range is given, reports each violation, and returns the exit code. */
-export function checkDocs(repository, range) {
+export function checkDocs(repository, range, messageFile) {
   // default: when [repository] of the usage is omitted, the repository in the current folder is checked.
   const root = resolve(repository ?? ".");
+  if (range && messageFile !== undefined) throw new Error("docs: --range and --message are exclusive");
   if (range) {
     const { commits, errors } = rangeDocViolations(root, range);
     if (errors.length) {
@@ -378,7 +392,8 @@ export function checkDocs(repository, range) {
     process.stdout.write(`Checklist history checks passed: ${commits} commits\n`);
     return 0;
   }
-  const { files, errors } = repositoryDocViolations(root);
+  const message = messageFile === undefined ? null : readFileSync(resolve(messageFile), "utf8");
+  const { files, errors } = repositoryDocViolations(root, message);
   if (errors.length) {
     process.stderr.write(errors.map((error) => `${error}\n`).join(""));
     process.stderr.write(`${errors.length} record lines state something other than facts about this repository\n`);

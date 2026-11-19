@@ -3,7 +3,7 @@
 //
 //   sok-check commands [repository]
 //   sok-check commits <message file | revision range...>
-//   sok-check docs [--range <revision range>] [repository]
+//   sok-check docs [--range <revision range> | --message <file>] [repository]
 //   sok-check events [--config <file>] [--catalog <file>] [--list] [repository]
 //   sok-check release <package.json> <checklist>
 //
@@ -21,9 +21,9 @@ const CHECKS = {
     run: async (_values, positionals) => (await import("./commits.js")).checkCommits(positionals),
   },
   docs: {
-    usage: "docs [--range <revision range>] [repository]", least: 0, most: 1,
-    options: { range: { type: "string" } },
-    run: async (values, [repository]) => (await import("./docs.js")).checkDocs(repository, values.range),
+    usage: "docs [--range <revision range> | --message <file>] [repository]", least: 0, most: 1,
+    options: { range: { type: "string" }, message: { type: "string" } },
+    run: async (values, [repository]) => (await import("./docs.js")).checkDocs(repository, values.range, values.message),
   },
   events: {
     usage: "events [--config <file>] [--catalog <file>] [--list] [repository]", least: 0, most: 1,
