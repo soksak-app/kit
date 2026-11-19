@@ -1,7 +1,7 @@
 // Checks that records state only facts about the repository. Documents are checked on every line outside code blocks, and configuration files (workflow, Makefile) only on comment lines,
 // a link of a document to a heading of a local Markdown document must name a heading that the document has, and violations are reported as `path:line`.
-// Each repository checks its own records with this command. A closed item keeps its state unless the commit retires it:
-// the command compares the working tree with HEAD, and with --range it compares each commit of a range with its first
+// Each repository checks its own records with this command. A closed item keeps its state unless the commit retires it,
+// renames it as a branch-only identifier, or holds it with its Cause in the commit body: the command compares the working tree with HEAD, and with --range it compares each commit of a range with its first
 // parent, because no pre-commit hook runs in a rebase and a tree in CI equals its HEAD.
 //
 //   sok-check docs [repository]
@@ -273,12 +273,33 @@ function snapshot(repository, revision, earlier = new Map()) {
 /** The text of a file of a snapshot, and the empty text where it holds no such file. */
 const textOf = (files) => (file) => files.get(file)?.text ?? "";
 
-/** The errors of one change of the checklist pair, whose texts `before` and `after` give by file. */
-function changeViolations(before, after) {
+/**
+ * The errors of one change of the checklist pair, whose texts `before` and `after` give by file. `commit` is the body of
+ * the commit and `carried` the identifiers of the base of its range (null without a base); a working tree has no commit.
+ */
+function changeViolations(before, after, commit = null) {
   const retired = retiredChecklistItems(after(CHANGELOGS[0]), after(CHANGELOGS[1]));
   const earlier = retiredChecklistItems(before(CHANGELOGS[0]), before(CHANGELOGS[1])).ids;
   const retiredHere = new Set([...retired.ids].filter((id) => !earlier.has(id)));
-  return [...retired.errors, ...FEATURES.flatMap((file) => checkChecklistChange(before(file), after(file), file, retiredHere, retired.ids))];
+  const context = commit && { ...commit, changelog: after(CHANGELOGS[0]) };
+  return [...retired.errors, ...FEATURES.flatMap((file) => checkChecklistChange(before(file), after(file), file, retiredHere, retired.ids, context))];
+}
+
+/**
+ * The identifiers that the base of a range `<base>..<tip>` carries: each identifier that a commit reachable from the base
+ * adds to one of the checklists. A range without one base, such as `HEAD` or a symmetric range, carries null.
+ */
+function carriedIdentifiers(repository, range) {
+  const match = range.match(/^(\S+)\.\.(\S+)$/);
+  if (!match || range.includes("...")) return null;
+  const log = execFileSync("git", ["log", "-p", "--format=", "--root", match[1], "--", ...FEATURES], { cwd: repository, encoding: "utf8", maxBuffer: 1 << 30 });
+  const carried = new Set();
+  for (const line of log.split("\n")) {
+    const label = line.match(/^\+\s*- \[[^\]]*\] (.*)$/)?.[1];
+    const id = label === undefined ? null : itemIdentifier(label).id;
+    if (id) carried.add(id);
+  }
+  return carried;
 }
 
 /** The commit that a revision resolves to, or null. */
@@ -305,6 +326,7 @@ function workingTreeViolations(repository) {
 export function rangeDocViolations(repository, range) {
   const git = (...args) => execFileSync("git", args, { cwd: repository, encoding: "utf8" });
   const commits = git("rev-list", "--reverse", ...range.split(" ")).split("\n").filter(Boolean);
+  const carried = carriedIdentifiers(repository, range);
   // Only the snapshot of the last compared commit stays: it is usually the parent of the next commit.
   let last = new Map();
   const errors = commits.flatMap((commit) => {
@@ -313,7 +335,8 @@ export function rangeDocViolations(repository, range) {
     if (!changed.trim()) return [];
     const before = snapshot(repository, parent, last);
     last = snapshot(repository, commit, before);
-    return changeViolations(textOf(before), textOf(last)).map((error) => `${commit.slice(0, 12)}: ${error}`);
+    const body = git("log", "-1", "--format=%B", commit);
+    return changeViolations(textOf(before), textOf(last), { body, carried }).map((error) => `${commit.slice(0, 12)}: ${error}`);
   });
   return { commits: commits.length, errors };
 }

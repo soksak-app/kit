@@ -68,6 +68,16 @@ function unavailableEvidenceErrors(label, file, line, id, korean) {
   return errors;
 }
 
+/** The Cause value of a held label, in the language of its file: the text between `Cause:` and `Retry when:`, or `원인:` and `재시도 조건:`. */
+function holdCause(label, korean) {
+  return label.match(korean ? /원인:\s*(.*?)\s+재시도 조건:/u : /Cause:\s*(.*?)\s+Retry when:/i)?.[1]?.trim();
+}
+
+/** Whether a text names an identifier as a whole word, so that `F1` is not named by `F10` or `F1.2`. */
+export function namesIdentifier(text, id) {
+  return new RegExp(`(?<![0-9A-Za-z.-])${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![0-9A-Za-z]|[.-][0-9A-Za-z])`).test(text);
+}
+
 export function checklist(text, file, errors) {
   const entries = [], identifiers = new Map();
   const lines = text.split("\n");
@@ -80,9 +90,8 @@ export function checklist(text, file, errors) {
     if (leading && !id) errors.push(`${file}:${index + 1}: checklist item ${leading} must state its identifier as \`${leading} — \``);
     if (state === "!") {
       const korean = file.endsWith(".ko.md");
-      const cause = korean ? /원인:\s*(.*?)\s+재시도 조건:/u : /Cause:\s*(.*?)\s+Retry when:/i;
       const retry = korean ? /재시도 조건:\s*(.+)$/u : /Retry when:\s*(.+)$/i;
-      const causeValue = label.match(cause)?.[1]?.trim();
+      const causeValue = holdCause(label, korean);
       const retryValue = label.match(retry)?.[1]?.trim();
       const hasContent = (value) => value && /[\p{L}\p{N}]/u.test(value);
       const missing = [!hasContent(causeValue) && (korean ? "원인" : "cause"), !hasContent(retryValue) && (korean ? "재시도 조건" : "retry condition")].filter(Boolean);
@@ -115,7 +124,7 @@ export function checklist(text, file, errors) {
     // An identifier that two lines state is refused whatever its form, with the line of its first statement.
     if (id && identifiers.has(id)) errors.push(`${file}:${index + 1}: duplicate checklist identifier ${id} (first stated on line ${identifiers.get(id)})`);
     if (id && !identifiers.has(id)) identifiers.set(id, index + 1);
-    entries.push({ id, indent: indent.length, state });
+    entries.push({ id, indent: indent.length, state, label });
   }
   return entries;
 }
@@ -125,10 +134,52 @@ export function checklist(text, file, errors) {
  * item leaves the checklist through a recorded state, unless retiredIds retires its identifier.
  */
 export function checkCompletedItems(previous, current, file, retiredIds = new Set()) {
-  return completedItemErrors(checklist(previous, file, []), checklist(current, file, []), file, retiredIds);
+  return completedItemErrors(checklist(previous, file, []), checklist(current, file, []), file, retiredIds, NO_EXCUSES);
 }
 
-function completedItemErrors(earlierEntries, entries, file, retiredIds) {
+const NO_EXCUSES = { renamed: new Set(), held: new Set() };
+
+/** The entries of a checklist grouped by identifier, in the order of the checklist. */
+function entriesById(entries) {
+  const grouped = new Map();
+  for (const entry of entries) {
+    if (!entry.id) continue;
+    if (!grouped.has(entry.id)) grouped.set(entry.id, []);
+    grouped.get(entry.id).push(entry);
+  }
+  return grouped;
+}
+
+/**
+ * The identifiers that one commit excuses from the completion check, given the context of the commit: `body` is its
+ * message body, `changelog` the English changelog of its tree and `carried` the identifiers that the base of its range
+ * carries, or null when the range has no base. Without a context nothing is excused. A removed identifier is renamed
+ * when the base does not carry it, the body names it and the identifier that replaces it, the changelog names it, and
+ * the new identifier has its state. A closed identifier becomes held when the body states the Cause of its new label.
+ */
+export function commitExcuses(earlierEntries, entries, file, context) {
+  const renamed = new Set(), held = new Set();
+  if (!context) return { renamed, held };
+  const { body, changelog, carried } = context;
+  const text = body.replace(/\s+/g, " ");
+  const earlier = entriesById(earlierEntries), now = entriesById(entries);
+  for (const [id, before] of earlier) {
+    const state = before[0].state;
+    const after = now.get(id);
+    if (!after) {
+      const replacement = [...now].find(([other, lines]) => !earlier.has(other)
+        && lines.every((line) => line.state === state) && namesIdentifier(text, other));
+      if (carried && !carried.has(id) && before.every((line) => line.state === state) && replacement
+        && namesIdentifier(text, id) && namesIdentifier(changelog, id)) renamed.add(id);
+    } else if (before.every((line) => line.state === "-") && after.every((line) => line.state === "!")) {
+      const cause = holdCause(after[0].label, file.endsWith(".ko.md"));
+      if (cause && text.includes(cause.replace(/\s+/g, " "))) held.add(id);
+    }
+  }
+  return { renamed, held };
+}
+
+function completedItemErrors(earlierEntries, entries, file, retiredIds, excused) {
   const errors = [];
   const after = new Map();
   for (const { id, state } of entries) {
@@ -137,12 +188,12 @@ function completedItemErrors(earlierEntries, entries, file, retiredIds) {
     after.get(id).push(state);
   }
   for (const { id, state } of earlierEntries) {
-    if (!id || retiredIds.has(id)) continue;
+    if (!id || retiredIds.has(id) || excused.renamed.has(id)) continue;
     const states = after.get(id);
     if (state === "o" && !(states && states.every((other) => other === "o"))) {
       errors.push(`${file}: completed checklist item ${id} must remain complete; add a linked follow-up identifier`);
     }
-    if (state === "-" && !(states && states.every((other) => other === "-"))) {
+    if (state === "-" && !(states && states.every((other) => other === "-" || (excused.held.has(id) && other === "!")))) {
       errors.push(`${file}: closed checklist item ${id} must remain closed; add a linked follow-up identifier`);
     }
     if ([" ", "~", "!"].includes(state) && !states) {
@@ -164,10 +215,14 @@ function retiredIdentifierErrors(earlierEntries, entries, file, retiredIds) {
     .map((id) => `${file}: retired checklist identifier ${id} must not name a new item; take the next free identifier`);
 }
 
-/** Both comparisons of one change of a checklist, which parse each text once. */
-export function checkChecklistChange(previous, current, file, retiredHere, retired) {
+/**
+ * Both comparisons of one change of a checklist, which parse each text once. `context` is the commit context of
+ * commitExcuses, or null for a working tree, whose commit has no message yet.
+ */
+export function checkChecklistChange(previous, current, file, retiredHere, retired, context = null) {
   const [earlierEntries, entries] = [checklist(previous, file, []), checklist(current, file, [])];
-  return [...completedItemErrors(earlierEntries, entries, file, retiredHere), ...retiredIdentifierErrors(earlierEntries, entries, file, retired)];
+  const excused = commitExcuses(earlierEntries, entries, file, context);
+  return [...completedItemErrors(earlierEntries, entries, file, retiredHere, excused), ...retiredIdentifierErrors(earlierEntries, entries, file, retired)];
 }
 
 /**
