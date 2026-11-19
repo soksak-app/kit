@@ -316,8 +316,11 @@ function resolved(repository, revision) {
 function workingTreeViolations(repository, message) {
   const head = resolved(repository, "HEAD");
   const present = (file) => (existsSync(join(repository, file)) ? readFileSync(join(repository, file), "utf8") : "");
-  return changeViolations(textOf(snapshot(repository, head)), present, { body: message, carried: carriedOnTarget(repository) });
+  return changeViolations(textOf(snapshot(repository, head)), present, { body: bodyOf(message), carried: carriedOnTarget(repository) });
 }
+
+/** The body of a commit message: the lines after its subject, so that a subject alone names no identifier of the change. */
+const bodyOf = (message) => message.split("\n").slice(1).join("\n");
 
 /**
  * The identifiers that origin/main carries, the target of a commit that is not pushed yet, or null when the repository has
@@ -343,7 +346,7 @@ export function rangeDocViolations(repository, range) {
     if (!changed.trim()) return [];
     const before = snapshot(repository, parent, last);
     last = snapshot(repository, commit, before);
-    const body = git("log", "-1", "--format=%B", commit);
+    const body = bodyOf(git("log", "-1", "--format=%B", commit));
     return changeViolations(textOf(before), textOf(last), { body, carried }).map((error) => `${commit.slice(0, 12)}: ${error}`);
   });
   return { commits: commits.length, errors };

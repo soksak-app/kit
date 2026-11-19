@@ -6,6 +6,8 @@
 
 - KR33: The term list defines `party`, a set of two or more touching content cards of one space drawn with one outer outline, with an optional leader card, and `leader`, the one card of a party that carries the leader mark and the leader color, or none. Red: the party and leader term test failed. Green: it passes.
 
+
+- KR32: The commit checks read the body of a commit message and not its subject, so a subject alone excuses no removal of a checklist identifier. Red: the body-only commit and range tests failed. Green: the checklist, history, docs and check tests pass.
 - KR31: The pre-commit hook runs the record checks only, and the commit-msg hook judges the checklist changes with the commit message through `check.js docs --message <file>`, so a rename or a held item is judged where its message exists. Red: the commit-time rename tests failed. Green: the checklist history and checklist tests pass.
 - KR30: A checklist identifier that only the branch carries may be renamed in one commit whose body names the old and new identifiers, whose English changelog names the old identifier and whose new row keeps the state; a closed row may become held in a commit whose body states its Cause. Red: the rename and held range tests failed. Green: the checklist history and checklist tests pass.
 - KR29: The term list defines `card`, a rectangle of the layout of a space that is a content card or a window sidebar, `content card`, a card whose one or more tabs hold content as opposed to a window sidebar, and `space`, one arrangement of the cards of a project saved in its projects.json. Red: the card, content card and space term test failed. Green: it passes.

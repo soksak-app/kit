@@ -323,7 +323,7 @@ test("the record check at commit time does not judge a staged change of the chec
 
 test("the commit message check accepts a staged rename that its message names", { timeout: 10000 }, (t) => {
   const { folder } = renameInWorkingTree(t);
-  assert.deepEqual(repositoryDocViolations(folder, "Rename F2 to F3. The state of the item stays complete.").errors, []);
+  assert.deepEqual(repositoryDocViolations(folder, "fix(checklist): Rename the item (#KR31)\n\nRename F2 to F3. The state of the item stays complete.\n").errors, []);
 });
 
 test("the commit message check refuses a staged removal that its message does not excuse", { timeout: 10000 }, (t) => {
