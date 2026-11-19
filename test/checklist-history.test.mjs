@@ -304,3 +304,29 @@ test("a complete item that is reopened is refused", { timeout: 10000 }, (t) => {
   });
   assert.match(errors.join("\n"), /completed checklist item F1 must remain complete/);
 });
+
+/** A branch of a repository whose main holds F1 and whose origin/main ref is main, with F2 committed and a rename of F2 to F3 in the working tree only. */
+function renameInWorkingTree(t) {
+  const { folder, git, write, commit, root } = repository(t, "- [o] F1 — P2: first\n");
+  git("update-ref", "refs/remotes/origin/main", root);
+  git("checkout", "-q", "-b", "rename");
+  write(`- [o] F1 — P2: first\n${ITEM_F2}`);
+  commit("add the branch item");
+  write("- [o] F1 — P2: first\n- [o] F3 — P2: branch item\n", RENAME_F2);
+  return { folder };
+}
+
+test("the record check at commit time does not judge a staged change of the checklist", { timeout: 10000 }, (t) => {
+  const { folder } = renameInWorkingTree(t);
+  assert.deepEqual(repositoryDocViolations(folder).errors, []);
+});
+
+test("the commit message check accepts a staged rename that its message names", { timeout: 10000 }, (t) => {
+  const { folder } = renameInWorkingTree(t);
+  assert.deepEqual(repositoryDocViolations(folder, "Rename F2 to F3. The state of the item stays complete.").errors, []);
+});
+
+test("the commit message check refuses a staged removal that its message does not excuse", { timeout: 10000 }, (t) => {
+  const { folder } = renameInWorkingTree(t);
+  assert.match(repositoryDocViolations(folder, "Rename the branch item.").errors.join("\n"), /completed checklist item F2 must remain complete/);
+});
