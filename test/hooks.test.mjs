@@ -4,6 +4,7 @@ import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+import "./git-env.mjs";
 
 const hook = new URL("../.githooks/pre-push", import.meta.url).pathname;
 const zero = "0".repeat(40);

@@ -6,6 +6,7 @@ import { copyFileSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
+import "./git-env.mjs";
 
 test("a checklist that states one identifier on two lines is refused, in any identifier form", () => {
   assert.deepEqual(checklistViolations("- [o] F218-2.4 — P2: a\n- [ ] F218-2.4 — P2: b\n", "docs/features.md"), ["docs/features.md:2: duplicate checklist identifier F218-2.4 (first stated on line 1)"]);

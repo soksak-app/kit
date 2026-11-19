@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import "./git-env.mjs";
 
 const root = new URL("../", import.meta.url);
 const manifest = JSON.parse(readFileSync(new URL("package.json", root), "utf8"));

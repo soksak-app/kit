@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import * as checker from '../events.js';
+import "./git-env.mjs";
 
 const CATALOG = 'docs/spec/events.json';
 const fieldSchema = (properties = {}, required = Object.keys(properties)) => ({

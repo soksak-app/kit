@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import "./git-env.mjs";
 
 const { terms } = JSON.parse(readFileSync(new URL("../terms.json", import.meta.url), "utf8"));
 

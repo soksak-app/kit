@@ -7,6 +7,7 @@
 - KR33: term 목록이 하나의 바깥 윤곽선으로 그려지는 공간의 맞닿은 두 개 이상의 content card 집합인 `party`와, leader 표식과 leader 색을 가진 party의 한 card 또는 none인 `leader`를 정의한다. Red: party와 leader term test가 실패했다. Green: 통과한다.
 
 
+- KR34: kit test는 git을 실행하기 전에 hook의 git 변수 `GIT_DIR`, `GIT_INDEX_FILE`, `GIT_WORK_TREE`, `GIT_OBJECT_DIRECTORY`, `GIT_COMMON_DIR`, `GIT_PREFIX`를 제거하므로 각 test repository는 자기 것이다. Red: 외부 repository test가 실패했다. Green: `pnpm test`가 변수를 설정했을 때와 설정하지 않았을 때 모두 140개 test 중 140개를 통과한다.
 - KR32: commit 검사는 commit message의 subject가 아니라 body를 읽으므로, subject만으로는 체크리스트 identifier의 제거를 용서하지 않는다. Red: body만 보는 commit 및 range test가 실패했다. Green: checklist, 이력, docs, check test가 통과한다.
 - KR31: pre-commit hook은 record 검사만 실행하고, commit-msg hook은 `check.js docs --message <file>`로 commit message와 함께 체크리스트 변경을 판단하므로, rename이나 보류 항목은 message가 있는 시점에 판단된다. Red: commit 시점 rename test가 실패했다. Green: checklist 이력과 checklist test가 통과한다.
 - KR30: branch에만 있는 체크리스트 identifier는 body가 옛 identifier와 새 identifier를 밝히고, 영어 changelog가 옛 identifier를 밝히며, 새 줄이 상태를 유지하는 commit 하나로 rename할 수 있다. 닫힌 항목은 body가 Cause를 밝히는 commit에서 보류(`[!]`)가 될 수 있다. Red: rename과 보류 range test가 실패했다. Green: checklist 이력과 checklist test가 통과한다.

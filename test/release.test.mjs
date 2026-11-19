@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { declaredVersion, openItems, releaseDecision } from "../release.js";
+import "./git-env.mjs";
 
 const decision = (checklistText, tags = []) => releaseDecision({
   manifestName: "package.json", manifestText: '{ "version": "0.0.3" }',

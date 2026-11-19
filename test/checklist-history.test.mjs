@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { checkCompletedItems, retiredChecklistItems } from "../checklist.js";
+import { clearHookGitVariables } from "./git-env.mjs";
 import { rangeDocViolations, repositoryDocViolations } from "../docs.js";
 
 const FILE = "docs/features.md";
@@ -57,6 +58,7 @@ test("a retirement line requires an identifier, a reason, one statement and its 
 
 /** A repository with docs/features.md, its translation and the changelog pair of one closed item, committed once. */
 function repository(t, initial = "- [o] F1 — P2: first\n") {
+  clearHookGitVariables();
   const folder = mkdtempSync(join(tmpdir(), "kit-records-history-"));
   t.after(() => rmSync(folder, { recursive: true, force: true }));
   const git = (...args) => execFileSync("git", args, { cwd: folder, encoding: "utf8" }).trim();

@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import test from "node:test";
 import { commandViolations } from "../commands.js";
+import "./git-env.mjs";
 
 /** A git repository that tracks the given files, and the violations that the check reports for it. */
 function violations(t, files) {
