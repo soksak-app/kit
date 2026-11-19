@@ -189,7 +189,7 @@ test("the range check reads each blob once, also across a commit and its child",
  * branch first commits `before` when given, then commits `features` (and `featuresKo` for the Korean checklist), the
  * changelog and the commit body.
  */
-function branchChange(t, { initial, before = null, features, featuresKo = features, changelog = "# Changelog\n", body = "" }) {
+function branchChange(t, { initial, before = null, features, featuresKo = features, changelog = "# Changelog\n", subject = "change the checklist", body = "" }) {
   const { folder, git, write, commit, root } = repository(t, initial);
   git("checkout", "-q", "-b", "branch");
   if (before !== null) {
@@ -198,7 +198,7 @@ function branchChange(t, { initial, before = null, features, featuresKo = featur
   }
   write(features, changelog);
   writeFileSync(join(folder, "docs/features.ko.md"), featuresKo);
-  commit("change the checklist", body);
+  commit(subject, body);
   return rangeDocViolations(folder, `${root}..HEAD`).errors;
 }
 
@@ -329,4 +329,22 @@ test("the commit message check accepts a staged rename that its message names", 
 test("the commit message check refuses a staged removal that its message does not excuse", { timeout: 10000 }, (t) => {
   const { folder } = renameInWorkingTree(t);
   assert.match(repositoryDocViolations(folder, "Rename the branch item.").errors.join("\n"), /completed checklist item F2 must remain complete/);
+});
+
+test("the commit message check reads the body of a message and not its subject", { timeout: 10000 }, (t) => {
+  const { folder } = renameInWorkingTree(t);
+  assert.match(repositoryDocViolations(folder, "fix(checklist): Rename F2 to F3 (#KR31)\n").errors.join("\n"), /completed checklist item F2 must remain complete/);
+  assert.deepEqual(repositoryDocViolations(folder, "fix(checklist): Rename the item (#KR31)\n\nRename F2 to F3. The state of the item stays complete.\n").errors, []);
+});
+
+test("the range check reads the body of a commit and not its subject", { timeout: 10000 }, (t) => {
+  const errors = branchChange(t, {
+    initial: "- [o] F1 — P2: first\n",
+    before: `- [o] F1 — P2: first\n${ITEM_F2}`,
+    features: "- [o] F1 — P2: first\n- [o] F3 — P2: branch item\n",
+    changelog: RENAME_F2,
+    subject: "fix(checklist): Rename F2 to F3 (#KR31)",
+    body: "",
+  });
+  assert.match(errors.join("\n"), /completed checklist item F2 must remain complete/);
 });
