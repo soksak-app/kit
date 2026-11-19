@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -347,4 +347,21 @@ test("the range check reads the body of a commit and not its subject", { timeout
     body: "",
   });
   assert.match(errors.join("\n"), /completed checklist item F2 must remain complete/);
+});
+
+test("a test repository is its own when the environment names a foreign repository", { timeout: 20000 }, (t) => {
+  const foreign = mkdtempSync(join(tmpdir(), "kit-foreign-"));
+  t.after(() => rmSync(foreign, { recursive: true, force: true }));
+  execFileSync("git", ["init", "-q", "-b", "foreign"], { cwd: foreign });
+  const saved = { GIT_DIR: process.env.GIT_DIR, GIT_INDEX_FILE: process.env.GIT_INDEX_FILE };
+  t.after(() => {
+    for (const [name, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
+  });
+  process.env.GIT_DIR = join(foreign, ".git");
+  process.env.GIT_INDEX_FILE = join(foreign, ".git", "index");
+  const { folder, git } = repository(t);
+  assert.equal(git("rev-parse", "--absolute-git-dir"), join(realpathSync(folder), ".git"));
 });
