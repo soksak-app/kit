@@ -56,7 +56,7 @@ test("a retirement line requires an identifier, a reason, one statement and its 
 });
 
 /** A repository with docs/features.md, its translation and the changelog pair of one closed item, committed once. */
-function repository(t) {
+function repository(t, initial = "- [o] F1 — P2: first\n") {
   const folder = mkdtempSync(join(tmpdir(), "kit-records-history-"));
   t.after(() => rmSync(folder, { recursive: true, force: true }));
   const git = (...args) => execFileSync("git", args, { cwd: folder, encoding: "utf8" }).trim();
@@ -66,14 +66,14 @@ function repository(t) {
     writeFileSync(join(folder, "CHANGELOG.md"), english);
     writeFileSync(join(folder, "CHANGELOG.ko.md"), korean);
   };
-  const commit = (subject) => {
+  const commit = (subject, body = "") => {
     git("add", "docs", "CHANGELOG.md", "CHANGELOG.ko.md");
-    git("-c", "user.name=test", "-c", "user.email=test@example.com", "commit", "-q", "--allow-empty", "-m", subject);
+    git("-c", "user.name=test", "-c", "user.email=test@example.com", "commit", "-q", "--allow-empty", "-m", subject, ...(body ? ["-m", body] : []));
     return git("rev-parse", "HEAD");
   };
   git("init", "-q", "-b", "main");
   mkdirSync(join(folder, "docs"));
-  write("- [o] F1 — P2: first\n");
+  write(initial);
   const root = commit("first");
   return { folder, git, write, commit, root };
 }
@@ -182,4 +182,125 @@ test("the range check reads each blob once, also across a commit and its child",
   // Both languages hold one text in this repository, so the range has three checklist blobs and two changelog blobs.
   assert.equal(reads.length, 5);
   assert.equal(new Set(reads).size, 5);
+});
+
+/**
+ * The range errors of one commit that changes the checklist on a branch of a repository whose main holds `initial`. The
+ * branch first commits `before` when given, then commits `features` (and `featuresKo` for the Korean checklist), the
+ * changelog and the commit body.
+ */
+function branchChange(t, { initial, before = null, features, featuresKo = features, changelog = "# Changelog\n", body = "" }) {
+  const { folder, git, write, commit, root } = repository(t, initial);
+  git("checkout", "-q", "-b", "branch");
+  if (before !== null) {
+    write(before);
+    commit("add the branch item");
+  }
+  write(features, changelog);
+  writeFileSync(join(folder, "docs/features.ko.md"), featuresKo);
+  commit("change the checklist", body);
+  return rangeDocViolations(folder, `${root}..HEAD`).errors;
+}
+
+const ITEM_F2 = "- [o] F2 — P2: branch item\n";
+const RENAME_F2 = "# Changelog\n\n- F2 is renamed to F3.\n";
+const HELD_F1 = "- [!] F1 — P2: first. Cause: the library is absent. Retry when: the library returns.\n";
+const HELD_F1_KO = "- [!] F1 — P2: first. 원인: the library is absent. 재시도 조건: the library returns.\n";
+const CLOSED_F1 = "- [-] F1 — P2: first. Closed: the library stays in core.\n";
+
+test("a branch-only identifier renamed in one commit that names old and new is accepted", { timeout: 10000 }, (t) => {
+  const errors = branchChange(t, {
+    initial: "- [o] F1 — P2: first\n",
+    before: `- [o] F1 — P2: first\n${ITEM_F2}`,
+    features: "- [o] F1 — P2: first\n- [o] F3 — P2: branch item\n",
+    changelog: RENAME_F2,
+    body: "Rename F2 to F3. The state of the item stays complete.",
+  });
+  assert.deepEqual(errors, []);
+});
+
+test("a closed item that becomes held is accepted when its body names its cause", { timeout: 10000 }, (t) => {
+  const errors = branchChange(t, {
+    initial: CLOSED_F1,
+    features: HELD_F1,
+    featuresKo: HELD_F1_KO,
+    body: "Hold F1 until the library returns.\nCause: the library is absent.",
+  });
+  assert.deepEqual(errors, []);
+});
+
+test("a rename of an identifier that the base carries is refused, whatever its commit names", { timeout: 10000 }, (t) => {
+  const errors = branchChange(t, {
+    initial: "- [o] F1 — P2: first\n",
+    features: "- [o] F3 — P2: first\n",
+    changelog: "# Changelog\n\n- F1 is renamed to F3.\n",
+    body: "Rename F1 to F3. The state of the item stays complete.",
+  });
+  assert.equal(errors.length, 2);
+  assert.ok(errors.every((error) => /completed checklist item F1 must remain complete/.test(error)), errors.join("\n"));
+});
+
+test("a rename of a branch-only identifier is refused when its body does not name both identifiers", { timeout: 10000 }, (t) => {
+  const errors = branchChange(t, {
+    initial: "- [o] F1 — P2: first\n",
+    before: `- [o] F1 — P2: first\n${ITEM_F2}`,
+    features: "- [o] F1 — P2: first\n- [o] F3 — P2: branch item\n",
+    changelog: RENAME_F2,
+    body: "Rename the branch item.",
+  });
+  assert.equal(errors.length, 2);
+  assert.ok(errors.every((error) => /completed checklist item F2 must remain complete/.test(error)), errors.join("\n"));
+});
+
+test("a rename of a branch-only identifier is refused when the changelog does not name the old identifier", { timeout: 10000 }, (t) => {
+  const errors = branchChange(t, {
+    initial: "- [o] F1 — P2: first\n",
+    before: `- [o] F1 — P2: first\n${ITEM_F2}`,
+    features: "- [o] F1 — P2: first\n- [o] F3 — P2: branch item\n",
+    changelog: "# Changelog\n",
+    body: "Rename F2 to F3. The state of the item stays complete.",
+  });
+  assert.equal(errors.length, 2);
+  assert.ok(errors.every((error) => /completed checklist item F2 must remain complete/.test(error)), errors.join("\n"));
+});
+
+test("a rename of a branch-only identifier is refused when the new identifier has another state", { timeout: 10000 }, (t) => {
+  const errors = branchChange(t, {
+    initial: "- [o] F1 — P2: first\n",
+    before: `- [o] F1 — P2: first\n${ITEM_F2}`,
+    features: "- [o] F1 — P2: first\n- [ ] F3 — P2: branch item\n",
+    changelog: RENAME_F2,
+    body: "Rename F2 to F3. The state of the item stays complete.",
+  });
+  assert.equal(errors.length, 2);
+  assert.ok(errors.every((error) => /completed checklist item F2 must remain complete/.test(error)), errors.join("\n"));
+});
+
+test("a closed item that becomes held is refused when its body does not name the cause", { timeout: 10000 }, (t) => {
+  const errors = branchChange(t, {
+    initial: CLOSED_F1,
+    features: HELD_F1,
+    featuresKo: HELD_F1_KO,
+    body: "Hold F1 until the library returns.",
+  });
+  assert.match(errors.join("\n"), /closed checklist item F1 must remain closed/);
+});
+
+test("an open or complete item that becomes held is refused, whatever its body names", { timeout: 10000 }, (t) => {
+  const errors = branchChange(t, {
+    initial: "- [o] F1 — P2: first\n",
+    features: HELD_F1,
+    featuresKo: HELD_F1_KO,
+    body: "Hold F1 until the library returns.\nCause: the library is absent.",
+  });
+  assert.match(errors.join("\n"), /completed checklist item F1 must remain complete/);
+});
+
+test("a complete item that is reopened is refused", { timeout: 10000 }, (t) => {
+  const errors = branchChange(t, {
+    initial: "- [o] F1 — P2: first\n",
+    features: "- [ ] F1 — P2: first\n",
+    body: "Reopen F1.",
+  });
+  assert.match(errors.join("\n"), /completed checklist item F1 must remain complete/);
 });
