@@ -3,6 +3,7 @@
 [English](CHANGELOG.md)
 
 ## 미출시
+- KR35: version은 0.0.15이므로, tag v0.0.14 이후의 commit을 release run이 v0.0.15로 게시한다.
 
 - KR33: term 목록이 하나의 바깥 윤곽선으로 그려지는 공간의 맞닿은 두 개 이상의 content card 집합인 `party`와, leader 표식과 leader 색을 가진 party의 한 card 또는 none인 `leader`를 정의한다. Red: party와 leader term test가 실패했다. Green: 통과한다.
 

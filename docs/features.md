@@ -2,6 +2,7 @@
 
 [한국어](features.ko.md)
 
+- [~] KR35 — P0, linked to KR33 and KR34: Release the commits after the tag v0.0.14 as 0.0.15. Input: package.json declares 0.0.14, whose tag v0.0.14 exists, so the release gate releases nothing for the commits after it. Expected: package.json declares 0.0.15, and the release run publishes the tag v0.0.15 with its assets. Remaining: the release run on the pushed commit publishes v0.0.15 and its assets; close the row after the run.
 - [o] KR33 — P1: The term list defines party and leader. Input: the term list had no entry for a set of touching content cards of one space with one outer outline and an optional leader card, or for the leader card of such a set, so a record could not name them. Expected: `terms.json` defines `party` as that set and `leader` as the one card of a party that carries the leader mark and the leader color, or none if the party has no leader; neither entry rejects a synonym. Red: `the party and leader terms name the touching cards of one space and the leader card` failed with `the term list defines party`. Green: it passes, and `node --test test/terms.test.mjs` reports 11 of 11 tests passing.
 
 

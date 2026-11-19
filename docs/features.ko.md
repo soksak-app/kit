@@ -2,6 +2,7 @@
 
 [English](features.md)
 
+- [~] KR35 — P0, KR33과 KR34와 연결: v0.0.14 tag 이후의 commit을 0.0.15로 release한다. 입력: package.json은 tag v0.0.14가 이미 있는 0.0.14를 선언하므로 release gate는 그 이후 commit에 대해 아무것도 release하지 않는다. 기대: package.json이 0.0.15를 선언하고, release run이 tag v0.0.15와 그 asset을 게시한다. 남은 일: push한 commit의 release run이 v0.0.15와 asset을 게시하면 이 행을 닫는다.
 - [o] KR33 — P1: term 목록이 party와 leader를 정의한다. 입력: term 목록에는 하나의 바깥 윤곽선으로 그려지는 공간의 맞닿은 content card 집합, 선택적인 leader card, 그리고 그 집합의 leader card를 가리키는 항목이 없어서 record가 그것들을 이름 지을 수 없었다. 기대: `terms.json`이 `party`를 그 집합으로, `leader`를 leader 표식과 leader 색을 가진 party의 한 card 또는 party에 leader가 없으면 none으로 정의하며, 두 항목 모두 동의어를 거부하지 않는다. Red: `the party and leader terms name the touching cards of one space and the leader card`가 `the term list defines party`로 실패했다. Green: 통과하고, `node --test test/terms.test.mjs`가 11개 test 중 11개를 통과한다고 보고한다.
 
 
