@@ -728,21 +728,15 @@
     },
     {
       "term": "stable identity",
-      "definition": "The text that the launch of an agent CLI delivers, which names the role file of its tab and the rule that messages beginning with the role prefix assign the role (docs/spec/agent-roles.md#stable-identity).",
+      "definition": "The text that soksak sends as the first message of each session of an agent CLI. It names the role file of its tab and the rule that messages beginning with the role prefix assign the role (docs/spec/agent-roles.md#stable-identity).",
       "rejected": [
         "launch identity"
       ],
       "allowed": []
     },
     {
-      "term": "launch adapter",
-      "definition": "The part of the launch of an agent CLI that carries the stable identity through a flag or option that adds to the built-in instructions of that CLI (docs/spec/agent-roles.md#launch-adapters).",
-      "rejected": [],
-      "allowed": []
-    },
-    {
       "term": "identity file",
-      "definition": "The file that a launch adapter reads for the stable identity, `<config-dir>/agents/<surface>/identity.txt` for Claude Code (docs/spec/agent-roles.md#launch-adapters).",
+      "definition": "The file that the measured launch of Claude Code read for its stable identity in the measured facts of the agent role contract; no current launch writes it (docs/spec/agent-roles.md#measured-facts).",
       "rejected": [],
       "allowed": []
     },
@@ -760,13 +754,7 @@
     },
     {
       "term": "reread request",
-      "definition": "A message that names the role file of a tab and asks its agent to read the file again and confirm its fingerprint; soksak sends at most two before the state becomes unconfirmed (docs/spec/agent-roles.md#requests).",
-      "rejected": [],
-      "allowed": []
-    },
-    {
-      "term": "unconfirmed",
-      "definition": "The role state of a tab after two reread requests that its agent did not answer with the current fingerprint; the state stays until the person assigns the role again (docs/spec/agent-roles.md#confirmation).",
+      "definition": "A message that names the role file of a tab and asks its agent to read the file again and confirm its fingerprint. soksak sends one at each not-busy report of the agent CLI while the role is pending, with no limit; the count is the `requests` of the status (docs/spec/agent-roles.md#requests).",
       "rejected": [],
       "allowed": []
     },
