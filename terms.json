@@ -707,6 +707,44 @@
       "definition": "One arrangement of the cards of a project, with its focused card, card sidebar widths and tabs, saved in the projects.json of the project (docs/spec/projects.md#persistence).",
       "rejected": [],
       "allowed": []
+    },
+    {
+      "term": "agent role",
+      "definition": "The role that soksak assigns to a tab of an agent CLI, defined by one agent role definition and read by the agent from its role file (docs/spec/agent-roles.md).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "role file",
+      "definition": "The file `<config-dir>/agents/<surface>/role.md` that holds the text of the agent role of one tab; soksak writes it and the agent reads it (docs/spec/agent-roles.md#role-file).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "change message",
+      "definition": "An injected message of soksak that names the path of a role file and carries no role text, and tells an agent that its role changed (docs/spec/agent-roles.md#change-message).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "stable identity",
+      "definition": "The text that the launch of an agent CLI delivers, which names the role file of its tab and the rule that messages beginning with the role prefix assign the role (docs/spec/agent-roles.md#stable-identity).",
+      "rejected": [
+        "launch identity"
+      ],
+      "allowed": []
+    },
+    {
+      "term": "launch adapter",
+      "definition": "The part of the launch of an agent CLI that carries the stable identity through a flag or option that adds to the built-in instructions of that CLI (docs/spec/agent-roles.md#launch-adapters).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "identity file",
+      "definition": "The file that a launch adapter reads for the stable identity, `<config-dir>/agents/<surface>/identity.txt` for Claude Code (docs/spec/agent-roles.md#launch-adapters).",
+      "rejected": [],
+      "allowed": []
     }
   ]
 }
