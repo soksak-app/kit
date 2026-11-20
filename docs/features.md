@@ -2,6 +2,7 @@
 
 [한국어](features.ko.md)
 
+- [o] KR35 — P1, linked to core F1006-1: The term list defines `fingerprint`, `generation`, `reread request`, `unconfirmed`, `confirmation`, `role message`, `delivery record` and `error display`, which the agent role specification uses.
 - [o] KR34 — P1, linked to core F1006-1: The term list defines `agent role`, `role file`, `change message`, `stable identity`, `launch adapter` and `identity file`, and rejects `launch identity` for `stable identity`. Input: core `docs/spec/agent-roles.md` uses these concepts, and the term list had no entry for them. Expected: each concept has one entry with its definition and the specification that defines it. Done: `make check` passes with the new entries.
 - [o] KR33 — P1: The term list defines party and leader. Input: the term list had no entry for a set of touching content cards of one space with one outer outline and an optional leader card, or for the leader card of such a set, so a record could not name them. Expected: `terms.json` defines `party` as that set and `leader` as the one card of a party that carries the leader mark and the leader color, or none if the party has no leader; neither entry rejects a synonym. Red: `the party and leader terms name the touching cards of one space and the leader card` failed with `the term list defines party`. Green: it passes, and `node --test test/terms.test.mjs` reports 11 of 11 tests passing.
 

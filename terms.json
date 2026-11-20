@@ -745,6 +745,54 @@
       "definition": "The file that a launch adapter reads for the stable identity, `<config-dir>/agents/<surface>/identity.txt` for Claude Code (docs/spec/agent-roles.md#launch-adapters).",
       "rejected": [],
       "allowed": []
+    },
+    {
+      "term": "fingerprint",
+      "definition": "The first 16 lowercase hexadecimal characters of the SHA-256 digest over a role identifier, a line feed and the stored definition text; it identifies the current role file (docs/spec/agent-roles.md#role-file).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "generation",
+      "definition": "The integer that starts at 1 and rises by one at each change of the agent role or its definition in a tab (docs/spec/agent-roles.md#tab-role-state).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "reread request",
+      "definition": "A message that names the role file of a tab and asks its agent to read the file again and confirm its fingerprint; soksak sends at most two before the state becomes unconfirmed (docs/spec/agent-roles.md#requests).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "unconfirmed",
+      "definition": "The role state of a tab after two reread requests that its agent did not answer with the current fingerprint; the state stays until the person assigns the role again (docs/spec/agent-roles.md#confirmation).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "confirmation",
+      "definition": "The agent's answer that it holds the current fingerprint of its role file, given by `sok role confirm <fingerprint>` or by the line `soksak role <fingerprint>` (docs/spec/agent-roles.md#confirmation).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "role message",
+      "definition": "An injected message of soksak that concerns the agent role of a tab: a change message or a reread request (docs/spec/agent-roles.md#change-message).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "delivery record",
+      "definition": "The event record that the terminal page writes for each decision on an injected message: `plugin.<plugin>.messages.delivered`, with its kind, sequence, path, sender, state and reason (docs/spec/messaging.md#delivery).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "error display",
+      "definition": "The one display path that shows an error to the person and writes it to the application log at the moment it appears, in the form `error: <where>: <text>`.",
+      "rejected": [],
+      "allowed": []
     }
   ]
 }
