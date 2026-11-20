@@ -3,6 +3,8 @@
 [한국어](CHANGELOG.ko.md)
 
 ## Unreleased
+- KR37: The term list defines `fingerprint`, `generation`, `reread request`, `confirmation`, `role message`, `delivery record` and `error display` for the agent role specification of core. `make check` passes.
+- KR36: The term list defines `agent role`, `role file`, `change message`, `stable identity` and `identity file`, and rejects `launch identity` for `stable identity`. `make check` passes.
 - KR35: The version is 0.0.15, so the release run publishes the commits after the tag v0.0.14 as v0.0.15, where the tag v0.0.14 held the release gate.
 
 - KR33: The term list defines `party`, a set of two or more touching content cards of one space drawn with one outer outline, with an optional leader card, and `leader`, the one card of a party that carries the leader mark and the leader color, or none. Red: the party and leader term test failed. Green: it passes.

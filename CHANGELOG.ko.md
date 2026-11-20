@@ -3,6 +3,8 @@
 [English](CHANGELOG.md)
 
 ## 미출시
+- KR37: term 목록이 core의 agent role 명세를 위해 `fingerprint`, `generation`, `reread request`, `confirmation`, `role message`, `delivery record`, `error display`를 정의한다. `make check`가 통과한다.
+- KR36: term 목록이 `agent role`, `role file`, `change message`, `stable identity`, `identity file`을 정의하고, `stable identity`에 대해 `launch identity`를 거부한다. `make check`가 통과한다.
 - KR35: version은 0.0.15이므로, tag v0.0.14 이후의 commit을 release run이 v0.0.15로 게시한다.
 
 - KR33: term 목록이 하나의 바깥 윤곽선으로 그려지는 공간의 맞닿은 두 개 이상의 content card 집합인 `party`와, leader 표식과 leader 색을 가진 party의 한 card 또는 none인 `leader`를 정의한다. Red: party와 leader term test가 실패했다. Green: 통과한다.

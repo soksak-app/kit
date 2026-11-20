@@ -707,6 +707,80 @@
       "definition": "One arrangement of the cards of a project, with its focused card, card sidebar widths and tabs, saved in the projects.json of the project (docs/spec/projects.md#persistence).",
       "rejected": [],
       "allowed": []
+    },
+    {
+      "term": "agent role",
+      "definition": "The role that soksak assigns to a tab of an agent CLI, defined by one agent role definition and read by the agent from its role file (docs/spec/agent-roles.md).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "role file",
+      "definition": "The file `<config-dir>/agents/<surface>/role.md` that holds the text of the agent role of one tab; soksak writes it and the agent reads it (docs/spec/agent-roles.md#role-file).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "change message",
+      "definition": "An injected message of soksak that names the path of a role file and carries no role text, and tells an agent that its role changed (docs/spec/agent-roles.md#change-message).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "stable identity",
+      "definition": "The text that soksak sends as the first message of each session of an agent CLI. It names the role file of its tab and the rule that messages beginning with the role prefix assign the role (docs/spec/agent-roles.md#stable-identity).",
+      "rejected": [
+        "launch identity"
+      ],
+      "allowed": []
+    },
+    {
+      "term": "identity file",
+      "definition": "The file that the measured launch of Claude Code read for its stable identity in the measured facts of the agent role contract; no current launch writes it (docs/spec/agent-roles.md#measured-facts).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "fingerprint",
+      "definition": "The first 16 lowercase hexadecimal characters of the SHA-256 digest over a role identifier, a line feed and the stored definition text; it identifies the current role file (docs/spec/agent-roles.md#role-file).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "generation",
+      "definition": "The integer that starts at 1 and rises by one at each change of the agent role or its definition in a tab (docs/spec/agent-roles.md#tab-role-state).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "reread request",
+      "definition": "A message that names the role file of a tab and asks its agent to read the file again and confirm its fingerprint. soksak sends one at each not-busy report of the agent CLI while the role is pending, with no limit; the count is the `requests` of the status (docs/spec/agent-roles.md#requests).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "confirmation",
+      "definition": "The agent's answer that it holds the current fingerprint of its role file, given by `sok role confirm <fingerprint>` or by the line `soksak role <fingerprint>` (docs/spec/agent-roles.md#confirmation).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "role message",
+      "definition": "An injected message of soksak that concerns the agent role of a tab: a change message or a reread request (docs/spec/agent-roles.md#change-message).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "delivery record",
+      "definition": "The event record that the terminal page writes for each decision on an injected message: `plugin.<plugin>.messages.delivered`, with its kind, sequence, path, sender, state and reason (docs/spec/messaging.md#delivery).",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "error display",
+      "definition": "The one display path that shows an error to the person and writes it to the application log at the moment it appears, in the form `error: <where>: <text>`.",
+      "rejected": [],
+      "allowed": []
     }
   ]
 }

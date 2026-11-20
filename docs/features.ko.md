@@ -2,7 +2,9 @@
 
 [English](features.md)
 
-- [~] KR35 — P0, KR33과 KR34와 연결: v0.0.14 tag 이후의 commit을 0.0.15로 release한다. 입력: package.json은 tag v0.0.14가 이미 있는 0.0.14를 선언하므로 release gate는 그 이후 commit에 대해 아무것도 release하지 않는다. 기대: package.json이 0.0.15를 선언하고, release run이 tag v0.0.15와 그 asset을 게시한다. 남은 일: push한 commit의 release run이 v0.0.15와 asset을 게시하면 이 행을 닫는다.
+- [o] KR37 — P1, core F1006-1과 연결: term 목록이 agent role 명세가 쓰는 `fingerprint`, `generation`, `reread request`, `confirmation`, `role message`, `delivery record`, `error display`를 정의한다. 입력: core `docs/spec/agent-roles.md`와 `docs/spec/messaging.md`가 이 개념을 쓰지만 term 목록에는 그 entry가 없었다. 기대: 각 개념은 정의와 그것을 정의하는 명세의 section을 가진 entry 하나를 가진다. 완료: `make check`가 통과하고 term 목록은 113개 entry를 가진다.
+- [o] KR36 — P1, core F1006-1과 연결: term 목록이 `agent role`, `role file`, `change message`, `stable identity`, `identity file`을 정의하고, `stable identity`에 대해 `launch identity`를 거부한다. 입력: core `docs/spec/agent-roles.md`가 이 개념을 쓰지만 term 목록에는 그 entry가 없었다. 기대: 각 개념은 정의와 그것을 정의하는 명세를 가진 entry 하나를 가진다. 완료: 새 entry와 함께 `make check`가 통과한다.
+- [o] KR35 — P0, KR33과 KR34와 연결: v0.0.14 tag 이후의 commit을 0.0.15로 release한다. 입력: package.json은 tag v0.0.14가 이미 있는 0.0.14를 선언하므로 release gate는 그 이후 commit에 대해 아무것도 release하지 않는다. 기대: package.json이 0.0.15를 선언하고, release run이 tag v0.0.15와 그 asset을 게시한다. 결과: package.json이 0.0.15를 선언하고, release run이 v0.0.15와 그 asset `soksak-kit-0.0.15.tgz`를 게시했다.
 - [o] KR33 — P1: term 목록이 party와 leader를 정의한다. 입력: term 목록에는 하나의 바깥 윤곽선으로 그려지는 공간의 맞닿은 content card 집합, 선택적인 leader card, 그리고 그 집합의 leader card를 가리키는 항목이 없어서 record가 그것들을 이름 지을 수 없었다. 기대: `terms.json`이 `party`를 그 집합으로, `leader`를 leader 표식과 leader 색을 가진 party의 한 card 또는 party에 leader가 없으면 none으로 정의하며, 두 항목 모두 동의어를 거부하지 않는다. Red: `the party and leader terms name the touching cards of one space and the leader card`가 `the term list defines party`로 실패했다. Green: 통과하고, `node --test test/terms.test.mjs`가 11개 test 중 11개를 통과한다고 보고한다.
 
 
