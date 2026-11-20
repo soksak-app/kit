@@ -2,7 +2,7 @@
 
 [English](features.md)
 
-- [~] KR38 — P0, KR36과 KR37과 연결: v0.0.15 tag 이후의 commit을 0.0.16으로 release한다. 입력: package.json은 tag v0.0.15가 이미 있는 0.0.15를 선언하므로 release gate는 그 이후 commit에 대해 아무것도 release하지 않는다. 기대: package.json이 0.0.16을 선언하고, release run이 tag v0.0.16과 그 asset을 게시한다. 남은 일: push한 commit의 release run이 v0.0.16과 asset을 게시하면 이 행을 닫는다.
+- [o] KR38 — P0, KR36과 KR37과 연결: v0.0.15 tag 이후의 commit을 0.0.16으로 release한다. 입력: package.json은 tag v0.0.15가 이미 있는 0.0.15를 선언하므로 release gate는 그 이후 commit에 대해 아무것도 release하지 않는다. 기대: package.json이 0.0.16을 선언하고, release run이 tag v0.0.16과 그 asset을 게시한다. 결과: package.json이 0.0.16을 선언하고, release run이 v0.0.16과 그 asset `soksak-kit-0.0.16.tgz`를 게시했다.
 - [o] KR37 — P1, core F1006-1과 연결: term 목록이 agent role 명세가 쓰는 `fingerprint`, `generation`, `reread request`, `confirmation`, `role message`, `delivery record`, `error display`를 정의한다. 입력: core `docs/spec/agent-roles.md`와 `docs/spec/messaging.md`가 이 개념을 쓰지만 term 목록에는 그 entry가 없었다. 기대: 각 개념은 정의와 그것을 정의하는 명세의 section을 가진 entry 하나를 가진다. 완료: `make check`가 통과하고 term 목록은 113개 entry를 가진다.
 - [o] KR36 — P1, core F1006-1과 연결: term 목록이 `agent role`, `role file`, `change message`, `stable identity`, `identity file`을 정의하고, `stable identity`에 대해 `launch identity`를 거부한다. 입력: core `docs/spec/agent-roles.md`가 이 개념을 쓰지만 term 목록에는 그 entry가 없었다. 기대: 각 개념은 정의와 그것을 정의하는 명세를 가진 entry 하나를 가진다. 완료: 새 entry와 함께 `make check`가 통과한다.
 - [o] KR35 — P0, KR33과 KR34와 연결: v0.0.14 tag 이후의 commit을 0.0.15로 release한다. 입력: package.json은 tag v0.0.14가 이미 있는 0.0.14를 선언하므로 release gate는 그 이후 commit에 대해 아무것도 release하지 않는다. 기대: package.json이 0.0.15를 선언하고, release run이 tag v0.0.15와 그 asset을 게시한다. 결과: package.json이 0.0.15를 선언하고, release run이 v0.0.15와 그 asset `soksak-kit-0.0.15.tgz`를 게시했다.
