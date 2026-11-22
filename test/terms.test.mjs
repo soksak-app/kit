@@ -147,3 +147,15 @@ test("the card, content card and space terms name the layout of a space and its 
   assert.match(space.definition, /focused card/);
   assert.match(space.definition, /projects\.json/);
 });
+
+test("the owned session and owner terms name a session that a surface opens and the surface that owns it", () => {
+  // The contract of core docs/spec/plugins.md, section Owned sessions.
+  const session = terms.find((term) => term.term === "owned session");
+  assert.ok(session, "the term list defines owned session");
+  assert.match(session.definition, /core\.session\.open/);
+  assert.match(session.definition, /no tab shows/);
+  const owner = terms.find((term) => term.term === "owner");
+  assert.ok(owner, "the term list defines owner");
+  assert.match(owner.definition, /surface/);
+  assert.match(owner.definition, /owned session/);
+});

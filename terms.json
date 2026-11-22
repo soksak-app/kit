@@ -495,6 +495,22 @@
       "allowed": []
     },
     {
+      "term": "owned session",
+      "definition": "A session that a surface of a plugin opens with `core.session.open` and that no tab shows until a tab shows it on request (docs/spec/plugins.md#owned-sessions).",
+      "rejected": [
+        "owned terminal"
+      ],
+      "allowed": []
+    },
+    {
+      "term": "owner",
+      "definition": "The surface that opened an owned session and may resize or end it, whose close ends the session with reason `owner-closed`.",
+      "rejected": [
+        "session owner"
+      ],
+      "allowed": []
+    },
+    {
       "term": "snapshot in transit",
       "definition": "A declared UI snapshot that is sent for one status and not yet acknowledged.",
       "rejected": [],
