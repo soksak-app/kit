@@ -6,6 +6,7 @@
 //   sok-check docs [--range <revision range> | --message <file>] [repository]
 //   sok-check events [--config <file>] [--catalog <file>] [--list] [repository]
 //   sok-check release <package.json> <checklist>
+//   sok-check shipped-imports [repository]
 //
 // A name, an option or a count of arguments that the usage does not declare exits with 2; a failed check exits with 1.
 // Each check loads only its own module, so a check without a dependency needs no installation.
@@ -33,6 +34,10 @@ const CHECKS = {
   release: {
     usage: "release <package.json> <checklist>", least: 2, most: 2,
     run: async (_values, [manifest, list]) => (await import("./release.js")).checkRelease(manifest, list),
+  },
+  "shipped-imports": {
+    usage: "shipped-imports [repository]", least: 0, most: 1,
+    run: async (_values, [repository]) => (await import("./shipped-imports.js")).checkShippedImports(repository),
   },
 };
 

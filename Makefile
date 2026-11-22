@@ -9,6 +9,7 @@ check:
 	node check.js docs
 	node check.js commands
 	node check.js events --config event-sources.json
+	node check.js shipped-imports
 
 # The checks that a push needs: make test, make check, and the commit messages and the checklist history of the pushed range.
 # RANGE holds the commits of the pushed refs; the pre-push hook sets it, and it defaults to origin/main..HEAD.

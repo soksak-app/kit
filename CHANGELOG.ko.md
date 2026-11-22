@@ -3,6 +3,7 @@
 [English](CHANGELOG.md)
 
 ## 미출시
+- KR39: `sok-check shipped-imports`가 shipped .js 또는 .mjs module의 상대 static import, re-export, string literal dynamic import가 `pnpm pack --dry-run --json` 목록의 파일을 가리키는지 검사하고, `make check`가 이를 실행한다. acorn 8.19.0과 acorn-walk 8.3.5가 정확한 버전의 dependency다. Red: `test/shipped-imports.test.mjs`가 `shipped-imports.js`에 대해 `ERR_MODULE_NOT_FOUND`로 실패했다. Green: `pnpm test`가 147개 test 중 147개를 통과한다.
 - KR38: version은 0.0.16이므로, tag v0.0.15 이후의 commit을 release run이 v0.0.16으로 게시한다.
 - KR37: term 목록이 core의 agent role 명세를 위해 `fingerprint`, `generation`, `reread request`, `confirmation`, `role message`, `delivery record`, `error display`를 정의한다. `make check`가 통과한다.
 - KR36: term 목록이 `agent role`, `role file`, `change message`, `stable identity`, `identity file`을 정의하고, `stable identity`에 대해 `launch identity`를 거부한다. `make check`가 통과한다.

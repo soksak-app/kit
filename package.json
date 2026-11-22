@@ -30,9 +30,12 @@
     "event-rules.json",
     "events.js",
     "release.js",
+    "shipped-imports.js",
     "terms.json"
   ],
   "dependencies": {
+    "acorn": "8.19.0",
+    "acorn-walk": "8.3.5",
     "ajv": "8.20.0",
     "smol-toml": "1.9.1"
   },
