@@ -1,6 +1,6 @@
 {
   "name": "@soksak/kit",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "private": true,
   "description": "Kit: the commit message check, the document check, the event source check, the release gate and the term list that every soksak repository runs.",
   "license": "MIT",
