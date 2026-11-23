@@ -72,6 +72,25 @@ test("record checks distinguish diagnostics from leading discovery accounts", ()
   ]) assert.ok(docViolations(account, "doc.md").some((error) => error.includes("account of who found or requested")), account);
 });
 
+// KR41: a passive sentence whose agent is a part of the program is a fact; a clause that starts with the verb and by, or an agent that is
+// a person, is an account.
+test("record checks accept a passive sentence whose agent is a program part and refuse an account of a person", () => {
+  for (const fact of [
+    "a mouse result for an input that a disposed view sent is reported by the view that replaces it",
+    "The error is reported by the display path.",
+    "The size is requested by the host at each frame.",
+    "The order is decided by the compositor.",
+  ]) assert.deepEqual(docViolations(fact, "doc.md"), [], fact);
+  for (const account of [
+    "Reported by the view on 2026-10-02.",
+    "- Requested by the host team.",
+    "The defect was reported by the user.",
+    "The change is requested by a reviewer.",
+    "The order was decided by the maintainers.",
+    "The check failed; Decided by the owner.",
+  ]) assert.ok(docViolations(account, "doc.md").some((error) => error.includes("account of who found or requested")), account);
+});
+
 test("record checks accept facts that contain hexadecimal values and the rule's own words", () => {
   for (const line of [
     "The session id is 4dc4a40a-1b2c-4d5e-8f90-123456789abc.",

@@ -3,6 +3,7 @@
 [English](CHANGELOG.md)
 
 ## 미출시
+- KR41: 발견·요청 경위 record 패턴은 행위자가 program 부분인 수동문을 받고, 절 시작의 동사와 `by` 또는 사람 행위자를 거부한다.
 - KR40: term 목록이 core의 owned session 명세를 위해 `owned session`과 `owner`를 정의하고, `owned terminal`과 `session owner`를 거부한다. Red: owned session term test가 실패했다. Green: `test/terms.test.mjs`가 14개 중 14개 통과한다. 전체 `pnpm test`는 설치된 dependency가 필요해서 실행하지 않았다.
 - KR39: `sok-check shipped-imports`가 shipped .js 또는 .mjs module의 상대 static import, re-export, string literal dynamic import가 `pnpm pack --dry-run --json` 목록의 파일을 가리키는지 검사하고, `make check`가 이를 실행한다. acorn 8.19.0과 acorn-walk 8.3.5가 정확한 버전의 dependency다. Red: `test/shipped-imports.test.mjs`가 `shipped-imports.js`에 대해 `ERR_MODULE_NOT_FOUND`로 실패했다. Green: `pnpm test`가 147개 test 중 147개를 통과한다.
 - KR38: version은 0.0.16이므로, tag v0.0.15 이후의 commit을 release run이 v0.0.16으로 게시한다.

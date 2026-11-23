@@ -3,6 +3,7 @@
 [한국어](CHANGELOG.ko.md)
 
 ## Unreleased
+- KR41: The record pattern of an account of who found or requested accepts a passive sentence whose agent is a program part and refuses the verb and `by` at the start of a clause or with a person as the agent.
 - KR40: The term list defines `owned session` and `owner` for the owned session specification of core, and rejects `owned terminal` and `session owner`. Red: the owned session term test failed. Green: `test/terms.test.mjs` passes 14 of 14 tests; the full `pnpm test` needs installed dependencies and was not run.
 - KR39: `sok-check shipped-imports` checks that each relative static import, re-export and string-literal dynamic import of a shipped .js or .mjs module names a file of the `pnpm pack --dry-run --json` list, and `make check` runs it; acorn 8.19.0 and acorn-walk 8.3.5 are exact dependencies. Red: `test/shipped-imports.test.mjs` failed with `ERR_MODULE_NOT_FOUND` for `shipped-imports.js`. Green: `pnpm test` reports 147 of 147 tests passing.
 - KR38: The version is 0.0.16, so the release run publishes the commits after the tag v0.0.15 as v0.0.16, where the tag v0.0.15 held the release gate.
