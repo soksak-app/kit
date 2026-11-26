@@ -20,6 +20,24 @@
       "allowed": []
     },
     {
+      "term": "settings tab",
+      "definition": "The tab of the main window that shows the settings of the application and of its plugins, beside the project tabs.",
+      "rejected": [
+        "settings window",
+        "settings modal",
+        "설정 창"
+      ],
+      "allowed": []
+    },
+    {
+      "term": "project home",
+      "definition": "The launcher of a window without an open project: a search, the pinned and recent projects, and the buttons to create or open one.",
+      "rejected": [
+        "project library"
+      ],
+      "allowed": []
+    },
+    {
       "term": "sidecar",
       "definition": "A native program of one domain with a sidecar.json that plugin pages talk to.",
       "rejected": [

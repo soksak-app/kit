@@ -2,6 +2,7 @@
 
 [한국어](features.ko.md)
 
+- [o] KR45 — P0, linked to core F1217: The term list defines `settings tab` and `project home`, which core F1217 uses for the settings shown as a tab of the main window and for the launcher of a window. Expected: both entries in `terms.json`, released with the next version of the kit. Result: both entries are in `terms.json`, rejecting `settings window`, `settings modal` and `project library`; the release is tracked separately.
 - [o] KR44 — P0, linked to core F1216: The term list defines `plugin category`, which core F1216 uses for the categories that a plugin serves and requires. Expected: the entry in `terms.json`, released with the next version of the kit. Result: the entry is in `terms.json` with `capability` rejected, because Tauri and MCP use that word for other concepts; the release is tracked separately.
 - [o] KR43 — P0, linked to core F1215: The term list defines `account` and `account home`, which core F1215 uses for the accounts that a plugin declares. Expected: both entries in `terms.json`, released with the next version of the kit. Result: both entries are in `terms.json`; the release is tracked by the next release item.
 - [~] KR42 — P0, linked to KR39, KR40 and KR41: Release the commits after the tag v0.0.16 as 0.0.17. Expected: package.json declares 0.0.17, and the release run publishes the tag v0.0.17 and its archive. Remains: the conclusion of the release run.

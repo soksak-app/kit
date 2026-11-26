@@ -3,6 +3,7 @@
 [한국어](CHANGELOG.ko.md)
 
 ## Unreleased
+- KR45: The term list defines `settings tab` and `project home`.
 - KR44: The term list defines `plugin category`.
 - KR43: The term list defines `account` and `account home`.
 - KR42: The version is 0.0.17, so the release run publishes KR39, KR40 and KR41.

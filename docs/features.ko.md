@@ -2,6 +2,7 @@
 
 [English](features.md)
 
+- [o] KR45 — P0, core F1217과 연결: 용어 목록이 core F1217이 본창의 tab으로 보이는 설정과 창의 launcher에 쓰는 `settings tab`과 `project home`을 정의한다. Expected: `terms.json`의 두 항목이며, kit 다음 버전과 함께 릴리즈된다. Result: 두 항목이 `terms.json`에 있고, `settings window`, `settings modal`, `project library`를 rejected로 둔다. 릴리즈는 따로 추적한다.
 - [o] KR44 — P0, core F1216과 연결: 용어 목록이 core F1216이 plugin이 속하고 요구하는 category에 쓰는 `plugin category`를 정의한다. Expected: `terms.json`의 항목이며, kit 다음 버전과 함께 릴리즈된다. Result: 항목이 `terms.json`에 있고, Tauri와 MCP가 다른 개념에 쓰는 `capability`는 rejected다. 릴리즈는 따로 추적한다.
 - [o] KR43 — P0, core F1215와 연결: 용어 목록은 core F1215가 plugin이 선언하는 계정에 쓰는 `account`와 `account home`을 정의한다. Expected: `terms.json`의 두 항목이 kit의 다음 버전으로 릴리즈된다. Result: 두 항목이 `terms.json`에 있다. 릴리즈는 다음 릴리즈 항목이 다룬다.
 - [~] KR42 — P0, KR39, KR40, KR41과 연결: tag v0.0.16 이후의 commit을 0.0.17로 릴리즈한다. Expected: package.json은 0.0.17을 선언하고, release run은 tag v0.0.17과 그 archive를 게시한다. 남은 일: release run의 결론.
