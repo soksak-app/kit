@@ -797,6 +797,18 @@
       "definition": "The one display path that shows an error to the person and writes it to the application log at the moment it appears, in the form `error: <where>: <text>`.",
       "rejected": [],
       "allowed": []
+    },
+    {
+      "term": "account",
+      "definition": "A login of a person that a plugin declares with `accounts` in `plugin.json`: the record `{id, name, kind}` in the plugin key `accounts`, whose CLI keeps its login in the home of the account.",
+      "rejected": [],
+      "allowed": []
+    },
+    {
+      "term": "account home",
+      "definition": "The folder `accounts/<id>` of the data folder of a plugin, where the CLI of an account keeps its login and settings.",
+      "rejected": [],
+      "allowed": []
     }
   ]
 }

@@ -3,6 +3,7 @@
 [한국어](CHANGELOG.ko.md)
 
 ## Unreleased
+- KR43: The term list defines `account` and `account home`.
 - KR42: The version is 0.0.17, so the release run publishes KR39, KR40 and KR41.
 - KR41: The record pattern of an account of who found or requested accepts a passive sentence whose agent is a program part and refuses the verb and `by` at the start of a clause or with a person as the agent.
 - KR40: The term list defines `owned session` and `owner` for the owned session specification of core, and rejects `owned terminal` and `session owner`. Red: the owned session term test failed. Green: `test/terms.test.mjs` passes 14 of 14 tests; the full `pnpm test` needs installed dependencies and was not run.
