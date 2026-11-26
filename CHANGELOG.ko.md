@@ -3,6 +3,7 @@
 [English](CHANGELOG.md)
 
 ## 미출시
+- KR44: 용어 목록이 `plugin category`를 정의한다.
 - KR43: 용어 목록은 `account`와 `account home`을 정의한다.
 - KR42: 버전은 0.0.17이며, release run이 KR39, KR40, KR41을 게시한다.
 - KR41: 발견·요청 경위 record 패턴은 행위자가 program 부분인 수동문을 받고, 절 시작의 동사와 `by` 또는 사람 행위자를 거부한다.

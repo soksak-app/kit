@@ -3,6 +3,7 @@
 [한국어](CHANGELOG.ko.md)
 
 ## Unreleased
+- KR44: The term list defines `plugin category`.
 - KR43: The term list defines `account` and `account home`.
 - KR42: The version is 0.0.17, so the release run publishes KR39, KR40 and KR41.
 - KR41: The record pattern of an account of who found or requested accepts a passive sentence whose agent is a program part and refuses the verb and `by` at the start of a clause or with a person as the agent.

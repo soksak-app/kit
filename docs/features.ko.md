@@ -2,6 +2,7 @@
 
 [English](features.md)
 
+- [o] KR44 — P0, core F1216과 연결: 용어 목록이 core F1216이 plugin이 속하고 요구하는 category에 쓰는 `plugin category`를 정의한다. Expected: `terms.json`의 항목이며, kit 다음 버전과 함께 릴리즈된다. Result: 항목이 `terms.json`에 있고, Tauri와 MCP가 다른 개념에 쓰는 `capability`는 rejected다. 릴리즈는 따로 추적한다.
 - [o] KR43 — P0, core F1215와 연결: 용어 목록은 core F1215가 plugin이 선언하는 계정에 쓰는 `account`와 `account home`을 정의한다. Expected: `terms.json`의 두 항목이 kit의 다음 버전으로 릴리즈된다. Result: 두 항목이 `terms.json`에 있다. 릴리즈는 다음 릴리즈 항목이 다룬다.
 - [~] KR42 — P0, KR39, KR40, KR41과 연결: tag v0.0.16 이후의 commit을 0.0.17로 릴리즈한다. Expected: package.json은 0.0.17을 선언하고, release run은 tag v0.0.17과 그 archive를 게시한다. 남은 일: release run의 결론.
 - [o] KR41 — P2: record 패턴 `account of who found or requested`는 행위자와 관계없이 `Reported` 뒤의 `by`를 거부하므로, 수동문의 행위자가 view인 test 이름은 사람을 밝히지 않는데도 실패한다. Expected: 패턴은 보고한 사람의 기술을 거부하고 행위자가 program 부분인 수동문은 받으며, 각각에 test가 있다. Done: 패턴은 절의 시작에 있는 동사와 `by`, 그리고 행위자가 user, owner, reviewer 같은 사람이면 위치와 관계없이 거부하고, 절 안에서 행위자가 program 부분인 수동문은 받는다. Red: `record checks accept a passive sentence whose agent is a program part and refuse an account of a person`이 실패했다. Green: kit test 149개가 통과한다.
