@@ -297,6 +297,24 @@ test("a link to a third repeated heading, a missing heading of the same document
   ]);
 });
 
+test("a section reference in plain text or a code span is checked like a link, and an explicit anchor of its target passes", () => {
+  const repository = trackedRepository("records-section-reference-", {
+    "docs/features.md": [
+      "# Features", "",
+      "- The frame follows docs/spec/core.md#gpu-frame.",
+      "- The strip is `docs/spec/core.md#strip-frame`, and `docs/spec/core.md#그림-frame`가 있다.",
+      "- The vacated place is docs/spec/core.md#vacated-slot.",
+      "- The removed file docs/spec/gone.md#strip-frame.", "",
+      "```", "docs/spec/core.md#gpu-frame", "```", "",
+    ].join("\n"),
+    "docs/spec/core.md": "# Core\n\n## Strip frame\n\n## 그림 frame\n\n<a id=\"vacated-slot\"></a>The vacated place.\n",
+  });
+  assert.deepEqual(repositoryDocViolations(repository).errors, [
+    "docs/features.md:3: missing heading docs/spec/core.md#gpu-frame",
+    "docs/features.md:6: missing link target docs/spec/gone.md#strip-frame",
+  ]);
+});
+
 test("the package exports the anchor rule of the record check for the documentation checks of other repositories", async () => {
   const { headingAnchors, markdownLinks } = await import("@soksak/kit/docs");
   assert.equal(typeof headingAnchors, "function", "the package exports headingAnchors");

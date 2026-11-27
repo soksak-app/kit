@@ -3,6 +3,7 @@
 [한국어](CHANGELOG.ko.md)
 
 ## Unreleased
+- KR52: A section reference `docs/<path>.md#<anchor>` in plain text or a code span names a missing heading or document as a violation, and an explicit anchor `<a id>` of its target is a valid anchor. Red: the new document test passed with no violation reported and failed on `actual: []`. Green: the document test file passes.
 - KR50: Release 0.0.18.
 - KR49: The summary of `sok-check docs` names the path and line of each record finding, and a test holds that. Red: not observed; the test passed on HEAD, so no production code changed. Green: the docs test file passes 34 of 34.
 - KR48: The term list rejects `plugin capability` for `plugin category` and no longer rejects the bare word `capability`, which names MCP capabilities, the Tauri capabilities folder and other senses that have no plugin category. Red: the document test failed, reporting `capabilities` on the MCP line. Green: the test passes, and `node --test test/` passes 151 of 151 tests.

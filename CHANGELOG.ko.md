@@ -3,6 +3,7 @@
 [English](CHANGELOG.md)
 
 ## 미출시
+- KR52: 평문이나 code span의 section 참조 `docs/<path>.md#<anchor>`가 없는 제목이나 문서를 가리키면 위반으로 보고하고, 대상의 명시 anchor `<a id>`는 유효한 anchor다. Red: 새 문서 테스트가 위반을 보고하지 않아 `actual: []`로 실패했다. Green: 문서 테스트 파일이 통과한다.
 - KR50: 0.0.18을 릴리즈한다.
 - KR49: `sok-check docs`의 요약이 record 지적마다 경로와 줄을 적고, 테스트가 이를 확인한다. Red: 관찰하지 못했다. 테스트가 HEAD에서 통과해 제품 코드를 바꾸지 않았다. Green: 문서 테스트 파일이 34개 중 34개 통과한다.
 - KR48: 용어 목록은 `plugin capability`를 `plugin category`의 거부 동의어로 두고, MCP capabilities, Tauri capabilities 폴더 및 plugin category에 해당하지 않는 다른 의미를 가리키는 단어 `capability`는 더 이상 거부하지 않는다. Red: 문서 테스트가 MCP 줄의 `capabilities`를 지적하며 실패했다. Green: 테스트가 통과하며, `node --test test/`가 151개 테스트 중 151개를 통과한다.

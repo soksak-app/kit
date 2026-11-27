@@ -113,6 +113,44 @@ export function headingAnchors(text) {
   return found;
 }
 
+/** The explicit anchors `<a id="name"></a>` of a Markdown text outside code blocks, which a section reference names like a heading anchor. */
+export function explicitAnchors(text) {
+  return new Set([...withoutCode(text).matchAll(/<a id="([^"]+)"><\/a>/g)].map((match) => match[1]));
+}
+
+/** The anchors that a section reference of a Markdown text can name: its heading anchors and its explicit anchors. */
+export function targetAnchors(text) {
+  return new Set([...headingAnchors(text), ...explicitAnchors(text)]);
+}
+
+// A section reference in plain text or a code span is `docs/<path>.md#<anchor>`; its anchor ends at the first character that is not a
+// letter, a number, `-` or `_`, so a Korean particle after the anchor needs no code span.
+const SECTION_REFERENCE = /(?<![\w./-])(docs\/(?:[\w.-]+\/)*[\w.-]+\.md)#([\p{L}\p{N}_-]+)/gu;
+
+/**
+ * The section references of a Markdown document outside its code blocks, which are checked like a link: `file:line: missing link
+ * target <target>#<anchor>` when the target does not exist, and `file:line: missing heading <target>#<anchor>` when the target has no
+ * such anchor. A reference inside the target of a Markdown link is the link's own, and anchorViolations checks it.
+ */
+export function sectionReferenceViolations(text, file, repository) {
+  const errors = [];
+  const anchors = new Map();
+  for (const [index, line] of withoutCode(text).split("\n").entries()) {
+    for (const match of line.matchAll(SECTION_REFERENCE)) {
+      if (match.index >= 2 && line[match.index - 1] === "(" && line[match.index - 2] === "]") continue;
+      const [, target, anchor] = match;
+      const full = resolve(repository, target);
+      if (!existsSync(full)) {
+        errors.push(`${file}:${index + 1}: missing link target ${target}#${anchor}`);
+        continue;
+      }
+      if (!anchors.has(full)) anchors.set(full, targetAnchors(readFileSync(full, "utf8")));
+      if (!anchors.get(full).has(anchor)) errors.push(`${file}:${index + 1}: missing heading ${target}#${anchor}`);
+    }
+  }
+  return errors;
+}
+
 /**
  * The links of a Markdown document, a path relative to repository, whose target is a local Markdown document with a
  * fragment: `file:line: missing link target <target>` when the target does not exist, and `file:line: missing heading
@@ -141,7 +179,7 @@ export function anchorViolations(text, file, repository) {
       errors.push(`${file}:${line}: missing link target ${target}`);
       continue;
     }
-    if (!anchors.has(full)) anchors.set(full, headingAnchors(readFileSync(full, "utf8")));
+    if (!anchors.has(full)) anchors.set(full, targetAnchors(readFileSync(full, "utf8")));
     if (!anchors.get(full).has(decode(fragment))) errors.push(`${file}:${line}: missing heading ${target}`);
   }
   return errors;
@@ -376,6 +414,7 @@ export function repositoryDocViolations(repository, message = null) {
     return [
       ...(docKind(file) ? docViolations(text, file, docKind(file)) : []),
       ...(docKind(file) === "document" ? anchorViolations(text, file, repository) : []),
+      ...(docKind(file) === "document" ? sectionReferenceViolations(text, file, repository) : []),
       ...(termChecked(file) ? termViolations(text, file) : []),
       ...(/(?:^|\/)features(?:\.[a-z]+)?\.md$/.test(file) ? checklistViolations(text, file) : []),
     ];
