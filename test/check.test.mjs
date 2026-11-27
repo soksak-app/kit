@@ -1,18 +1,22 @@
+import { after } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import "./git-env.mjs";
+import { removeTemporaryFolders, temporaryFolder } from "./temporary-folder.mjs";
+
+after(removeTemporaryFolders);
 
 const command = fileURLToPath(new URL("../check.js", import.meta.url));
 const run = (args, cwd) => spawnSync(process.execPath, [command, ...args], { cwd, encoding: "utf8" });
 const GOOD = "fix(kit): Reject an unknown check (#KR7)\n\nThe executable names each check, so an unknown name is an error.\n";
 
 function folder(t) {
-  const path = mkdtempSync(join(tmpdir(), "kit-"));
+  const path = temporaryFolder("kit-");
   t.after(() => rmSync(path, { recursive: true, force: true }));
   return path;
 }

@@ -3,6 +3,7 @@
 [English](CHANGELOG.md)
 
 ## 미출시
+- KR55: check, docs, checklist 이력, hooks, commands, shipped imports 시험은 만든 임시 폴더를 helper `test/temporary-folder.mjs`로 지워서 실행이 `records-*`, `kit-*`, `kit-records-*` 폴더를 남기지 않는다. Red: `temp-folders.test.mjs`가 실행이 남긴 폴더를 나열했다.
 - KR54: docs와 events 시험은 임시 폴더에 만든 저장소 폴더를 각자 지워서 `event-sources-`와 `invalid-event-sources-` 폴더가 남지 않는다. Red: `temp-folders.test.mjs`가 실행이 남긴 폴더를 찾았다.
 - KR53: 용어 목록이 컴퓨터에 속하고 프로젝트에 속하지 않는 설정이나 페이지의 범위로 `global`을 정의하며, `common only`와 `common-only`를 거부한다. Red: terms 시험에 `global` 항목이 없었다. Green: terms 시험이 통과한다.
 - KR52: 평문이나 code span의 section 참조 `docs/<path>.md#<anchor>`가 없는 제목이나 문서를 가리키면 위반으로 보고하고, 대상의 명시 anchor `<a id>`는 유효한 anchor다. Red: 새 문서 테스트가 위반을 보고하지 않아 `actual: []`로 실패했다. Green: 문서 테스트 파일이 통과한다.

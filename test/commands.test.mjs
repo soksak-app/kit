@@ -1,15 +1,19 @@
+import { after } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import test from "node:test";
 import { commandViolations } from "../commands.js";
 import "./git-env.mjs";
+import { removeTemporaryFolders, temporaryFolder } from "./temporary-folder.mjs";
+
+after(removeTemporaryFolders);
 
 /** A git repository that tracks the given files, and the violations that the check reports for it. */
 function violations(t, files) {
-  const root = mkdtempSync(join(tmpdir(), "kit-commands-"));
+  const root = temporaryFolder("kit-commands-");
   t.after(() => rmSync(root, { recursive: true, force: true }));
   for (const [path, text] of Object.entries(files)) {
     mkdirSync(dirname(join(root, path)), { recursive: true });

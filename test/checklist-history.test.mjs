@@ -1,12 +1,16 @@
+import { after } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { checkCompletedItems, retiredChecklistItems } from "../checklist.js";
 import { clearHookGitVariables } from "./git-env.mjs";
 import { rangeDocViolations, repositoryDocViolations } from "../docs.js";
+import { removeTemporaryFolders, temporaryFolder } from "./temporary-folder.mjs";
+
+after(removeTemporaryFolders);
 
 const FILE = "docs/features.md";
 
@@ -59,7 +63,7 @@ test("a retirement line requires an identifier, a reason, one statement and its 
 /** A repository with docs/features.md, its translation and the changelog pair of one closed item, committed once. */
 function repository(t, initial = "- [o] F1 — P2: first\n") {
   clearHookGitVariables();
-  const folder = mkdtempSync(join(tmpdir(), "kit-records-history-"));
+  const folder = temporaryFolder("kit-records-history-");
   t.after(() => rmSync(folder, { recursive: true, force: true }));
   const git = (...args) => execFileSync("git", args, { cwd: folder, encoding: "utf8" }).trim();
   const write = (features, english = "# Changelog\n", korean = "# 변경 기록\n") => {
@@ -93,7 +97,7 @@ test("the record check compares the working tree with HEAD", (t) => {
 });
 
 test("a repository without a commit has no earlier checklist", (t) => {
-  const folder = mkdtempSync(join(tmpdir(), "kit-records-unborn-"));
+  const folder = temporaryFolder("kit-records-unborn-");
   t.after(() => rmSync(folder, { recursive: true, force: true }));
   execFileSync("git", ["init", "-q"], { cwd: folder });
   assert.deepEqual(repositoryDocViolations(folder, "").errors, []);
@@ -352,7 +356,7 @@ test("the range check reads the body of a commit and not its subject", { timeout
 });
 
 test("a test repository is its own when the environment names a foreign repository", { timeout: 20000 }, (t) => {
-  const foreign = mkdtempSync(join(tmpdir(), "kit-foreign-"));
+  const foreign = temporaryFolder("kit-foreign-");
   t.after(() => rmSync(foreign, { recursive: true, force: true }));
   execFileSync("git", ["init", "-q", "-b", "foreign"], { cwd: foreign });
   const saved = { GIT_DIR: process.env.GIT_DIR, GIT_INDEX_FILE: process.env.GIT_INDEX_FILE };

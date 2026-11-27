@@ -1,12 +1,16 @@
+import { after } from "node:test";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { checklistViolations, commitMessageErrors, docKind, repositoryDocViolations, docViolations, termChecked, termViolations } from "../docs.js";
 import { execSync, spawnSync } from "node:child_process";
-import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import "./git-env.mjs";
+import { removeTemporaryFolders, temporaryFolder } from "./temporary-folder.mjs";
+
+after(removeTemporaryFolders);
 
 test("a checklist that states one identifier on two lines is refused, in any identifier form", () => {
   assert.deepEqual(checklistViolations("- [o] F218-2.4 — P2: a\n- [ ] F218-2.4 — P2: b\n", "docs/features.md"), ["docs/features.md:2: duplicate checklist identifier F218-2.4 (first stated on line 1)"]);
@@ -187,7 +191,7 @@ test("a commit message that uses a rejected synonym is refused", () => {
 });
 
 test("a file the event source declaration excludes is not a record of the repository", () => {
-  const repository = mkdtempSync(join(tmpdir(), "records-exclude-"));
+  const repository = temporaryFolder("records-exclude-");
   execSync("git init -q .", { cwd: repository });
   writeFileSync(join(repository, "event-sources.json"), JSON.stringify({ exclude: "^ui/vendor/" }));
   mkdirSync(join(repository, "ui", "vendor"), { recursive: true });
@@ -199,7 +203,7 @@ test("a file the event source declaration excludes is not a record of the reposi
 });
 
 test("a event source declaration without an exclude checks every tracked record", () => {
-  const repository = mkdtempSync(join(tmpdir(), "records-no-exclude-"));
+  const repository = temporaryFolder("records-no-exclude-");
   execSync("git init -q .", { cwd: repository });
   writeFileSync(join(repository, "event-sources.json"), JSON.stringify({}));
   writeFileSync(join(repository, "own.md"), "The plugin package holds pages.\n");
@@ -210,7 +214,7 @@ test("a event source declaration without an exclude checks every tracked record"
 });
 
 test("a event source declaration rejects a non-string exclude with its file and value", () => {
-  const repository = mkdtempSync(join(tmpdir(), "records-invalid-exclude-"));
+  const repository = temporaryFolder("records-invalid-exclude-");
   execSync("git init -q .", { cwd: repository });
   writeFileSync(join(repository, "event-sources.json"), JSON.stringify({ exclude: 3 }));
   writeFileSync(join(repository, "own.md"), "Repository facts.\n");
@@ -220,7 +224,7 @@ test("a event source declaration rejects a non-string exclude with its file and 
 
 test("a event source declaration rejects null and array roots with its file and value", (t) => {
   for (const declaration of [null, []]) {
-    const repository = mkdtempSync(join(tmpdir(), "invalid-event-sources-"));
+    const repository = temporaryFolder("invalid-event-sources-");
     t.after(() => rmSync(repository, { recursive: true, force: true }));
     execSync("git init -q .", { cwd: repository });
     writeFileSync(join(repository, "event-sources.json"), JSON.stringify(declaration));
@@ -231,7 +235,7 @@ test("a event source declaration rejects null and array roots with its file and 
 });
 
 test("a event source declaration reports an invalid exclude pattern with its file and value", () => {
-  const repository = mkdtempSync(join(tmpdir(), "records-invalid-pattern-"));
+  const repository = temporaryFolder("records-invalid-pattern-");
   execSync("git init -q .", { cwd: repository });
   writeFileSync(join(repository, "event-sources.json"), JSON.stringify({ exclude: "[" }));
   writeFileSync(join(repository, "own.md"), "Repository facts.\n");
@@ -241,7 +245,7 @@ test("a event source declaration reports an invalid exclude pattern with its fil
 
 /** A git repository in a new temporary folder that tracks files, a map from a path in the repository to its text. */
 function trackedRepository(prefix, files) {
-  const repository = mkdtempSync(join(tmpdir(), prefix));
+  const repository = temporaryFolder(prefix);
   execSync("git init -q .", { cwd: repository });
   for (const [path, text] of Object.entries(files)) {
     mkdirSync(join(repository, dirname(path)), { recursive: true });
@@ -357,7 +361,7 @@ test("dom entry and dom name are rejected for element entry and element name, al
 
 test("a rejected phrase with a regular expression character matches only its own words, also in identifiers", async () => {
   // A copy of the check with a term list whose rejected phrase holds `.`, which a pattern must match literally.
-  const kit = mkdtempSync(join(tmpdir(), "records-escape-"));
+  const kit = temporaryFolder("records-escape-");
   for (const file of ["docs.js", "checklist.js"]) copyFileSync(new URL(`../${file}`, import.meta.url), join(kit, file));
   writeFileSync(join(kit, "terms.json"), JSON.stringify({ terms: [{ term: "dotted term", definition: "A term.", rejected: ["a.b entry"], allowed: [] }] }));
   const { termViolations: check } = await import(pathToFileURL(join(kit, "docs.js")).href);
@@ -380,7 +384,7 @@ test("a record does not cite a log of the temporary folder", () => {
 });
 
 test("a repository has no untracked file", () => {
-  const repository = mkdtempSync(join(tmpdir(), "kit-untracked-"));
+  const repository = temporaryFolder("kit-untracked-");
   execSync("git init -q", { cwd: repository });
   writeFileSync(join(repository, ".gitignore"), "/ignored/\n");
   writeFileSync(join(repository, "tracked.md"), "A record.\n");
@@ -399,7 +403,7 @@ const middle = "=".repeat(7);
 const theirs = `${">".repeat(7)} fa48e56 (fix(input): Hold input)`;
 
 test("the document check refuses each line of a conflict in a record, a code block and any tracked text file, with its file and line", () => {
-  const repository = mkdtempSync(join(tmpdir(), "records-conflict-"));
+  const repository = temporaryFolder("records-conflict-");
   execSync("git init -q .", { cwd: repository });
   mkdirSync(join(repository, "docs"));
   writeFileSync(join(repository, "docs/features.md"), `# Features\n\n${ours}\n- [o] P2 — P1: Two.\n${middle}\n- [o] P1 — P1: One.\n${theirs}\n`);
@@ -424,7 +428,7 @@ test("the document check refuses each line of a conflict in a record, a code blo
 });
 
 test("the document check passes a heading underline, a longer rule and a marker inside a line", () => {
-  const repository = mkdtempSync(join(tmpdir(), "records-no-conflict-"));
+  const repository = temporaryFolder("records-no-conflict-");
   execSync("git init -q .", { cwd: repository });
   writeFileSync(join(repository, "README.md"), `Title\n${"=".repeat(8)}\n\nA line that quotes ${ours} inside it.\n\n${"=".repeat(5)}\n`);
   execSync("git add .", { cwd: repository });
@@ -432,7 +436,7 @@ test("the document check passes a heading underline, a longer rule and a marker 
 });
 
 test("the summary of a check counts an untracked file under its own label and no record line", () => {
-  const repository = mkdtempSync(join(tmpdir(), "kit-summary-"));
+  const repository = temporaryFolder("kit-summary-");
   execSync("git init -q", { cwd: repository });
   writeFileSync(join(repository, "tracked.md"), "A record.\n");
   execSync("git add tracked.md", { cwd: repository });
@@ -446,7 +450,7 @@ test("the summary of a check counts an untracked file under its own label and no
 });
 
 test("each record line of the summary names the path and line of its finding", () => {
-  const repository = mkdtempSync(join(tmpdir(), "kit-record-line-"));
+  const repository = temporaryFolder("kit-record-line-");
   execSync("git init -q", { cwd: repository });
   writeFileSync(join(repository, "note.md"), "# Title\n\nThe plugin capability is wrong here.\n");
   execSync("git add note.md", { cwd: repository });

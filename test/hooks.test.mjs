@@ -1,17 +1,21 @@
+import { after } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import "./git-env.mjs";
+import { removeTemporaryFolders, temporaryFolder } from "./temporary-folder.mjs";
+
+after(removeTemporaryFolders);
 
 const hook = new URL("../.githooks/pre-push", import.meta.url).pathname;
 const zero = "0".repeat(40);
 
 /** Runs the pre-push hook in a new repository with one commit, with a make that records its arguments. */
 function prePush(t, remoteRef) {
-  const folder = mkdtempSync(join(tmpdir(), "kit-hook-"));
+  const folder = temporaryFolder("kit-hook-");
   t.after(() => rmSync(folder, { recursive: true, force: true }));
   const git = (...args) => execFileSync("git", args, { cwd: folder, encoding: "utf8" }).trim();
   git("init", "-q", "-b", "main");

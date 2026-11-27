@@ -1,14 +1,18 @@
+import { after } from "node:test";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import test from "node:test";
 import { shippedImportViolations } from "../shipped-imports.js";
 import "./git-env.mjs";
+import { removeTemporaryFolders, temporaryFolder } from "./temporary-folder.mjs";
+
+after(removeTemporaryFolders);
 
 /** A package folder with the given manifest `files` list and modules, and the violations that the check reports for it. */
 function violations(t, files, modules) {
-  const root = mkdtempSync(join(tmpdir(), "kit-shipped-imports-"));
+  const root = temporaryFolder("kit-shipped-imports-");
   t.after(() => rmSync(root, { recursive: true, force: true }));
   writeFileSync(join(root, "package.json"), JSON.stringify({ name: "@soksak/fixture", version: "0.0.0", files }));
   for (const [path, text] of Object.entries(modules)) {
