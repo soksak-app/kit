@@ -425,3 +425,18 @@ test("the summary of a check counts an untracked file under its own label and no
   assert.deepEqual(summary, ["1 untracked file: commit each, ignore it or remove it"]);
   assert.equal(run.stderr.includes("record lines"), false, run.stderr);
 });
+
+test("each record line of the summary names the path and line of its finding", () => {
+  const repository = mkdtempSync(join(tmpdir(), "kit-record-line-"));
+  execSync("git init -q", { cwd: repository });
+  writeFileSync(join(repository, "note.md"), "# Title\n\nThe plugin capability is wrong here.\n");
+  execSync("git add note.md", { cwd: repository });
+  writeFileSync(join(repository, "stray.log"), "output\n");
+  const module = pathToFileURL(fileURLToPath(new URL("../docs.js", import.meta.url))).href;
+  const run = spawnSync(process.execPath, ["--input-type=module", "-e", `process.exitCode = (await import(${JSON.stringify(module)})).checkDocs(${JSON.stringify(repository)});`], { encoding: "utf8" });
+  assert.equal(run.status, 1);
+  const lines = run.stderr.split("\n").filter(Boolean);
+  const records = lines.filter((line) => line.includes("rejected term"));
+  assert.deepEqual(records, ['note.md:3: rejected term "plugin capability", use "plugin category": plugin capability'], run.stderr);
+  assert.ok(lines.includes("1 record lines state something other than facts about this repository"), run.stderr);
+});
