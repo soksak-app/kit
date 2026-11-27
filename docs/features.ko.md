@@ -2,6 +2,7 @@
 
 [English](features.md)
 
+- [~] KR50 — P0, KR43, KR44, KR45, KR46, KR47, KR48, KR49와 연결: tag v0.0.17 이후의 commit을 0.0.18로 릴리즈한다. Expected: package.json은 0.0.18을 선언하고, release run은 tag v0.0.18과 그 archive를 게시한다. 남은 일: release run의 결론.
 - [o] KR49 — P1: `sok-check docs`의 요약이 record 지적마다 경로와 줄을 적는다. 입력: 저장소의 `note.md` 3행에 거부 용어가 있고 미추적 파일이 하나 있는 경우. 동작: 지적이 `note.md:3: rejected term ...`으로 출력되고, 요약이 record 줄 하나와 미추적 파일 하나를 각자의 표시로 센다. Red: 관찰하지 못했다. 현재 HEAD에서 테스트가 통과했고, 릴리스된 0.0.16 빌드가 미추적 파일을 record 줄로 세던 표시 오류는 KR47이 고쳤다. Green: `node --test test/docs.test.mjs`가 34개 중 34개 통과한다. 제품 코드 변경은 없다.
 - [o] KR48 — P1, core F1224과 연결: 용어 목록이 `capability`를 `plugin category`의 거부 동의어로 두지만, 이 단어만으로는 MCP capabilities, Tauri capabilities 폴더 및 plugin category에 해당하지 않는 개념을 가리킨다. 입력: `the MCP capabilities field`라는 줄. 동작: `sok-check docs`가 이 줄을 거부 용어로 지적한다. 기대: 지적하지 않으며, `plugin capability`는 `plugin category`의 거부 동의어로 남는다. Red: 테스트 `a bare capability is no rejected synonym of plugin category, and plugin capability is`가 MCP 줄의 `capabilities`를 지적하며 실패했다. Green: `plugin category`는 `plugin capability`만 거부한다. `node --test test/`가 151개 테스트 중 151개를 통과한다.
 - [o] KR47 — P1: `sok-check docs`의 요약이 미추적 파일과 record 줄을 각자의 표시로 센다. 입력: 미추적 파일 하나와 record 지적이 없는 저장소. 동작: 요약이 `1 untracked file: commit each, ignore it or remove it`를 출력하고 record 줄 수를 세지 않는다. Red: 요약에 미추적 줄이 없어 테스트 `the summary of a check counts an untracked file under its own label and no record line`이 실패했다. Green: 테스트가 통과한다.
