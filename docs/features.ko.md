@@ -2,6 +2,7 @@
 
 [English](features.md)
 
+- [o] KR54 — P1: docs와 events 시험은 임시 폴더에 만든 저장소 폴더를 각자 지운다. 입력: 시험이 `mkdtempSync`로 `event-sources-`와 `invalid-event-sources-` 폴더를 만들고 지우지 않았다. 기대: 시험이 끝난 뒤 그런 폴더가 남지 않는다. 시험 `temp-folders.test.mjs`, 변경 전 Red: 실행이 폴더를 남겼다.
 - [o] KR53 — P0, core F1217-17-21과 연결: 용어 목록이 `global`을 정의한다. core F1217-17-21이 컴퓨터에 속하고 프로젝트에 속하지 않는 설정과 페이지의 범위에 이 용어를 쓴다. 입력: 선언과 설정 스펙이 같은 범위를 `common only`, `common`, `global`로 적었다. 기대: `terms.json` 항목이 컴퓨터 범위를 적고 `common only`와 `common-only`를 거부한다. Red: terms 시험에 `global` 항목이 없었다. Green: terms 시험이 15개 중 15개 통과한다.
 - [~] KR50 — P0, KR43, KR44, KR45, KR46, KR47, KR48, KR49와 연결: tag v0.0.17 이후의 commit을 0.0.18로 릴리즈한다. Expected: package.json은 0.0.18을 선언하고, release run은 tag v0.0.18과 그 archive를 게시한다. 남은 일: release run의 결론.
 - [o] KR52 — P1: 평문이나 code span의 section 참조 `docs/<path>.md#<anchor>`는 link와 같이 검사한다. 입력: 문서의 3행이 평문으로 다른 문서의 제목을 가리켰고 그 문서에 그 제목이 없다. 동작: `sok-check docs`가 통과한다. 기대: 문서의 3행을 파일과 줄과 함께 없는 제목으로 보고하고, 대상의 명시 anchor `<a id="..."></a>`는 제목 anchor와 같이 통과한다. Red: 새 테스트 `a section reference in plain text or a code span is checked like a link`가 `actual: []`로 실패했다. Green: 문서 테스트 파일이 통과하고 전체 suite가 153개 중 153개 통과한다. 소비 저장소에서는 대상에 없는 제목을 가리키는 참조마다 보고하고, 참조가 있는 제목을 가리키면 통과한다.

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -415,11 +415,12 @@ test('functionRange holds the offset in the named function of Go and Rust, the f
   assert.deepEqual(checker.functionRange(checker.lexSource('a.js', 'y();\n'), 0), [0, 5]);
 });
 
-test('sok-check events fails with the file and line of a source that has neither an event nor a reason', () => {
+test('sok-check events fails with the file and line of a source that has neither an event nor a reason', (t) => {
   const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
   assert.ok(manifest.files.includes('events.js') && manifest.files.includes('event-rules.json'));
   const command = fileURLToPath(new URL('../check.js', import.meta.url));
   const repository = mkdtempSync(join(tmpdir(), 'event-sources-'));
+  t.after(() => rmSync(repository, { recursive: true, force: true }));
   const run = (...args) => spawnSync(process.execPath, [command, 'events', ...args], { cwd: repository, encoding: 'utf8' });
   const git = (...args) => assert.equal(spawnSync('git', args, { cwd: repository }).status, 0);
   git('init', '-q');
@@ -460,9 +461,10 @@ test('the record calls of the native library are emit sites of the declared reco
   assert.deepEqual(checker.emitFindings(records, new Map([['a.m', 'void f(void) {\n    sp_log_error("w", "t");\n    sp_log_info("w", "t");\n}\n']]), CATALOG), []);
 });
 
-test('the event source exclude removes a vendored file before the catalog check parses it', () => {
+test('the event source exclude removes a vendored file before the catalog check parses it', (t) => {
   const command = fileURLToPath(new URL('../check.js', import.meta.url));
   const repository = mkdtempSync(join(tmpdir(), 'event-sources-'));
+  t.after(() => rmSync(repository, { recursive: true, force: true }));
   const run = (...args) => spawnSync(process.execPath, [command, 'events', ...args], { cwd: repository, encoding: 'utf8' });
   const git = (...args) => assert.equal(spawnSync('git', args, { cwd: repository }).status, 0);
   git('init', '-q');
@@ -624,9 +626,10 @@ test('a declaration of emitters outside the form is an error naming the file, th
   assert.throws(parse({ rs: [{ call: 'emit', level: 0, event: 1, only: '(' }] }), /event-sources\.json: emitters\.rs\[0\]: only is not a pattern/);
 });
 
-test('sok-check events --catalog finds the emit sites of a Rust sidecar through the emitters of its event source declaration', () => {
+test('sok-check events --catalog finds the emit sites of a Rust sidecar through the emitters of its event source declaration', (t) => {
   const command = fileURLToPath(new URL('../check.js', import.meta.url));
   const repository = mkdtempSync(join(tmpdir(), 'event-sources-'));
+  t.after(() => rmSync(repository, { recursive: true, force: true }));
   const run = (...args) => spawnSync(process.execPath, [command, 'events', ...args], { cwd: repository, encoding: 'utf8' });
   const git = (...args) => assert.equal(spawnSync('git', args, { cwd: repository }).status, 0);
   git('init', '-q');

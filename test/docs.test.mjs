@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { checklistViolations, commitMessageErrors, docKind, repositoryDocViolations, docViolations, termChecked, termViolations } from "../docs.js";
 import { execSync, spawnSync } from "node:child_process";
-import { copyFileSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -218,9 +218,10 @@ test("a event source declaration rejects a non-string exclude with its file and 
   assert.throws(() => repositoryDocViolations(repository), /event-sources\.json.*exclude.*number.*3/);
 });
 
-test("a event source declaration rejects null and array roots with its file and value", () => {
+test("a event source declaration rejects null and array roots with its file and value", (t) => {
   for (const declaration of [null, []]) {
     const repository = mkdtempSync(join(tmpdir(), "invalid-event-sources-"));
+    t.after(() => rmSync(repository, { recursive: true, force: true }));
     execSync("git init -q .", { cwd: repository });
     writeFileSync(join(repository, "event-sources.json"), JSON.stringify(declaration));
     writeFileSync(join(repository, "own.md"), "Repository facts.\n");

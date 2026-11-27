@@ -3,6 +3,7 @@
 [한국어](CHANGELOG.ko.md)
 
 ## Unreleased
+- KR54: The docs and events tests remove each repository folder they create in the temporary directory, so no `event-sources-` or `invalid-event-sources-` folder remains. Red: `temp-folders.test.mjs` found the folders left by the run.
 - KR53: The term list defines `global` for the scope of a setting or a page that belongs to the computer, and rejects `common only` and `common-only`. Red: the terms test found no `global` entry. Green: the terms test passes.
 - KR52: A section reference `docs/<path>.md#<anchor>` in plain text or a code span names a missing heading or document as a violation, and an explicit anchor `<a id>` of its target is a valid anchor. Red: the new document test passed with no violation reported and failed on `actual: []`. Green: the document test file passes.
 - KR50: Release 0.0.18.
