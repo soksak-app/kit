@@ -2,6 +2,7 @@
 
 [English](features.md)
 
+- [o] KR47 — P1: `sok-check docs`의 요약이 미추적 파일과 record 줄을 각자의 표시로 센다. 입력: 미추적 파일 하나와 record 지적이 없는 저장소. 동작: 요약이 `1 untracked file: commit each, ignore it or remove it`를 출력하고 record 줄 수를 세지 않는다. Red: 요약에 미추적 줄이 없어 테스트 `the summary of a check counts an untracked file under its own label and no record line`이 실패했다. Green: 테스트가 통과한다.
 - [o] KR46 — P0, core F1217-10과 연결: 결과: terms.json이 notice, notice center, toast, system notification을 정의한다. 용어 목록이 core의 알림 용어 `notice`, `notice center`, `toast`, `system notification`을 정의하므로 core 기록이 개념마다 용어 하나를 쓴다.
 - [o] KR45 — P0, core F1217과 연결: 용어 목록이 core F1217이 본창의 tab으로 보이는 설정과 창의 launcher에 쓰는 `settings tab`과 `project home`을 정의한다. Expected: `terms.json`의 두 항목이며, kit 다음 버전과 함께 릴리즈된다. Result: 두 항목이 `terms.json`에 있고, `settings window`, `settings modal`, `project library`를 rejected로 둔다. 릴리즈는 따로 추적한다.
 - [o] KR44 — P0, core F1216과 연결: 용어 목록이 core F1216이 plugin이 속하고 요구하는 category에 쓰는 `plugin category`를 정의한다. Expected: `terms.json`의 항목이며, kit 다음 버전과 함께 릴리즈된다. Result: 항목이 `terms.json`에 있고, Tauri와 MCP가 다른 개념에 쓰는 `capability`는 rejected다. 릴리즈는 따로 추적한다.

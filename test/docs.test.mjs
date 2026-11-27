@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { checklistViolations, commitMessageErrors, docKind, repositoryDocViolations, docViolations, termChecked, termViolations } from "../docs.js";
-import { execSync } from "node:child_process";
+import { execSync, spawnSync } from "node:child_process";
 import { copyFileSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import "./git-env.mjs";
 
 test("a checklist that states one identifier on two lines is refused, in any identifier form", () => {
@@ -404,4 +404,18 @@ test("the document check passes a heading underline, a longer rule and a marker 
   writeFileSync(join(repository, "README.md"), `Title\n${"=".repeat(8)}\n\nA line that quotes ${ours} inside it.\n\n${"=".repeat(5)}\n`);
   execSync("git add .", { cwd: repository });
   assert.deepEqual(repositoryDocViolations(repository).errors, []);
+});
+
+test("the summary of a check counts an untracked file under its own label and no record line", () => {
+  const repository = mkdtempSync(join(tmpdir(), "kit-summary-"));
+  execSync("git init -q", { cwd: repository });
+  writeFileSync(join(repository, "tracked.md"), "A record.\n");
+  execSync("git add tracked.md", { cwd: repository });
+  writeFileSync(join(repository, "stray.log"), "output\n");
+  const module = pathToFileURL(fileURLToPath(new URL("../docs.js", import.meta.url))).href;
+  const run = spawnSync(process.execPath, ["--input-type=module", "-e", `process.exitCode = (await import(${JSON.stringify(module)})).checkDocs(${JSON.stringify(repository)});`], { encoding: "utf8" });
+  assert.equal(run.status, 1);
+  const summary = run.stderr.split("\n").filter((line) => line.includes("untracked") && !line.startsWith("stray.log:"));
+  assert.deepEqual(summary, ["1 untracked file: commit each, ignore it or remove it"]);
+  assert.equal(run.stderr.includes("record lines"), false, run.stderr);
 });

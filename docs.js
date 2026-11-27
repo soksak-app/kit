@@ -370,7 +370,8 @@ export function repositoryDocViolations(repository, message = null) {
     const bytes = readFileSync(join(repository, file));
     return bytes.includes(0) ? [] : conflictMarkerViolations(bytes.toString("utf8"), file);
   });
-  return { files, errors: [...untracked, ...conflicts, ...files.flatMap((file) => {
+  // untracked is also in errors; a caller that labels the findings of each kind reads it separately.
+  return { files, untracked, errors: [...untracked, ...conflicts, ...files.flatMap((file) => {
     const text = readFileSync(join(repository, file), "utf8");
     return [
       ...(docKind(file) ? docViolations(text, file, docKind(file)) : []),
@@ -396,10 +397,13 @@ export function checkDocs(repository, range, messageFile) {
     return 0;
   }
   const message = messageFile === undefined ? null : readFileSync(resolve(messageFile), "utf8");
-  const { files, errors } = repositoryDocViolations(root, message);
+  const { files, untracked, errors } = repositoryDocViolations(root, message);
   if (errors.length) {
     process.stderr.write(errors.map((error) => `${error}\n`).join(""));
-    process.stderr.write(`${errors.length} record lines state something other than facts about this repository\n`);
+    // Each kind of finding has its own label: an untracked file is not a record line.
+    const records = errors.length - untracked.length;
+    if (untracked.length) process.stderr.write(`${untracked.length} untracked ${untracked.length === 1 ? "file" : "files"}: commit each, ignore it or remove it\n`);
+    if (records) process.stderr.write(`${records} record lines state something other than facts about this repository\n`);
     return 1;
   }
   process.stdout.write(`Document checks passed: ${files.length} files\n`);

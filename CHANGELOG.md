@@ -3,6 +3,7 @@
 [한국어](CHANGELOG.ko.md)
 
 ## Unreleased
+- KR47: The summary of `sok-check docs` counts untracked files and record lines under their own labels. Red: the summary test failed with no untracked summary line. Green: the test passes.
 - KR46: The term list defines the notification terms notice, notice center, toast and system notification.
 - KR45: The term list defines `settings tab` and `project home`.
 - KR44: The term list defines `plugin category`.

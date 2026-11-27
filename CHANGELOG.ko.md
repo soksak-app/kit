@@ -3,6 +3,7 @@
 [English](CHANGELOG.md)
 
 ## 미출시
+- KR47: `sok-check docs`의 요약이 미추적 파일과 record 줄을 각자의 표시로 센다. Red: 요약에 미추적 줄이 없어 요약 테스트가 실패했다. Green: 테스트가 통과한다.
 - KR46: 용어 목록이 알림 용어 notice, notice center, toast, system notification을 정의한다.
 - KR45: 용어 목록이 `settings tab`과 `project home`을 정의한다.
 - KR44: 용어 목록이 `plugin category`를 정의한다.
