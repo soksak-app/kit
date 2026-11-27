@@ -2,6 +2,7 @@
 
 [English](features.md)
 
+- [o] KR53 — P0, core F1217-17-21과 연결: 용어 목록이 `global`을 정의한다. core F1217-17-21이 컴퓨터에 속하고 프로젝트에 속하지 않는 설정과 페이지의 범위에 이 용어를 쓴다. 입력: 선언과 설정 스펙이 같은 범위를 `common only`, `common`, `global`로 적었다. 기대: `terms.json` 항목이 컴퓨터 범위를 적고 `common only`와 `common-only`를 거부한다. Red: terms 시험에 `global` 항목이 없었다. Green: terms 시험이 15개 중 15개 통과한다.
 - [~] KR50 — P0, KR43, KR44, KR45, KR46, KR47, KR48, KR49와 연결: tag v0.0.17 이후의 commit을 0.0.18로 릴리즈한다. Expected: package.json은 0.0.18을 선언하고, release run은 tag v0.0.18과 그 archive를 게시한다. 남은 일: release run의 결론.
 - [o] KR52 — P1: 평문이나 code span의 section 참조 `docs/<path>.md#<anchor>`는 link와 같이 검사한다. 입력: 문서의 3행이 평문으로 다른 문서의 제목을 가리켰고 그 문서에 그 제목이 없다. 동작: `sok-check docs`가 통과한다. 기대: 문서의 3행을 파일과 줄과 함께 없는 제목으로 보고하고, 대상의 명시 anchor `<a id="..."></a>`는 제목 anchor와 같이 통과한다. Red: 새 테스트 `a section reference in plain text or a code span is checked like a link`가 `actual: []`로 실패했다. Green: 문서 테스트 파일이 통과하고 전체 suite가 153개 중 153개 통과한다. 소비 저장소에서는 대상에 없는 제목을 가리키는 참조마다 보고하고, 참조가 있는 제목을 가리키면 통과한다.
 - [o] KR49 — P1: `sok-check docs`의 요약이 record 지적마다 경로와 줄을 적는다. 입력: 저장소의 `note.md` 3행에 거부 용어가 있고 미추적 파일이 하나 있는 경우. 동작: 지적이 `note.md:3: rejected term ...`으로 출력되고, 요약이 record 줄 하나와 미추적 파일 하나를 각자의 표시로 센다. Red: 관찰하지 못했다. 현재 HEAD에서 테스트가 통과했고, 릴리스된 0.0.16 빌드가 미추적 파일을 record 줄로 세던 표시 오류는 KR47이 고쳤다. Green: `node --test test/docs.test.mjs`가 34개 중 34개 통과한다. 제품 코드 변경은 없다.

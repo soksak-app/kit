@@ -859,6 +859,15 @@
       "definition": "A notification that the host posts through the notification center of the operating system for a notice whose plugin sets system.",
       "rejected": [],
       "allowed": []
+    },
+    {
+      "term": "global",
+      "definition": "The scope of a setting or a page that belongs to the computer and not to a project: its one value applies to every project, and no project value overrides it.",
+      "rejected": [
+        "common only",
+        "common-only"
+      ],
+      "allowed": []
     }
   ]
 }

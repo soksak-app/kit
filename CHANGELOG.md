@@ -3,6 +3,7 @@
 [한국어](CHANGELOG.ko.md)
 
 ## Unreleased
+- KR53: The term list defines `global` for the scope of a setting or a page that belongs to the computer, and rejects `common only` and `common-only`. Red: the terms test found no `global` entry. Green: the terms test passes.
 - KR52: A section reference `docs/<path>.md#<anchor>` in plain text or a code span names a missing heading or document as a violation, and an explicit anchor `<a id>` of its target is a valid anchor. Red: the new document test passed with no violation reported and failed on `actual: []`. Green: the document test file passes.
 - KR50: Release 0.0.18.
 - KR49: The summary of `sok-check docs` names the path and line of each record finding, and a test holds that. Red: not observed; the test passed on HEAD, so no production code changed. Green: the docs test file passes 34 of 34.

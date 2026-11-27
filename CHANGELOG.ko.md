@@ -3,6 +3,7 @@
 [English](CHANGELOG.md)
 
 ## 미출시
+- KR53: 용어 목록이 컴퓨터에 속하고 프로젝트에 속하지 않는 설정이나 페이지의 범위로 `global`을 정의하며, `common only`와 `common-only`를 거부한다. Red: terms 시험에 `global` 항목이 없었다. Green: terms 시험이 통과한다.
 - KR52: 평문이나 code span의 section 참조 `docs/<path>.md#<anchor>`가 없는 제목이나 문서를 가리키면 위반으로 보고하고, 대상의 명시 anchor `<a id>`는 유효한 anchor다. Red: 새 문서 테스트가 위반을 보고하지 않아 `actual: []`로 실패했다. Green: 문서 테스트 파일이 통과한다.
 - KR50: 0.0.18을 릴리즈한다.
 - KR49: `sok-check docs`의 요약이 record 지적마다 경로와 줄을 적고, 테스트가 이를 확인한다. Red: 관찰하지 못했다. 테스트가 HEAD에서 통과해 제품 코드를 바꾸지 않았다. Green: 문서 테스트 파일이 34개 중 34개 통과한다.

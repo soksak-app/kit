@@ -159,3 +159,12 @@ test("the owned session and owner terms name a session that a surface opens and 
   assert.match(owner.definition, /surface/);
   assert.match(owner.definition, /owned session/);
 });
+
+test("the global term names the scope of a computer setting and rejects its synonyms", () => {
+  const entry = terms.find((term) => term.term === "global");
+  assert.ok(entry, "the term list defines global");
+  assert.match(entry.definition, /computer/);
+  assert.match(entry.definition, /not to a project/);
+  assert.ok(entry.rejected.length > 0, "global lists its rejected synonyms");
+  assert.ok(!entry.rejected.includes("global"), "global is no rejected synonym of itself");
+});
