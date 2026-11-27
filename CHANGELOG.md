@@ -3,6 +3,7 @@
 [한국어](CHANGELOG.ko.md)
 
 ## Unreleased
+- KR46: The term list defines the notification terms notice, notice center, toast and system notification.
 - KR45: The term list defines `settings tab` and `project home`.
 - KR44: The term list defines `plugin category`.
 - KR43: The term list defines `account` and `account home`.

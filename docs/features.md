@@ -2,6 +2,7 @@
 
 [한국어](features.ko.md)
 
+- [o] KR46 — P0, linked to core F1217-10: Result: terms.json defines notice, notice center, toast and system notification. The term list names the notification terms of core: `notice`, `notice center`, `toast` and `system notification`, so that core records use each concept with one term.
 - [o] KR45 — P0, linked to core F1217: The term list defines `settings tab` and `project home`, which core F1217 uses for the settings shown as a tab of the main window and for the launcher of a window. Expected: both entries in `terms.json`, released with the next version of the kit. Result: both entries are in `terms.json`, rejecting `settings window`, `settings modal` and `project library`; the release is tracked separately.
 - [o] KR44 — P0, linked to core F1216: The term list defines `plugin category`, which core F1216 uses for the categories that a plugin serves and requires. Expected: the entry in `terms.json`, released with the next version of the kit. Result: the entry is in `terms.json` with `capability` rejected, because Tauri and MCP use that word for other concepts; the release is tracked separately.
 - [o] KR43 — P0, linked to core F1215: The term list defines `account` and `account home`, which core F1215 uses for the accounts that a plugin declares. Expected: both entries in `terms.json`, released with the next version of the kit. Result: both entries are in `terms.json`; the release is tracked by the next release item.

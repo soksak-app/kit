@@ -3,6 +3,7 @@
 [English](CHANGELOG.md)
 
 ## 미출시
+- KR46: 용어 목록이 알림 용어 notice, notice center, toast, system notification을 정의한다.
 - KR45: 용어 목록이 `settings tab`과 `project home`을 정의한다.
 - KR44: 용어 목록이 `plugin category`를 정의한다.
 - KR43: 용어 목록은 `account`와 `account home`을 정의한다.

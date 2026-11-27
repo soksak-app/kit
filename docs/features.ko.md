@@ -2,6 +2,7 @@
 
 [English](features.md)
 
+- [o] KR46 — P0, core F1217-10과 연결: 결과: terms.json이 notice, notice center, toast, system notification을 정의한다. 용어 목록이 core의 알림 용어 `notice`, `notice center`, `toast`, `system notification`을 정의하므로 core 기록이 개념마다 용어 하나를 쓴다.
 - [o] KR45 — P0, core F1217과 연결: 용어 목록이 core F1217이 본창의 tab으로 보이는 설정과 창의 launcher에 쓰는 `settings tab`과 `project home`을 정의한다. Expected: `terms.json`의 두 항목이며, kit 다음 버전과 함께 릴리즈된다. Result: 두 항목이 `terms.json`에 있고, `settings window`, `settings modal`, `project library`를 rejected로 둔다. 릴리즈는 따로 추적한다.
 - [o] KR44 — P0, core F1216과 연결: 용어 목록이 core F1216이 plugin이 속하고 요구하는 category에 쓰는 `plugin category`를 정의한다. Expected: `terms.json`의 항목이며, kit 다음 버전과 함께 릴리즈된다. Result: 항목이 `terms.json`에 있고, Tauri와 MCP가 다른 개념에 쓰는 `capability`는 rejected다. 릴리즈는 따로 추적한다.
 - [o] KR43 — P0, core F1215와 연결: 용어 목록은 core F1215가 plugin이 선언하는 계정에 쓰는 `account`와 `account home`을 정의한다. Expected: `terms.json`의 두 항목이 kit의 다음 버전으로 릴리즈된다. Result: 두 항목이 `terms.json`에 있다. 릴리즈는 다음 릴리즈 항목이 다룬다.
