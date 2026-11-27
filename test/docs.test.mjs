@@ -163,6 +163,12 @@ test("the verb of presentation is not a synonym of drawing", () => {
     ['a.md:1: rejected term "presenting state", use "drawing": presenting state']);
 });
 
+test("a bare capability is no rejected synonym of plugin category, and plugin capability is", () => {
+  assert.deepEqual(termViolations("The MCP capabilities field and the Tauri capabilities/ folder are wire and tool names.", "a.md"), []);
+  assert.deepEqual(termViolations("A plugin capability reads the clipboard.", "a.md"),
+    ['a.md:1: rejected term "plugin capability", use "plugin category": plugin capability']);
+});
+
 test("the term list, the changelogs and the checklists are not checked for rejected terms", () => {
   assert.equal(termChecked("packages/plugin-api/terms.json"), false);
   assert.equal(termChecked("CHANGELOG.ko.md"), false);

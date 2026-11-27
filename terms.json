@@ -14,7 +14,6 @@
       "term": "plugin category",
       "definition": "A function that core defines and several plugins can serve; a plugin lists its categories in categories and the categories it needs in requires.",
       "rejected": [
-        "capability",
         "plugin capability"
       ],
       "allowed": []

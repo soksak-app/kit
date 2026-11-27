@@ -3,6 +3,7 @@
 [한국어](CHANGELOG.ko.md)
 
 ## Unreleased
+- KR48: The term list rejects `plugin capability` for `plugin category` and no longer rejects the bare word `capability`, which names MCP capabilities, the Tauri capabilities folder and other senses that have no plugin category. Red: the document test failed, reporting `capabilities` on the MCP line. Green: the test passes, and `node --test test/` passes 151 of 151 tests.
 - KR47: The summary of `sok-check docs` counts untracked files and record lines under their own labels. Red: the summary test failed with no untracked summary line. Green: the test passes.
 - KR46: The term list defines the notification terms notice, notice center, toast and system notification.
 - KR45: The term list defines `settings tab` and `project home`.

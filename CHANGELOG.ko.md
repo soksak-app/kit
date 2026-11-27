@@ -3,6 +3,7 @@
 [English](CHANGELOG.md)
 
 ## 미출시
+- KR48: 용어 목록은 `plugin capability`를 `plugin category`의 거부 동의어로 두고, MCP capabilities, Tauri capabilities 폴더 및 plugin category에 해당하지 않는 다른 의미를 가리키는 단어 `capability`는 더 이상 거부하지 않는다. Red: 문서 테스트가 MCP 줄의 `capabilities`를 지적하며 실패했다. Green: 테스트가 통과하며, `node --test test/`가 151개 테스트 중 151개를 통과한다.
 - KR47: `sok-check docs`의 요약이 미추적 파일과 record 줄을 각자의 표시로 센다. Red: 요약에 미추적 줄이 없어 요약 테스트가 실패했다. Green: 테스트가 통과한다.
 - KR46: 용어 목록이 알림 용어 notice, notice center, toast, system notification을 정의한다.
 - KR45: 용어 목록이 `settings tab`과 `project home`을 정의한다.

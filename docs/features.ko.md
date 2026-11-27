@@ -2,6 +2,7 @@
 
 [English](features.md)
 
+- [o] KR48 — P1, core F1224과 연결: 용어 목록이 `capability`를 `plugin category`의 거부 동의어로 두지만, 이 단어만으로는 MCP capabilities, Tauri capabilities 폴더 및 plugin category에 해당하지 않는 개념을 가리킨다. 입력: `the MCP capabilities field`라는 줄. 동작: `sok-check docs`가 이 줄을 거부 용어로 지적한다. 기대: 지적하지 않으며, `plugin capability`는 `plugin category`의 거부 동의어로 남는다. Red: 테스트 `a bare capability is no rejected synonym of plugin category, and plugin capability is`가 MCP 줄의 `capabilities`를 지적하며 실패했다. Green: `plugin category`는 `plugin capability`만 거부한다. `node --test test/`가 151개 테스트 중 151개를 통과한다.
 - [o] KR47 — P1: `sok-check docs`의 요약이 미추적 파일과 record 줄을 각자의 표시로 센다. 입력: 미추적 파일 하나와 record 지적이 없는 저장소. 동작: 요약이 `1 untracked file: commit each, ignore it or remove it`를 출력하고 record 줄 수를 세지 않는다. Red: 요약에 미추적 줄이 없어 테스트 `the summary of a check counts an untracked file under its own label and no record line`이 실패했다. Green: 테스트가 통과한다.
 - [o] KR46 — P0, core F1217-10과 연결: 결과: terms.json이 notice, notice center, toast, system notification을 정의한다. 용어 목록이 core의 알림 용어 `notice`, `notice center`, `toast`, `system notification`을 정의하므로 core 기록이 개념마다 용어 하나를 쓴다.
 - [o] KR45 — P0, core F1217과 연결: 용어 목록이 core F1217이 본창의 tab으로 보이는 설정과 창의 launcher에 쓰는 `settings tab`과 `project home`을 정의한다. Expected: `terms.json`의 두 항목이며, kit 다음 버전과 함께 릴리즈된다. Result: 두 항목이 `terms.json`에 있고, `settings window`, `settings modal`, `project library`를 rejected로 둔다. 릴리즈는 따로 추적한다.
