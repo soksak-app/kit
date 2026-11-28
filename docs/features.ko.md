@@ -2,7 +2,7 @@
 
 [English](features.md)
 
-- [~] KR56 — P1: `sok-check docs`는 줄마다 금지어 63개를 차례로 검사해서, core 저장소 검사가 커밋마다 약 70~100초 걸린다. 입력: core series head에서 `node check.js docs`를 실행했다. tracked 파일 5200개, 약 114만 줄이고, 실측 wall 103초와 74초, user 54초와 53초다. 기대: 줄을 한 번만 검사하면서 같은 finding을 내고, 시간은 위 실측보다 줄어든다. Red: 고정 말뭉치 `test/term-violations.test.mjs`가 현재 matcher의 finding을 기록하고 있고 그 matcher에서 통과한다. 재구성한 matcher도 같은 finding을 내야 한다.
+- [o] KR56 — P1: `sok-check docs`는 줄마다 금지어 63개를 차례로 검사해서, core 저장소 검사가 한 번에 약 50초 걸린다. 입력: tracked 파일 5200개, 약 114만 줄인 core worktree에서 `node check.js docs`를 실행한다. 동작: allowed name의 패턴을 줄마다 새로 만들고, 금지어마다 모든 줄을 검사한다. 기대: 같은 finding을 더 짧은 시간에 낸다. 결과: 같은 worktree에서 변경 전 wall 54.7초와 51.6초, 변경 후 4.1초와 4.1초이며, 출력은 바이트 단위로 같다. Red: 고정 말뭉치 `test/term-violations.test.mjs`가 이전 matcher의 finding을 기록하고 있고, 변경 전후 모두 통과한다. 속도 변경이라 재현할 finding이 없다.
 - [o] KR55 — P1, KR54의 후속: check, docs, checklist 이력, hooks, commands, shipped imports 시험이 임시 폴더에 만든 `records-*`, `kit-*`, `kit-records-*` 폴더를 지운다. 입력: 여섯 시험 파일의 `mkdtempSync` 호출 23개 중 여러 개가 어떤 시험 본문도 지우지 않는 helper에 있었다. 기대: 실행이 그런 폴더를 남기지 않는다. 시험 `temp-folders.test.mjs`, 변경 전 Red: 실행이 남긴 폴더를 나열했다. 시험 helper `temporary-folder.mjs`가 파일이 끝날 때 각 폴더를 지운다.
 - [o] KR54 — P1: docs와 events 시험은 임시 폴더에 만든 저장소 폴더를 각자 지운다. 입력: 시험이 `mkdtempSync`로 `event-sources-`와 `invalid-event-sources-` 폴더를 만들고 지우지 않았다. 기대: 시험이 끝난 뒤 그런 폴더가 남지 않는다. 시험 `temp-folders.test.mjs`, 변경 전 Red: 실행이 폴더를 남겼다.
 - [o] KR53 — P0, core F1217-17-21과 연결: 용어 목록이 `global`을 정의한다. core F1217-17-21이 컴퓨터에 속하고 프로젝트에 속하지 않는 설정과 페이지의 범위에 이 용어를 쓴다. 입력: 선언과 설정 스펙이 같은 범위를 `common only`, `common`, `global`로 적었다. 기대: `terms.json` 항목이 컴퓨터 범위를 적고 `common only`와 `common-only`를 거부한다. Red: terms 시험에 `global` 항목이 없었다. Green: terms 시험이 15개 중 15개 통과한다.

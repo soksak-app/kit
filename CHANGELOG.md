@@ -3,6 +3,7 @@
 [한국어](CHANGELOG.ko.md)
 
 ## Unreleased
+- KR56: `sok-check docs` tests each line only against the rejected synonyms whose first word the line holds, and compiles each allowed name once. The check of a core worktree takes 4.1 s instead of 51.6 to 54.7 s on the same worktree, with byte-identical output. Red: the pinned corpus test passes before and after, since no finding changes.
 - KR55: The kit tests of checks, docs, checklist history, hooks, commands and shipped imports remove the temporary folders that they create, through the helper `test/temporary-folder.mjs`, so a run leaves no `records-*`, `kit-*` or `kit-records-*` folder. Red: `temp-folders.test.mjs` listed the folders left by the run.
 - KR54: The docs and events tests remove each repository folder they create in the temporary directory, so no `event-sources-` or `invalid-event-sources-` folder remains. Red: `temp-folders.test.mjs` found the folders left by the run.
 - KR53: The term list defines `global` for the scope of a setting or a page that belongs to the computer, and rejects `common only` and `common-only`. Red: the terms test found no `global` entry. Green: the terms test passes.

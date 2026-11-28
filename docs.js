@@ -17,6 +17,12 @@ const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 // The pattern source of a synonym followed by its plural ending: `ies` in place of a final `y` after a consonant, otherwise `s`.
 const withPlural = (source) => (/[^aeiou]y$/i.test(source) ? `${source.slice(0, -1)}(?:y|ies)` : `${source}s?`);
 
+// The first word of a rejected synonym, without the final `y` of a one-word synonym that its plural replaces with `ies`.
+const firstWordOf = (word) => {
+  const parts = word.split(/[\s-]+/);
+  return parts.length === 1 && /[^aeiou]y$/i.test(word) ? word.slice(0, -1) : parts[0];
+};
+
 /**
  * The rejected synonyms of terms.json, each with the term to use, the names that may hold it, such as names of external
  * libraries, and a pattern that also matches it in identifiers.
@@ -25,11 +31,17 @@ export const REJECTED_TERMS = JSON.parse(readFileSync(new URL("./terms.json", im
   .flatMap(({ term, rejected, allowed }) => rejected.map((word) => ({
     word,
     term,
-    allowed,
+    // The allowed names with their patterns, compiled once: a name holds the word without using it.
+    allowed: allowed.map((name) => ({ name, pattern: new RegExp(escapeRegExp(name), "g") })),
     pattern: new RegExp(`(?<![A-Za-z0-9])${withPlural(word.split(/[\s-]+/).map(escapeRegExp).join("[\\s_-]?"))}(?![A-Za-z0-9]|\\.json)`, "gi"),
     // The same words joined with capital initials inside an identifier.
     camel: new RegExp(`(?<=[a-z0-9])${withPlural(word.split(/[\s-]+/).map((part) => escapeRegExp(part[0].toUpperCase() + part.slice(1))).join(""))}(?![a-z])`, "g"),
+    // Every match of the word contains its first word in any case, so a line without it holds no match of the word.
+    first: new RegExp(escapeRegExp(firstWordOf(word)), "i"),
   })));
+
+// One pattern of the first words of all rejected synonyms: a line that it does not match holds no match, so the check skips it.
+const CANDIDATE_LINE = new RegExp(REJECTED_TERMS.map(({ word }) => escapeRegExp(firstWordOf(word))).join("|"), "i");
 
 /**
  * Lines of text that use a rejected synonym, as `file:line: rejected term "<word>", use "<term>": <match>`. A synonym
@@ -39,9 +51,11 @@ export const REJECTED_TERMS = JSON.parse(readFileSync(new URL("./terms.json", im
 export function termViolations(text, file) {
   const errors = [];
   text.split("\n").forEach((line, index) => {
-    const found = REJECTED_TERMS.flatMap(({ word, term, allowed, pattern, camel }) => {
+    if (!CANDIDATE_LINE.test(line)) return;
+    const found = REJECTED_TERMS.flatMap(({ word, term, allowed, pattern, camel, first }) => {
+      if (!first.test(line)) return [];
       // An allowed name, such as the name of an external library, holds the word without using it.
-      const spans = allowed.flatMap((name) => [...line.matchAll(new RegExp(escapeRegExp(name), "g"))]
+      const spans = allowed.flatMap(({ name, pattern: namePattern }) => [...line.matchAll(namePattern)]
         .map((match) => [match.index, match.index + name.length]));
       return [...line.matchAll(pattern), ...line.matchAll(camel)]
         .filter((match) => !spans.some(([start, end]) => match.index >= start && match.index < end))
