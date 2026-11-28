@@ -138,7 +138,8 @@ export function targetAnchors(text) {
 }
 
 // A section reference in plain text or a code span is `docs/<path>.md#<anchor>`; its anchor ends at the first character that is not a
-// letter, a number, `-` or `_`, so a Korean particle after the anchor needs no code span.
+// letter, a number, `-` or `_`. Hangul is a letter, so a Korean particle after an anchor in plain text is part of the anchor and needs a
+// code span.
 const SECTION_REFERENCE = /(?<![\w./-])(docs\/(?:[\w.-]+\/)*[\w.-]+\.md)#([\p{L}\p{N}_-]+)/gu;
 
 /**

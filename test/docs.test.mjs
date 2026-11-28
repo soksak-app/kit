@@ -320,6 +320,16 @@ test("a section reference in plain text or a code span is checked like a link, a
   ]);
 });
 
+test("a Korean particle after a section reference in plain text is part of its anchor, so the reference names a missing heading", () => {
+  const repository = trackedRepository("records-section-particle-", {
+    "docs/features.md": "# Features\n\n- The frame follows docs/spec/core.md#gpu-frame는 여기.\n- The frame is `docs/spec/core.md#gpu-frame`는 여기.\n",
+    "docs/spec/core.md": "# Core\n\n## Gpu frame\n",
+  });
+  assert.deepEqual(repositoryDocViolations(repository).errors, [
+    "docs/features.md:3: missing heading docs/spec/core.md#gpu-frame는",
+  ]);
+});
+
 test("the package exports the anchor rule of the record check for the documentation checks of other repositories", async () => {
   const { headingAnchors, markdownLinks } = await import("@soksak/kit/docs");
   assert.equal(typeof headingAnchors, "function", "the package exports headingAnchors");
