@@ -3,6 +3,7 @@
 [English](CHANGELOG.md)
 
 ## 미출시
+- KR58: 0.0.19를 릴리즈한다.
 - KR57: 섹션 참조 규칙의 주석이 평문에서 anchor 뒤의 한글 조사는 anchor에 붙고 code span이 필요하다고 적는다. Red: 조사 시험은 바뀌지 않은 코드에서 통과했다. 주석만 틀렸기 때문이다.
 - KR56: `sok-check docs`는 줄에 첫 단어가 있는 금지어만 검사하고, allowed name은 한 번만 컴파일한다. 같은 worktree에서 core 검사가 51.6~54.7초 걸리던 것이 4.1초가 되며, 출력은 바이트 단위로 같다. Red: 고정 말뭉치 시험은 변경 전후 모두 통과한다. finding이 바뀌지 않기 때문이다.
 - KR55: check, docs, checklist 이력, hooks, commands, shipped imports 시험은 만든 임시 폴더를 helper `test/temporary-folder.mjs`로 지워서 실행이 `records-*`, `kit-*`, `kit-records-*` 폴더를 남기지 않는다. Red: `temp-folders.test.mjs`가 실행이 남긴 폴더를 나열했다.
